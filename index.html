@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Join365 - Under Construction.</title>
+  <title>Join365 — Coming Soon</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,74 +12,99 @@
     }
 
     body {
+      background-color: #000000;
+      color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      padding: 24px;
       text-align: center;
-      padding: 20px;
     }
 
-    .card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 12px;
-      padding: 40px 30px;
-      max-width: 450px;
+    .container {
+      max-width: 480px;
       width: 100%;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
 
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid #30363d;
-      border-top-color: #58a6ff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 24px auto;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+    .logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      margin-bottom: 28px;
     }
 
     h1 {
-      font-size: 1.8rem;
-      color: #f0f6fc;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
       margin-bottom: 12px;
     }
 
     p {
+      color: #888888;
       font-size: 1rem;
-      color: #8b949e;
       line-height: 1.5;
+      margin-bottom: 32px;
     }
 
-    .badge {
+    .status {
       display: inline-block;
-      margin-top: 20px;
-      padding: 6px 12px;
-      background-color: rgba(56, 139, 253, 0.15);
-      color: #58a6ff;
-      border-radius: 20px;
+      border: 1px solid #333333;
+      background: #0a0a0a;
+      padding: 8px 16px;
+      border-radius: 999px;
       font-size: 0.85rem;
-      font-weight: 600;
+      color: #aaaaaa;
+      margin-bottom: 40px;
+    }
+
+    .status span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    footer {
+      border-top: 1px solid #1a1a1a;
+      padding-top: 24px;
+      font-size: 0.85rem;
+      color: #666666;
+    }
+
+    footer a {
+      color: #ffffff;
+      text-decoration: none;
+      border-bottom: 1px dotted #666666;
+      transition: border-color 0.2s ease;
+    }
+
+    footer a:hover {
+      border-bottom-color: #ffffff;
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="spinner"></div>
-    <h1>Join365 is Under Construction</h1>
-    <p>We're currently setting up the chat platform. Check back soon!</p>
-    <div class="badge">Building in progress...</div>
+  <div class="container">
+    <img src="https://htmltools.me/logo3.png" alt="HTMLTools Logo" class="logo">
+    
+    <h1>Join365</h1>
+    <p>A simple, real-time chat platform currently under active development. Check back soon.</p>
+
+    <div class="status">
+      <span></span> Development in progress
+    </div>
+
+    <footer>
+      Built by the creator of <a href="https://htmltools.me" target="_blank" rel="noopener">htmltools.me</a>
+    </footer>
   </div>
 
 </body>
