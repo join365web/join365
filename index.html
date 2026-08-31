@@ -290,6 +290,27 @@
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-subtle);padding:10px 18px;border-radius:10px;font-size:13px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;}
   .toast.show{opacity:1;}
 
+  /* friends */
+  .badge-dot{position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;background:var(--danger);border:2px solid var(--bg-rail);}
+  .badge-count{margin-left:auto;background:var(--danger);color:#fff;font-size:10.5px;font-weight:700;border-radius:9px;padding:1px 6px;font-family:var(--font-mono);}
+  .dm-item.friends-pin{font-weight:600;}
+  .friend-section{max-width:520px;margin:0 auto 30px;}
+  .friend-section-title{font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+  .add-friend-row{display:flex;gap:10px;}
+  .add-friend-row input{flex:1;padding:11px 14px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;color:var(--text-primary);font-size:14px;}
+  .add-friend-row input:focus{border-color:var(--accent);}
+  .add-friend-row button{flex-shrink:0;}
+  .friend-row{display:flex;align-items:center;gap:12px;padding:10px 8px;border-bottom:1px solid var(--border-subtle);}
+  .friend-row:last-child{border-bottom:none;}
+  .friend-row .fname{flex:1;font-size:14px;font-weight:500;min-width:0;}
+  .friend-row .frole{font-size:11.5px;color:var(--text-faint);font-family:var(--font-mono);}
+  .pill-btn{padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;flex-shrink:0;}
+  .pill-accept{background:var(--pulse);color:#062622;}
+  .pill-deny{background:var(--bg-elevated);color:var(--danger);border:1px solid var(--border-subtle);}
+  .pill-cancel{background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-subtle);}
+  .pill-message{background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border-subtle);}
+  .friend-empty{color:var(--text-faint);font-size:13px;padding:6px 8px;}
+
   @media (max-width:720px){
     #app{grid-template-columns:60px 200px 1fr;}
     #app.member-open{grid-template-columns:60px 200px 1fr;}
@@ -525,6 +546,9 @@
     currentChannelId: null,
     presenceList: [],        // all known presence records
     userDirectory: {},       // lowercased username -> {username, color, avatar}
+    friendRequestsIncoming: [],
+    friendRequestsOutgoing: [],
+    friends: [],
     dmPartner: null,
     lastTypingPing: 0
   };
@@ -695,6 +719,7 @@
   function initApp(){
     heartbeat();
     refreshUserDirectory();
+    refreshFriendData();
     ensureDefaultServer().then(function(){
       return refreshServers();
     }).then(function(){
@@ -760,7 +785,8 @@
       wrap.appendChild(btn);
     });
     var home = document.getElementById('home-btn');
-    home.className = 'rail-btn system' + (state.view === 'dm' ? ' active' : '');
+    home.className = 'rail-btn system' + ((state.view === 'dm' || state.view === 'friends') ? ' active' : '');
+    updateHomeBadge();
   }
 
   // ---------- SERVER / CHANNEL SELECTION ----------
@@ -1053,53 +1079,223 @@
 
   function pollTick(){
     if(!state.me) return;
+    refreshFriendData();
     if(state.view === 'channel'){
       refreshMessages();
       refreshMembers();
     } else if(state.view === 'dm'){
       refreshDMs();
       dbList('presence', 'all').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); });
+    } else if(state.view === 'friends'){
+      dbList('presence', 'all').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); renderFriendsMain(); });
     }
+  }
+
+  // ---------- FRIENDS ----------
+  function refreshFriendData(){
+    return dbList('friendRequests', 'all').then(function(raw){
+      var all = toArray(raw);
+      var meLower = state.me.username.toLowerCase();
+      state.friendRequestsIncoming = all.filter(function(r){ return r.toLower === meLower && r.status === 'pending'; });
+      state.friendRequestsOutgoing = all.filter(function(r){ return r.fromLower === meLower && r.status === 'pending'; });
+      state.friends = all.filter(function(r){ return r.status === 'accepted' && (r.fromLower === meLower || r.toLower === meLower); })
+        .map(function(r){ return {username: r.fromLower === meLower ? r.to : r.from, recordId: r.id}; });
+      updateHomeBadge();
+      if(state.view === 'friends') renderFriendsMain();
+    });
+  }
+
+  function updateHomeBadge(){
+    var homeBtn = document.getElementById('home-btn');
+    var existing = homeBtn.querySelector('.badge-dot');
+    if(existing) existing.remove();
+    if(state.friendRequestsIncoming && state.friendRequestsIncoming.length > 0){
+      var b = document.createElement('span');
+      b.className = 'badge-dot';
+      homeBtn.appendChild(b);
+    }
+  }
+
+  function sendFriendRequest(rawName){
+    var errEl = document.getElementById('add-friend-error');
+    if(errEl) errEl.textContent = '';
+    var name = (rawName || '').trim();
+    if(!name) return;
+    if(name.toLowerCase() === state.me.username.toLowerCase()){
+      if(errEl) errEl.textContent = "You can't send a friend request to yourself.";
+      return;
+    }
+    var toLower = name.toLowerCase();
+    var fromLower = state.me.username.toLowerCase();
+    dbGet('users', toLower).then(function(targetUser){
+      if(!targetUser){
+        if(errEl) errEl.textContent = 'No user with that username exists.';
+        return;
+      }
+      var forwardId = fromLower + '__' + toLower;
+      var reverseId = toLower + '__' + fromLower;
+      Promise.all([dbGet('friendRequests', forwardId), dbGet('friendRequests', reverseId)]).then(function(pair){
+        var forward = pair[0], reverse = pair[1];
+        if(forward && forward.status === 'accepted'){ if(errEl) errEl.textContent = "You're already friends."; return; }
+        if(forward && forward.status === 'pending'){ if(errEl) errEl.textContent = 'Request already sent.'; return; }
+        if(reverse && reverse.status === 'accepted'){ if(errEl) errEl.textContent = "You're already friends."; return; }
+        if(reverse && reverse.status === 'pending'){
+          reverse.status = 'accepted';
+          return dbPut('friendRequests', reverseId, reverse).then(function(){
+            document.getElementById('add-friend-input').value = '';
+            showToast('You are now friends with ' + targetUser.username + '!');
+            refreshFriendData();
+          });
+        }
+        return dbCreate('friendRequests', {
+          from: state.me.username, fromLower: fromLower,
+          to: targetUser.username, toLower: toLower,
+          status: 'pending', ts: Date.now()
+        }, forwardId).then(function(){
+          document.getElementById('add-friend-input').value = '';
+          showToast('Friend request sent to ' + targetUser.username + '.');
+          refreshFriendData();
+        });
+      });
+    });
+  }
+
+  function acceptFriendRequest(reqId){
+    dbGet('friendRequests', reqId).then(function(data){
+      if(!data) return;
+      data.status = 'accepted';
+      return dbPut('friendRequests', reqId, data).then(function(){
+        showToast('Friend request accepted.');
+        refreshFriendData();
+      });
+    });
+  }
+  function denyFriendRequest(reqId){
+    dbDelete('friendRequests', reqId).then(refreshFriendData);
+  }
+  function cancelFriendRequest(reqId){
+    dbDelete('friendRequests', reqId).then(refreshFriendData);
+  }
+  function removeFriend(reqId){
+    dbDelete('friendRequests', reqId).then(function(){
+      showToast('Friend removed.');
+      refreshFriendData();
+    });
+  }
+
+  function openFriendsView(){
+    state.view = 'friends';
+    renderDMSidebar();
+    renderFriendsMain();
+  }
+
+  function renderFriendsMain(){
+    if(state.view !== 'friends') return;
+    var incoming = state.friendRequestsIncoming || [];
+    var outgoing = state.friendRequestsOutgoing || [];
+    var friends = state.friends || [];
+
+    function friendRow(username, rightHtml){
+      var dot = '<span class="status-dot ' + (isOnline(username) ? 'online' : 'offline') + '"></span>';
+      return '<div class="friend-row">' + avatarDiv('mini-avatar', username, null, dot) +
+        '<span class="fname">' + esc(username) + '</span>' + rightHtml + '</div>';
+    }
+
+    var incomingHtml = incoming.length ? incoming.map(function(r){
+      return friendRow(r.from,
+        '<button class="pill-btn pill-accept" data-accept="' + r.id + '">Accept</button>' +
+        '<button class="pill-btn pill-deny" data-deny="' + r.id + '">Deny</button>');
+    }).join('') : '<div class="friend-empty">No incoming requests.</div>';
+
+    var outgoingHtml = outgoing.length ? outgoing.map(function(r){
+      return friendRow(r.to, '<span class="frole">Pending</span><button class="pill-btn pill-cancel" data-cancel="' + r.id + '">Cancel</button>');
+    }).join('') : '<div class="friend-empty">No outgoing requests.</div>';
+
+    var friendsHtml = friends.length ? friends.map(function(f){
+      return friendRow(f.username,
+        '<button class="pill-btn pill-message" data-message="' + esc(f.username) + '">Message</button>' +
+        '<button class="pill-btn pill-deny" data-remove="' + f.recordId + '">Remove</button>');
+    }).join('') : '<div class="friend-empty">No friends yet — send a request above to get started.</div>';
+
+    document.getElementById('main').innerHTML =
+      '<div id="main-header"><div class="title">Friends</div></div>' +
+      '<div style="flex:1;overflow-y:auto;padding:24px 20px;">' +
+        '<div class="friend-section">' +
+          '<div class="friend-section-title">Add a friend</div>' +
+          '<div class="add-friend-row"><input type="text" id="add-friend-input" placeholder="Enter an exact username" maxlength="20">' +
+          '<button class="btn-primary" id="add-friend-btn" style="width:auto;padding:11px 22px;">Send Request</button></div>' +
+          '<div class="login-error" id="add-friend-error"></div>' +
+        '</div>' +
+        '<div class="friend-section"><div class="friend-section-title">Pending — Incoming (' + incoming.length + ')</div>' + incomingHtml + '</div>' +
+        '<div class="friend-section"><div class="friend-section-title">Pending — Sent (' + outgoing.length + ')</div>' + outgoingHtml + '</div>' +
+        '<div class="friend-section"><div class="friend-section-title">All Friends (' + friends.length + ')</div>' + friendsHtml + '</div>' +
+      '</div>';
+    document.getElementById('member-panel').innerHTML = '';
+
+    var input = document.getElementById('add-friend-input');
+    var btn = document.getElementById('add-friend-btn');
+    btn.addEventListener('click', function(){ sendFriendRequest(input.value); });
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') sendFriendRequest(input.value); });
+
+    document.querySelectorAll('[data-accept]').forEach(function(el){
+      el.addEventListener('click', function(){ acceptFriendRequest(el.getAttribute('data-accept')); });
+    });
+    document.querySelectorAll('[data-deny]').forEach(function(el){
+      el.addEventListener('click', function(){ denyFriendRequest(el.getAttribute('data-deny')); });
+    });
+    document.querySelectorAll('[data-cancel]').forEach(function(el){
+      el.addEventListener('click', function(){ cancelFriendRequest(el.getAttribute('data-cancel')); });
+    });
+    document.querySelectorAll('[data-remove]').forEach(function(el){
+      el.addEventListener('click', function(){ removeFriend(el.getAttribute('data-remove')); });
+    });
+    document.querySelectorAll('[data-message]').forEach(function(el){
+      el.addEventListener('click', function(){ openDM(el.getAttribute('data-message')); });
+    });
   }
 
   // ---------- DIRECT MESSAGES ----------
   document.getElementById('home-btn').addEventListener('click', renderHome);
 
   function renderHome(){
-    state.view = 'dm';
     state.currentServerId = null;
     state.currentChannelId = null;
     document.getElementById('server-gear').style.display = 'none';
     document.getElementById('sidebar-title').textContent = 'Direct Messages';
     renderServerRail();
-    dbList('presence', 'all').then(function(raw){
-      state.presenceList = toArray(raw);
+    Promise.all([dbList('presence', 'all'), refreshFriendData()]).then(function(results){
+      state.presenceList = toArray(results[0]);
       renderDMSidebar();
-      if(state.dmPartner){ openDM(state.dmPartner); }
-      else { renderEmptyMain('Your signal, your people', 'Pick someone from the list to start a conversation.'); }
+      openFriendsView();
     });
   }
 
   function renderDMSidebar(){
     var list = document.getElementById('channel-list');
+    var pendingCount = (state.friendRequestsIncoming || []).length;
     var others = state.presenceList.filter(function(p){ return p.username !== state.me.username; });
-    var html = '<div class="channel-group-label"><span>Known Users</span></div>';
+    var html = '<div class="dm-item friends-pin' + (state.view === 'friends' ? ' active' : '') + '" id="friends-pin-row">' +
+      '<div class="mini-avatar" style="background:var(--accent);display:flex;align-items:center;justify-content:center;">🤝</div>' +
+      '<span>Friends</span>' + (pendingCount > 0 ? '<span class="badge-count">' + pendingCount + '</span>' : '') + '</div>' +
+      '<div class="channel-group-label" style="margin-top:8px;"><span>Known Users</span></div>';
     if(others.length === 0){
       html += '<div style="padding:8px 10px;color:var(--text-faint);font-size:12.5px;">No one else has joined yet.</div>';
     }
     others.forEach(function(p){
       var dot = '<span class="status-dot ' + (isOnline(p.username) ? 'online' : 'offline') + '"></span>';
-      html += '<div class="dm-item' + (p.username === state.dmPartner ? ' active' : '') + '" data-user="' + esc(p.username) + '">' +
+      html += '<div class="dm-item' + (state.view === 'dm' && p.username === state.dmPartner ? ' active' : '') + '" data-user="' + esc(p.username) + '">' +
         avatarDiv('mini-avatar', p.username, p.color, dot) +
         '<span>' + esc(p.username) + '</span></div>';
     });
     list.innerHTML = html;
-    list.querySelectorAll('.dm-item').forEach(function(el){
+    document.getElementById('friends-pin-row').addEventListener('click', openFriendsView);
+    list.querySelectorAll('.dm-item[data-user]').forEach(function(el){
       el.addEventListener('click', function(){ openDM(el.getAttribute('data-user')); });
     });
   }
 
   function openDM(username){
+    state.view = 'dm';
     state.dmPartner = username;
     renderDMSidebar();
     var main = document.getElementById('main');
