@@ -73,12 +73,12 @@
   }
   @keyframes wave{0%{background-position:0% 0;}100%{background-position:200% 0;}}
   .login-sub{color:var(--text-muted);font-size:13px;margin-bottom:24px;}
-  .login-card input[type=text]{
+  .login-card input[type=text],.login-card input[type=password]{
     width:100%;padding:12px 14px;background:var(--bg-elevated);
     border:1px solid var(--border-subtle);border-radius:10px;
     color:var(--text-primary);font-size:14px;margin-bottom:16px;
   }
-  .login-card input[type=text]:focus{border-color:var(--accent);}
+  .login-card input[type=text]:focus,.login-card input[type=password]:focus{border-color:var(--accent);}
   .swatches{display:flex;justify-content:center;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
   .swatch{
     width:26px;height:26px;border-radius:50%;cursor:pointer;
@@ -92,6 +92,23 @@
   }
   .btn-primary:hover{filter:brightness(1.1);}
   .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .login-error{color:var(--danger);font-size:12.5px;margin:-10px 0 14px;min-height:14px;text-align:left;}
+
+  .auth-tabs{display:flex;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:3px;margin-bottom:20px;}
+  .auth-tab{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text-muted);}
+  .auth-tab.active{background:var(--bg-hover);color:var(--text-primary);}
+
+  .avatar-upload-row{display:flex;align-items:center;gap:14px;margin-bottom:18px;text-align:left;}
+  .avatar-upload-circle{
+    width:60px;height:60px;border-radius:50%;flex-shrink:0;position:relative;cursor:pointer;
+    background:var(--bg-elevated);border:1px dashed var(--border-subtle);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    font-family:var(--font-display);font-weight:700;font-size:20px;
+  }
+  .avatar-upload-circle img{width:100%;height:100%;object-fit:cover;}
+  .avatar-upload-circle .cam{position:absolute;bottom:-1px;right:-1px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#1a0e08;font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg-panel);}
+  .avatar-upload-hint{font-size:12px;color:var(--text-faint);}
+  .avatar-upload-hint b{color:var(--text-muted);}
 
   /* ---------- APP LAYOUT ---------- */
   #app{display:none;height:100vh;grid-template-columns:72px 240px 1fr;}
@@ -193,6 +210,9 @@
   .msg-row:hover{background:rgba(255,255,255,.02);}
   .msg-row:hover .msg-del{display:inline;}
   .avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-display);color:#0A0D12;flex-shrink:0;margin-top:2px;}
+  .avatar-img{object-fit:cover;flex-shrink:0;}
+  img.avatar{padding:0;}
+  img.mini-avatar{padding:0;object-fit:cover;}
   .msg-body{flex:1;min-width:0;}
   .msg-meta{display:flex;align-items:baseline;gap:8px;}
   .msg-author{font-weight:600;font-size:14.5px;}
@@ -284,10 +304,38 @@
   <div class="login-card">
     <div class="wordmark">JOIN<span>365</span></div>
     <div class="wave"></div>
-    <div class="login-sub">Pick a name and a signal color to get connected.</div>
-    <input type="text" id="login-username" maxlength="20" placeholder="Your display name" autocomplete="off">
-    <div class="swatches" id="login-swatches"></div>
-    <button class="btn-primary" id="login-btn" disabled>Join the signal</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" data-tab="login">Log in</button>
+      <button class="auth-tab" id="tab-signup" data-tab="signup">Sign up</button>
+    </div>
+
+    <!-- LOG IN -->
+    <div id="pane-login">
+      <div class="login-sub">Every account is its own signal — no one else can log in as you.</div>
+      <input type="text" id="login-username" maxlength="20" placeholder="Username" autocomplete="username">
+      <input type="password" id="login-password" maxlength="100" placeholder="Password" autocomplete="current-password">
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-primary" id="login-btn">Log in</button>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="pane-signup" style="display:none;">
+      <div class="login-sub">Create your own character. Your username and password are yours alone.</div>
+      <div class="avatar-upload-row">
+        <div class="avatar-upload-circle" id="signup-avatar-circle">
+          <span id="signup-avatar-fallback">?</span>
+          <div class="cam">✎</div>
+        </div>
+        <div class="avatar-upload-hint">Click to upload a<br><b>profile picture</b> (optional)</div>
+        <input type="file" id="signup-avatar-file" accept="image/*" style="display:none;">
+      </div>
+      <input type="text" id="signup-username" maxlength="20" placeholder="Choose a username" autocomplete="username">
+      <input type="password" id="signup-password" maxlength="100" placeholder="Choose a password" autocomplete="new-password">
+      <input type="password" id="signup-password2" maxlength="100" placeholder="Confirm password" autocomplete="new-password">
+      <div class="swatches" id="login-swatches"></div>
+      <div class="login-error" id="signup-error"></div>
+      <button class="btn-primary" id="signup-btn">Create my character</button>
+    </div>
   </div>
 </div>
 
@@ -309,7 +357,7 @@
         <div class="name" id="me-name"></div>
         <div class="sub">● online</div>
       </div>
-      <span class="edit-color" id="edit-color-btn" title="Change color">✎</span>
+      <span class="edit-color" id="edit-color-btn" title="Edit profile">✎</span>
     </div>
   </div>
 
@@ -358,13 +406,23 @@
   </div>
 </div>
 
-<!-- Color picker modal -->
+<!-- Edit profile modal -->
 <div class="modal-overlay" id="modal-color">
   <div class="modal">
-    <h3>Your signal color</h3>
+    <h3>Edit profile</h3>
+    <div class="avatar-upload-row">
+      <div class="avatar-upload-circle" id="profile-avatar-circle">
+        <span id="profile-avatar-fallback">?</span>
+        <div class="cam">✎</div>
+      </div>
+      <div class="avatar-upload-hint">Click to change your<br><b>profile picture</b></div>
+      <input type="file" id="profile-avatar-file" accept="image/*" style="display:none;">
+    </div>
+    <label>Signal color</label>
     <div class="swatches" id="color-swatches"></div>
     <div class="modal-actions">
-      <button class="btn-secondary" data-close="modal-color">Done</button>
+      <button class="btn-secondary" data-close="modal-color">Cancel</button>
+      <button class="btn-primary" id="save-profile-btn">Save</button>
     </div>
   </div>
 </div>
@@ -442,9 +500,23 @@
     setTimeout(function(){ t.classList.remove('show'); }, 2200);
   }
 
+  // ---------- CRYPTO (account passwords) ----------
+  function bufToHex(buf){
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
+  }
+  function sha256Hex(text){
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(bufToHex);
+  }
+  function randomSalt(){
+    return bufToHex(crypto.getRandomValues(new Uint8Array(16)));
+  }
+  function hashPassword(password, salt){
+    return sha256Hex(salt + ':' + password);
+  }
+
   // ---------- STATE ----------
   var state = {
-    me: null,                // {username, color}
+    me: null,                // {username, id, color, avatar}
     view: 'none',            // 'channel' | 'dm'
     servers: [],
     myMemberships: [],       // members records for me
@@ -452,50 +524,177 @@
     channels: [],
     currentChannelId: null,
     presenceList: [],        // all known presence records
+    userDirectory: {},       // lowercased username -> {username, color, avatar}
     dmPartner: null,
     lastTypingPing: 0
   };
 
-  // ---------- LOGIN ----------
+  // ---------- AVATAR RENDERING ----------
+  function avatarDiv(className, username, fallbackColor, extraInnerHtml){
+    var key = (username || '').toLowerCase();
+    var u = state.userDirectory[key];
+    var color = (u && u.color) || fallbackColor || '#888';
+    var inner = (u && u.avatar) ?
+      '<img src="' + u.avatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">' :
+      esc(initials(username));
+    return '<div class="' + className + '" style="background:' + color + '">' + inner + (extraInnerHtml || '') + '</div>';
+  }
+
+  function refreshUserDirectory(){
+    return dbList('users', 'all').then(function(raw){
+      var dir = {};
+      toArray(raw).forEach(function(u){
+        dir[(u.username || '').toLowerCase()] = {username: u.username, color: u.color, avatar: u.avatar || null};
+      });
+      state.userDirectory = dir;
+    });
+  }
+
+  function updateMeFooterUI(){
+    document.getElementById('me-name').textContent = state.me.username;
+    var av = document.getElementById('me-avatar');
+    if(state.me.avatar){
+      av.style.background = 'transparent';
+      av.innerHTML = '<img src="' + state.me.avatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
+    } else {
+      av.style.background = state.me.color;
+      av.textContent = initials(state.me.username);
+    }
+  }
+
+  // ---------- AVATAR FILE UPLOAD (shared by signup + profile edit) ----------
+  function readImageAsCompressedDataUrl(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = function(){ reject(new Error('read failed')); };
+      reader.onload = function(){
+        var img = new Image();
+        img.onerror = function(){ reject(new Error('decode failed')); };
+        img.onload = function(){
+          var size = 128;
+          var canvas = document.createElement('canvas');
+          canvas.width = size; canvas.height = size;
+          var ctx = canvas.getContext('2d');
+          var scale = Math.max(size / img.width, size / img.height);
+          var w = img.width * scale, h = img.height * scale;
+          ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.72));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function wireAvatarUpload(circleId, fileId, fallbackId, onPicked){
+    var circle = document.getElementById(circleId);
+    var file = document.getElementById(fileId);
+    circle.addEventListener('click', function(){ file.click(); });
+    file.addEventListener('change', function(){
+      if(!file.files || !file.files[0]) return;
+      readImageAsCompressedDataUrl(file.files[0]).then(function(dataUrl){
+        circle.innerHTML = '<img src="' + dataUrl + '"><div class="cam">✎</div>';
+        onPicked(dataUrl);
+      }).catch(function(){ showToast('Could not read that image.'); });
+    });
+  }
+
+  // ---------- LOGIN / SIGNUP ----------
+  var pendingSignupAvatar = null;
+  wireAvatarUpload('signup-avatar-circle', 'signup-avatar-file', 'signup-avatar-fallback', function(dataUrl){
+    pendingSignupAvatar = dataUrl;
+  });
+
+  var signupColor = PALETTE[0];
   var loginSwatchesEl = document.getElementById('login-swatches');
-  var loginColor = PALETTE[0];
   PALETTE.forEach(function(c, i){
     var s = document.createElement('div');
     s.className = 'swatch' + (i === 0 ? ' active' : '');
     s.style.background = c;
     s.addEventListener('click', function(){
-      loginColor = c;
+      signupColor = c;
       Array.from(loginSwatchesEl.children).forEach(function(el){ el.classList.remove('active'); });
       s.classList.add('active');
     });
     loginSwatchesEl.appendChild(s);
   });
-  var loginInput = document.getElementById('login-username');
-  var loginBtn = document.getElementById('login-btn');
-  loginInput.addEventListener('input', function(){
-    loginBtn.disabled = loginInput.value.trim().length === 0;
-  });
-  loginInput.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' && !loginBtn.disabled) doLogin();
-  });
-  loginBtn.addEventListener('click', doLogin);
+
+  document.getElementById('tab-login').addEventListener('click', function(){ switchAuthTab('login'); });
+  document.getElementById('tab-signup').addEventListener('click', function(){ switchAuthTab('signup'); });
+  function switchAuthTab(tab){
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+    document.getElementById('pane-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('pane-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  }
+
+  document.getElementById('login-btn').addEventListener('click', doLogin);
+  document.getElementById('login-password').addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
+  document.getElementById('signup-password2').addEventListener('keydown', function(e){ if(e.key === 'Enter') doSignup(); });
+  document.getElementById('signup-btn').addEventListener('click', doSignup);
+
+  function setAuthBusy(btnId, busy, label){
+    var btn = document.getElementById(btnId);
+    btn.disabled = busy;
+    if(label) btn.textContent = label;
+  }
 
   function doLogin(){
-    var name = loginInput.value.trim().slice(0, 20);
-    if(!name) return;
-    state.me = {username: name, color: loginColor};
+    var errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    var name = document.getElementById('login-username').value.trim();
+    var password = document.getElementById('login-password').value;
+    if(!name || !password){ errEl.textContent = 'Enter your username and password.'; return; }
+    var id = name.toLowerCase();
+    setAuthBusy('login-btn', true, 'Logging in…');
+    dbGet('users', id).then(function(user){
+      if(!user){ setAuthBusy('login-btn', false, 'Log in'); errEl.textContent = 'No account with that username. Sign up instead?'; return; }
+      return hashPassword(password, user.salt).then(function(hash){
+        setAuthBusy('login-btn', false, 'Log in');
+        if(hash !== user.passwordHash){ errEl.textContent = 'Incorrect password.'; return; }
+        completeLogin({username: user.username, id: id, color: user.color, avatar: user.avatar || null});
+      });
+    });
+  }
+
+  function doSignup(){
+    var errEl = document.getElementById('signup-error');
+    errEl.textContent = '';
+    var name = document.getElementById('signup-username').value.trim();
+    var password = document.getElementById('signup-password').value;
+    var password2 = document.getElementById('signup-password2').value;
+    if(!/^[A-Za-z0-9_ .-]{2,20}$/.test(name)){ errEl.textContent = 'Usernames are 2-20 characters (letters, numbers, spaces, - or _).'; return; }
+    if(password.length < 4){ errEl.textContent = 'Password must be at least 4 characters.'; return; }
+    if(password !== password2){ errEl.textContent = 'Passwords do not match.'; return; }
+    var id = name.toLowerCase();
+    setAuthBusy('signup-btn', true, 'Creating…');
+    dbGet('users', id).then(function(existing){
+      if(existing){ setAuthBusy('signup-btn', false, 'Create my character'); errEl.textContent = 'That username is already taken.'; return; }
+      var salt = randomSalt();
+      return hashPassword(password, salt).then(function(hash){
+        return dbCreate('users', {
+          username: name, passwordHash: hash, salt: salt,
+          color: signupColor, avatar: pendingSignupAvatar, createdAt: Date.now()
+        }, id);
+      }).then(function(res){
+        setAuthBusy('signup-btn', false, 'Create my character');
+        if(!res){ errEl.textContent = 'Could not create your account. Try again.'; return; }
+        completeLogin({username: name, id: id, color: signupColor, avatar: pendingSignupAvatar});
+      });
+    });
+  }
+
+  function completeLogin(me){
+    state.me = me;
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('app').classList.add('active');
-    document.getElementById('me-name').textContent = name;
-    var av = document.getElementById('me-avatar');
-    av.style.background = loginColor;
-    av.textContent = initials(name);
+    updateMeFooterUI();
     initApp();
   }
 
   // ---------- INIT ----------
   function initApp(){
     heartbeat();
+    refreshUserDirectory();
     ensureDefaultServer().then(function(){
       return refreshServers();
     }).then(function(){
@@ -507,6 +706,7 @@
     });
     setInterval(pollTick, 3000);
     setInterval(heartbeat, 8000);
+    setInterval(refreshUserDirectory, 6000);
   }
 
   function ensureDefaultServer(){
@@ -743,9 +943,9 @@
     }
     var delHtml = (m.author === state.me.username) ? '<span class="msg-del" data-del-mid="' + m.id + '" data-coll="' + (withReactions ? 'messages' : 'dms') + '">delete</span>' : '';
     return '<div class="msg-row">' +
-      '<div class="avatar" style="background:' + (m.color || '#888') + '">' + initials(m.author || m.from) + '</div>' +
+      avatarDiv('avatar', m.author || m.from, m.color) +
       '<div class="msg-body">' +
-        '<div class="msg-meta"><span class="msg-author" style="color:' + (m.color || '#fff') + '">' + esc(m.author || m.from) + '</span>' +
+        '<div class="msg-meta"><span class="msg-author" style="color:' + ((state.userDirectory[(m.author||m.from||'').toLowerCase()]||{}).color || m.color || '#fff') + '">' + esc(m.author || m.from) + '</span>' +
         '<span class="msg-time">' + fmtTime(m.ts) + '</span>' + delHtml + '</div>' +
         '<div class="msg-text">' + esc(m.text) + '</div>' +
         reactionsHtml +
@@ -821,8 +1021,8 @@
     var offline = members.filter(function(m){ return !isOnline(m.username); });
     function row(m){
       var isOwner = server && server.owner === m.username;
-      return '<div class="member-item"><div class="mini-avatar" style="background:' + (m.color||'#888') + '">' + initials(m.username) +
-        '<span class="status-dot ' + (isOnline(m.username) ? 'online' : 'offline') + '"></span></div>' +
+      var dot = '<span class="status-dot ' + (isOnline(m.username) ? 'online' : 'offline') + '"></span>';
+      return '<div class="member-item">' + avatarDiv('mini-avatar', m.username, m.color, dot) +
         '<span class="name' + (isOnline(m.username) ? '' : ' offline') + '">' + esc(m.username) + (isOwner ? '<span class="owner-tag">OWNER</span>' : '') + '</span></div>';
     }
     document.getElementById('member-panel').innerHTML =
@@ -888,9 +1088,9 @@
       html += '<div style="padding:8px 10px;color:var(--text-faint);font-size:12.5px;">No one else has joined yet.</div>';
     }
     others.forEach(function(p){
+      var dot = '<span class="status-dot ' + (isOnline(p.username) ? 'online' : 'offline') + '"></span>';
       html += '<div class="dm-item' + (p.username === state.dmPartner ? ' active' : '') + '" data-user="' + esc(p.username) + '">' +
-        '<div class="mini-avatar" style="background:' + (p.color||'#888') + '">' + initials(p.username) +
-        '<span class="status-dot ' + (isOnline(p.username) ? 'online' : 'offline') + '"></span></div>' +
+        avatarDiv('mini-avatar', p.username, p.color, dot) +
         '<span>' + esc(p.username) + '</span></div>';
     });
     list.innerHTML = html;
@@ -1022,28 +1222,57 @@
     });
   });
 
-  // ---------- COLOR EDIT ----------
+  // ---------- PROFILE EDIT (color + picture) ----------
+  var profileColor = PALETTE[0];
+  var profileAvatar = null;
   var colorSwatches = document.getElementById('color-swatches');
   PALETTE.forEach(function(c){
     var s = document.createElement('div');
     s.className = 'swatch';
     s.style.background = c;
     s.addEventListener('click', function(){
-      state.me.color = c;
-      document.getElementById('me-avatar').style.background = c;
+      profileColor = c;
       Array.from(colorSwatches.children).forEach(function(el){ el.classList.remove('active'); });
       s.classList.add('active');
-      heartbeat();
     });
     colorSwatches.appendChild(s);
   });
+  wireAvatarUpload('profile-avatar-circle', 'profile-avatar-file', 'profile-avatar-fallback', function(dataUrl){
+    profileAvatar = dataUrl;
+  });
+
   document.getElementById('edit-color-btn').addEventListener('click', function(){
+    profileColor = state.me.color;
+    profileAvatar = state.me.avatar || null;
     Array.from(colorSwatches.children).forEach(function(el){
-      el.classList.toggle('active', el.style.background === hexToRgbMaybe(state.me.color));
+      el.classList.toggle('active', el.style.background === state.me.color);
     });
+    var circle = document.getElementById('profile-avatar-circle');
+    circle.innerHTML = state.me.avatar ?
+      ('<img src="' + state.me.avatar + '"><div class="cam">✎</div>') :
+      ('<span>' + esc(initials(state.me.username)) + '</span><div class="cam">✎</div>');
     openModal('modal-color');
   });
-  function hexToRgbMaybe(hex){ return hex; }
+
+  document.getElementById('save-profile-btn').addEventListener('click', function(){
+    var btn = document.getElementById('save-profile-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    dbGet('users', state.me.id).then(function(user){
+      if(!user){ btn.disabled = false; btn.textContent = 'Save'; showToast('Could not load your account.'); return; }
+      user.color = profileColor;
+      user.avatar = profileAvatar;
+      return dbPut('users', state.me.id, user).then(function(){
+        state.me.color = profileColor;
+        state.me.avatar = profileAvatar;
+        updateMeFooterUI();
+        heartbeat();
+        refreshUserDirectory();
+        btn.disabled = false; btn.textContent = 'Save';
+        closeModal('modal-color');
+        showToast('Profile updated.');
+      });
+    });
+  });
 
   // ---------- MODAL HELPERS ----------
   function openModal(id){ document.getElementById(id).classList.add('open'); }
