@@ -73,12 +73,12 @@
   }
   @keyframes wave{0%{background-position:0% 0;}100%{background-position:200% 0;}}
   .login-sub{color:var(--text-muted);font-size:13px;margin-bottom:24px;}
-  .login-card input[type=text],.login-card input[type=password]{
+  .login-card input[type=text],.login-card input[type=password],.login-card input[type=email]{
     width:100%;padding:12px 14px;background:var(--bg-elevated);
     border:1px solid var(--border-subtle);border-radius:10px;
     color:var(--text-primary);font-size:14px;margin-bottom:16px;
   }
-  .login-card input[type=text]:focus,.login-card input[type=password]:focus{border-color:var(--accent);}
+  .login-card input[type=text]:focus,.login-card input[type=password]:focus,.login-card input[type=email]:focus{border-color:var(--accent);}
   .swatches{display:flex;justify-content:center;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
   .swatch{
     width:26px;height:26px;border-radius:50%;cursor:pointer;
@@ -333,7 +333,7 @@
     <!-- LOG IN -->
     <div id="pane-login">
       <div class="login-sub">Every account is its own signal — no one else can log in as you.</div>
-      <input type="text" id="login-username" maxlength="20" placeholder="Username" autocomplete="username">
+      <input type="email" id="login-email" maxlength="100" placeholder="Email" autocomplete="username">
       <input type="password" id="login-password" maxlength="100" placeholder="Password" autocomplete="current-password">
       <div class="login-error" id="login-error"></div>
       <button class="btn-primary" id="login-btn">Log in</button>
@@ -351,6 +351,7 @@
         <input type="file" id="signup-avatar-file" accept="image/*" style="display:none;">
       </div>
       <input type="text" id="signup-username" maxlength="20" placeholder="Choose a username" autocomplete="username">
+      <input type="email" id="signup-email" maxlength="100" placeholder="Email" autocomplete="username">
       <input type="password" id="signup-password" maxlength="100" placeholder="Choose a password" autocomplete="new-password">
       <input type="password" id="signup-password2" maxlength="100" placeholder="Confirm password" autocomplete="new-password">
       <div class="swatches" id="login-swatches"></div>
@@ -450,52 +451,61 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Firebase SDKs (compat build so this stays a single plain-<script> file) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <script>
 (function(){
   "use strict";
 
-  var CONFIG = {
-    databaseId: "s5OLUN6Pk3",
-    apiKey: "cTYHS1ICJpovtNlHHu0Car1HXz2kxNaa",
-    baseURL: "https://past-time-database-storage-htmltools-me.bozhetarnikmatthew.workers.dev"
+  // ---------- FIREBASE SETUP ----------
+  var firebaseConfig = {
+    apiKey: "AIzaSyAOld48eda9m_rIJ_72wnMVUyJM1unDlzA",
+    authDomain: "join365-9a175.firebaseapp.com",
+    databaseURL: "https://join365-9a175-default-rtdb.firebaseio.com/",
+    projectId: "join365-9a175",
+    storageBucket: "join365-9a175.firebasestorage.app",
+    messagingSenderId: "624922796690",
+    appId: "1:624922796690:web:2ca60637523e4aadcb3c4b",
+    measurementId: "G-3FKMNX91SH"
   };
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var db = firebase.database();
+
   var PALETTE = ['#FF6B47','#2DD4BF','#A78BFA','#FBBF24','#F472B6','#60A5FA','#34D399','#F87171'];
   var EMOJIS = ['👍','❤️','😂','🔥','🎉','👀'];
 
-  // ---------- DB HELPERS ----------
-  function dbUrl(collection, id){
-    var u = CONFIG.baseURL + '/db/' + CONFIG.databaseId + '/' + collection;
-    if(id) u += '/' + encodeURIComponent(id);
-    return u;
-  }
-  var authHeaders = {'Content-Type':'application/json','x-api-key':CONFIG.apiKey};
+  // ---------- DB HELPERS (Firebase Realtime Database) ----------
+  // Each "collection" is a top-level RTDB node. Records are keyed by push-id
+  // or by an explicit id (e.g. usernames, composite ids) when we need lookup by key.
+  function colRef(collection){ return db.ref(collection); }
+  function recRef(collection, id){ return db.ref(collection + '/' + id); }
 
-  function dbList(collection, limit){
-    var q = limit ? ('?limit=' + limit) : '';
-    return fetch(dbUrl(collection) + q, {headers:{'x-api-key':CONFIG.apiKey}})
-      .then(function(res){ return res.ok ? res.json() : {}; })
-      .catch(function(){ return {}; });
+  function dbList(collection){
+    return colRef(collection).once('value').then(function(snap){ return snap.val() || {}; }).catch(function(){ return {}; });
   }
   function dbGet(collection, id){
-    return fetch(dbUrl(collection, id), {headers:{'x-api-key':CONFIG.apiKey}})
-      .then(function(res){ return res.ok ? res.json() : null; })
-      .catch(function(){ return null; });
+    return recRef(collection, id).once('value').then(function(snap){
+      var v = snap.val();
+      if(!v) return null;
+      return v;
+    }).catch(function(){ return null; });
   }
   function dbCreate(collection, data, id){
-    var body = id ? {id:id, data:data} : {data:data};
-    return fetch(dbUrl(collection), {method:'POST', headers:authHeaders, body:JSON.stringify(body)})
-      .then(function(res){ return res.ok ? res.json() : null; })
-      .catch(function(){ return null; });
+    if(id){
+      return recRef(collection, id).set(data).then(function(){ return {id:id}; }).catch(function(){ return null; });
+    }
+    var ref = colRef(collection).push();
+    return ref.set(data).then(function(){ return {id: ref.key}; }).catch(function(){ return null; });
   }
   function dbPut(collection, id, data){
-    return fetch(dbUrl(collection, id), {method:'PUT', headers:authHeaders, body:JSON.stringify(data)})
-      .then(function(res){ return res.ok ? res.json() : null; })
-      .catch(function(){ return null; });
+    return recRef(collection, id).set(data).then(function(){ return data; }).catch(function(){ return null; });
   }
   function dbDelete(collection, id){
-    return fetch(dbUrl(collection, id), {method:'DELETE', headers:{'x-api-key':CONFIG.apiKey}})
-      .then(function(res){ return res.ok; })
-      .catch(function(){ return false; });
+    return recRef(collection, id).remove().then(function(){ return true; }).catch(function(){ return false; });
   }
   function toArray(raw){
     return Object.entries(raw || {}).map(function(pair){
@@ -520,24 +530,15 @@
     t.classList.add('show');
     setTimeout(function(){ t.classList.remove('show'); }, 2200);
   }
-
-  // ---------- CRYPTO (account passwords) ----------
-  function bufToHex(buf){
-    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
-  }
-  function sha256Hex(text){
-    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(bufToHex);
-  }
-  function randomSalt(){
-    return bufToHex(crypto.getRandomValues(new Uint8Array(16)));
-  }
-  function hashPassword(password, salt){
-    return sha256Hex(salt + ':' + password);
+  function safeKey(str){
+    // usernames are used as RTDB keys for the 'users' and 'presence' nodes,
+    // so strip characters RTDB keys can't contain.
+    return String(str || '').toLowerCase().replace(/[.#$\[\]\/]/g, '_');
   }
 
   // ---------- STATE ----------
   var state = {
-    me: null,                // {username, id, color, avatar}
+    me: null,                // {username, id, color, avatar, uid}
     view: 'none',            // 'channel' | 'dm'
     servers: [],
     myMemberships: [],       // members records for me
@@ -565,7 +566,7 @@
   }
 
   function refreshUserDirectory(){
-    return dbList('users', 'all').then(function(raw){
+    return dbList('users').then(function(raw){
       var dir = {};
       toArray(raw).forEach(function(u){
         dir[(u.username || '').toLowerCase()] = {username: u.username, color: u.color, avatar: u.avatar || null};
@@ -622,7 +623,7 @@
     });
   }
 
-  // ---------- LOGIN / SIGNUP ----------
+  // ---------- LOGIN / SIGNUP (Firebase Auth: email/password) ----------
   var pendingSignupAvatar = null;
   wireAvatarUpload('signup-avatar-circle', 'signup-avatar-file', 'signup-avatar-fallback', function(dataUrl){
     pendingSignupAvatar = dataUrl;
@@ -662,21 +663,36 @@
     if(label) btn.textContent = label;
   }
 
+  function friendlyAuthError(err){
+    var code = (err && err.code) || '';
+    if(code === 'auth/invalid-email') return 'That email address looks invalid.';
+    if(code === 'auth/user-not-found') return 'No account with that email.';
+    if(code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Incorrect email or password.';
+    if(code === 'auth/email-already-in-use') return 'That email is already registered.';
+    if(code === 'auth/weak-password') return 'Password must be at least 6 characters.';
+    if(code === 'auth/too-many-requests') return 'Too many attempts. Try again later.';
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
   function doLogin(){
     var errEl = document.getElementById('login-error');
     errEl.textContent = '';
-    var name = document.getElementById('login-username').value.trim();
+    var email = document.getElementById('login-email').value.trim();
     var password = document.getElementById('login-password').value;
-    if(!name || !password){ errEl.textContent = 'Enter your username and password.'; return; }
-    var id = name.toLowerCase();
+    if(!email || !password){ errEl.textContent = 'Enter your email and password.'; return; }
     setAuthBusy('login-btn', true, 'Logging in…');
-    dbGet('users', id).then(function(user){
-      if(!user){ setAuthBusy('login-btn', false, 'Log in'); errEl.textContent = 'No account with that username. Sign up instead?'; return; }
-      return hashPassword(password, user.salt).then(function(hash){
-        setAuthBusy('login-btn', false, 'Log in');
-        if(hash !== user.passwordHash){ errEl.textContent = 'Incorrect password.'; return; }
-        completeLogin({username: user.username, id: id, color: user.color, avatar: user.avatar || null});
+    auth.signInWithEmailAndPassword(email, password).then(function(cred){
+      setAuthBusy('login-btn', false, 'Log in');
+      return dbGet('users', cred.user.uid).then(function(profile){
+        if(!profile){
+          errEl.textContent = 'Account profile missing. Please sign up again.';
+          return;
+        }
+        completeLogin({username: profile.username, id: cred.user.uid, uid: cred.user.uid, color: profile.color, avatar: profile.avatar || null});
       });
+    }).catch(function(err){
+      setAuthBusy('login-btn', false, 'Log in');
+      errEl.textContent = friendlyAuthError(err);
     });
   }
 
@@ -684,25 +700,33 @@
     var errEl = document.getElementById('signup-error');
     errEl.textContent = '';
     var name = document.getElementById('signup-username').value.trim();
+    var email = document.getElementById('signup-email').value.trim();
     var password = document.getElementById('signup-password').value;
     var password2 = document.getElementById('signup-password2').value;
     if(!/^[A-Za-z0-9_ .-]{2,20}$/.test(name)){ errEl.textContent = 'Usernames are 2-20 characters (letters, numbers, spaces, - or _).'; return; }
-    if(password.length < 4){ errEl.textContent = 'Password must be at least 4 characters.'; return; }
+    if(!email){ errEl.textContent = 'Enter an email address.'; return; }
+    if(password.length < 6){ errEl.textContent = 'Password must be at least 6 characters.'; return; }
     if(password !== password2){ errEl.textContent = 'Passwords do not match.'; return; }
-    var id = name.toLowerCase();
     setAuthBusy('signup-btn', true, 'Creating…');
-    dbGet('users', id).then(function(existing){
-      if(existing){ setAuthBusy('signup-btn', false, 'Create my character'); errEl.textContent = 'That username is already taken.'; return; }
-      var salt = randomSalt();
-      return hashPassword(password, salt).then(function(hash){
-        return dbCreate('users', {
-          username: name, passwordHash: hash, salt: salt,
-          color: signupColor, avatar: pendingSignupAvatar, createdAt: Date.now()
-        }, id);
-      }).then(function(res){
+
+    // Ensure the username isn't already taken by scanning the users node.
+    dbList('users').then(function(raw){
+      var taken = toArray(raw).some(function(u){ return (u.username || '').toLowerCase() === name.toLowerCase(); });
+      if(taken){
         setAuthBusy('signup-btn', false, 'Create my character');
-        if(!res){ errEl.textContent = 'Could not create your account. Try again.'; return; }
-        completeLogin({username: name, id: id, color: signupColor, avatar: pendingSignupAvatar});
+        errEl.textContent = 'That username is already taken.';
+        return;
+      }
+      return auth.createUserWithEmailAndPassword(email, password).then(function(cred){
+        var profile = {username: name, email: email, color: signupColor, avatar: pendingSignupAvatar, createdAt: Date.now()};
+        return dbPut('users', cred.user.uid, profile).then(function(res){
+          setAuthBusy('signup-btn', false, 'Create my character');
+          if(!res){ errEl.textContent = 'Could not create your account. Try again.'; return; }
+          completeLogin({username: name, id: cred.user.uid, uid: cred.user.uid, color: signupColor, avatar: pendingSignupAvatar});
+        });
+      }).catch(function(err){
+        setAuthBusy('signup-btn', false, 'Create my character');
+        errEl.textContent = friendlyAuthError(err);
       });
     });
   }
@@ -714,6 +738,17 @@
     updateMeFooterUI();
     initApp();
   }
+
+  // Keep users signed in across reloads via Firebase's auth persistence.
+  auth.onAuthStateChanged(function(user){
+    if(user && !state.me){
+      dbGet('users', user.uid).then(function(profile){
+        if(profile){
+          completeLogin({username: profile.username, id: user.uid, uid: user.uid, color: profile.color, avatar: profile.avatar || null});
+        }
+      });
+    }
+  });
 
   // ---------- INIT ----------
   function initApp(){
@@ -735,7 +770,7 @@
   }
 
   function ensureDefaultServer(){
-    return dbList('servers', 'all').then(function(raw){
+    return dbList('servers').then(function(raw){
       var servers = toArray(raw);
       if(servers.length > 0) return;
       return dbCreate('servers', {
@@ -754,7 +789,7 @@
   }
 
   function refreshServers(){
-    return Promise.all([dbList('servers', 'all'), dbList('members', 'all')]).then(function(results){
+    return Promise.all([dbList('servers'), dbList('members')]).then(function(results){
       var servers = toArray(results[0]).sort(function(a,b){ return a.createdAt - b.createdAt; });
       var allMembers = toArray(results[1]);
       state.servers = servers;
@@ -806,7 +841,7 @@
   }
 
   function refreshChannels(){
-    return dbList('channels', 'all').then(function(raw){
+    return dbList('channels').then(function(raw){
       state.channels = toArray(raw)
         .filter(function(c){ return c.serverId === state.currentServerId; })
         .sort(function(a,b){ return a.createdAt - b.createdAt; });
@@ -924,7 +959,7 @@
     if(now - state.lastTypingPing < 1500) return;
     state.lastTypingPing = now;
     if(state.view !== 'channel' || !state.currentChannelId) return;
-    dbPut('presence', state.me.username, {
+    dbPut('presence', safeKey(state.me.username), {
       username: state.me.username, color: state.me.color, status: 'online',
       lastSeen: now, serverId: state.currentServerId, channelId: state.currentChannelId,
       typingUntil: now + 3000
@@ -935,7 +970,7 @@
   function refreshMessages(){
     if(state.view !== 'channel' || !state.currentChannelId) return Promise.resolve();
     var cid = state.currentChannelId;
-    return dbList('messages', 'all').then(function(raw){
+    return dbList('messages').then(function(raw){
       if(state.currentChannelId !== cid) return; // channel changed mid-flight
       var msgs = toArray(raw).filter(function(m){ return m.channelId === cid; })
         .sort(function(a,b){ return a.ts - b.ts; });
@@ -1028,7 +1063,7 @@
   function refreshMembers(){
     if(state.view !== 'channel' || !state.currentServerId) return;
     var sid = state.currentServerId;
-    return Promise.all([dbList('members', 'all'), dbList('presence', 'all')]).then(function(results){
+    return Promise.all([dbList('members'), dbList('presence')]).then(function(results){
       var members = toArray(results[0]).filter(function(m){ return m.serverId === sid; });
       state.presenceList = toArray(results[1]);
       renderMemberPanel(members);
@@ -1070,7 +1105,7 @@
 
   function heartbeat(){
     if(!state.me) return;
-    dbPut('presence', state.me.username, {
+    dbPut('presence', safeKey(state.me.username), {
       username: state.me.username, color: state.me.color, status: 'online',
       lastSeen: Date.now(), serverId: state.currentServerId, channelId: state.currentChannelId,
       typingUntil: 0
@@ -1085,15 +1120,15 @@
       refreshMembers();
     } else if(state.view === 'dm'){
       refreshDMs();
-      dbList('presence', 'all').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); });
+      dbList('presence').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); });
     } else if(state.view === 'friends'){
-      dbList('presence', 'all').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); renderFriendsMain(); });
+      dbList('presence').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); renderFriendsMain(); });
     }
   }
 
   // ---------- FRIENDS ----------
   function refreshFriendData(){
-    return dbList('friendRequests', 'all').then(function(raw){
+    return dbList('friendRequests').then(function(raw){
       var all = toArray(raw);
       var meLower = state.me.username.toLowerCase();
       state.friendRequestsIncoming = all.filter(function(r){ return r.toLower === meLower && r.status === 'pending'; });
@@ -1127,13 +1162,15 @@
     }
     var toLower = name.toLowerCase();
     var fromLower = state.me.username.toLowerCase();
-    dbGet('users', toLower).then(function(targetUser){
+
+    dbList('users').then(function(raw){
+      var targetUser = toArray(raw).find(function(u){ return (u.username || '').toLowerCase() === toLower; });
       if(!targetUser){
         if(errEl) errEl.textContent = 'No user with that username exists.';
         return;
       }
-      var forwardId = fromLower + '__' + toLower;
-      var reverseId = toLower + '__' + fromLower;
+      var forwardId = safeKey(fromLower + '__' + toLower);
+      var reverseId = safeKey(toLower + '__' + fromLower);
       Promise.all([dbGet('friendRequests', forwardId), dbGet('friendRequests', reverseId)]).then(function(pair){
         var forward = pair[0], reverse = pair[1];
         if(forward && forward.status === 'accepted'){ if(errEl) errEl.textContent = "You're already friends."; return; }
@@ -1263,7 +1300,7 @@
     document.getElementById('server-gear').style.display = 'none';
     document.getElementById('sidebar-title').textContent = 'Direct Messages';
     renderServerRail();
-    Promise.all([dbList('presence', 'all'), refreshFriendData()]).then(function(results){
+    Promise.all([dbList('presence'), refreshFriendData()]).then(function(results){
       state.presenceList = toArray(results[0]);
       renderDMSidebar();
       openFriendsView();
@@ -1317,7 +1354,7 @@
     if(state.view !== 'dm' || !state.dmPartner) return Promise.resolve();
     var partner = state.dmPartner;
     var pairKey = [state.me.username, partner].sort().join('|');
-    return dbList('dms', 'all').then(function(raw){
+    return dbList('dms').then(function(raw){
       if(state.dmPartner !== partner) return;
       var msgs = toArray(raw).filter(function(m){ return m.pairKey === pairKey; })
         .sort(function(a,b){ return a.ts - b.ts; });
@@ -1364,7 +1401,7 @@
 
   // ---------- EXPLORE MODAL ----------
   document.getElementById('explore-btn').addEventListener('click', function(){
-    dbList('servers', 'all').then(function(raw){
+    dbList('servers').then(function(raw){
       var servers = toArray(raw).sort(function(a,b){ return a.createdAt - b.createdAt; });
       var myIds = state.myMemberships.map(function(m){ return m.serverId; });
       var list = document.getElementById('explore-list');
