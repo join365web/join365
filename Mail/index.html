@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join365 Mail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+  :root{
+    --bg-void:#0A0D12;
+    --bg-panel:#10141C;
+    --bg-elevated:#171C26;
+    --bg-hover:#1E2430;
+    --border-subtle:#232938;
+    --border-strong:#323A4C;
+    --text-primary:#E8EAED;
+    --text-muted:#8B93A5;
+    --text-faint:#5B6272;
+    --amber:#E8A93B;
+    --amber-dim:#7A5A22;
+    --amber-ink:#1a1408;
+    --pulse:#2DD4BF;
+    --danger:#F87171;
+    --font-display:'Space Grotesk',sans-serif;
+    --font-body:'Inter',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--bg-void);
+    color:var(--text-primary);
+    font-family:var(--font-body);
+    overflow:hidden;
+  }
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none;color:inherit;}
+  input,textarea,select{font-family:inherit;outline:none;border:none;background:none;color:inherit;}
+  a{color:var(--amber);}
+
+  /* ---------- WAVEFORM MARK (matches Join365 app icon) ---------- */
+  .wave-mark{display:inline-flex;align-items:flex-end;gap:2px;height:20px;}
+  .wave-mark span{display:block;width:3px;background:var(--amber);border-radius:2px;}
+  .wave-mark span:nth-child(1){height:40%;}
+  .wave-mark span:nth-child(2){height:100%;}
+  .wave-mark span:nth-child(3){height:65%;}
+  .wave-mark span:nth-child(4){height:100%;}
+  .wave-mark span:nth-child(5){height:30%;}
+
+  /* ---------- GATE (login / signup) ---------- */
+  #gate{
+    position:fixed;inset:0;z-index:100;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 15%, #1c150a 0%, #0A0D12 55%);
+  }
+  #gate.hidden{display:none;}
+  .gate-card{
+    width:400px;max-width:90vw;
+    background:var(--bg-panel);
+    border:1px solid var(--border-subtle);
+    border-radius:16px;
+    padding:34px 32px;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);
+  }
+  .gate-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+  .gate-wordmark{font-family:var(--font-display);font-weight:700;font-size:24px;letter-spacing:-.02em;}
+  .gate-wordmark span{color:var(--amber);}
+  .gate-sub2{font-size:12.5px;color:var(--text-faint);font-family:var(--font-mono);letter-spacing:.03em;margin-bottom:22px;}
+
+  .auth-tabs{display:flex;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:3px;margin-bottom:20px;}
+  .auth-tab{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text-muted);}
+  .auth-tab.active{background:var(--bg-hover);color:var(--text-primary);}
+
+  .gate-field{margin-bottom:14px;}
+  .gate-field label{display:block;font-family:var(--font-mono);font-size:11px;color:var(--text-faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  .gate-field input{
+    width:100%;padding:11px 13px;background:var(--bg-elevated);
+    border:1px solid var(--border-subtle);border-radius:9px;
+    color:var(--text-primary);font-size:14px;
+  }
+  .gate-field input:focus{border-color:var(--amber);}
+  .gate-btn{
+    width:100%;padding:12px;border-radius:9px;margin-top:4px;
+    background:var(--amber);color:var(--amber-ink);font-weight:700;font-size:14px;
+    transition:filter .15s;
+  }
+  .gate-btn:hover{filter:brightness(1.08);}
+  .gate-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .gate-msg{font-size:12.5px;margin:8px 0 4px;min-height:14px;}
+  .gate-msg.err{color:var(--danger);}
+  .gate-msg.ok{color:var(--pulse);}
+
+  .req-block{background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:14px;margin-top:4px;}
+  .req-block-label{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+  .req-owner-row{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-muted);padding:5px 0;}
+  .req-owner-row input[type=radio]{accent-color:var(--amber);width:15px;height:15px;}
+
+  /* ---------- PENDING SCREEN ---------- */
+  #pending{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 15%, #1c150a 0%, #0A0D12 55%);}
+  #pending.show{display:flex;}
+  .pending-card{
+    width:380px;max-width:90vw;text-align:center;
+    background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:16px;
+    padding:40px 30px;display:flex;flex-direction:column;align-items:center;gap:14px;
+  }
+  .pending-icon{font-size:30px;color:var(--amber-dim);}
+  .pending-title{font-family:var(--font-display);font-size:19px;font-weight:600;}
+  .pending-sub{font-size:13px;color:var(--text-muted);line-height:1.6;}
+  .pending-email{font-family:var(--font-mono);font-size:12px;color:var(--text-faint);}
+  .pending-refresh{
+    margin-top:8px;padding:10px 20px;border-radius:9px;background:var(--amber);
+    color:var(--amber-ink);font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;
+  }
+  .pending-refresh.spin i{animation:spin .6s linear infinite;}
+  .pending-signout{font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);text-decoration:underline;text-underline-offset:3px;}
+  .pending-signout:hover{color:var(--danger);}
+
+  /* ---------- SHELL ---------- */
+  #shell{display:none;height:100vh;grid-template-columns:220px 1fr;}
+  #shell.active{display:grid;}
+
+  #sidebar{background:var(--bg-panel);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;}
+  #sidebar-top{padding:16px;border-bottom:1px solid var(--border-subtle);}
+  #sidebar-brand{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+  #sidebar-brand .name{font-family:var(--font-display);font-weight:700;font-size:15.5px;}
+  #sidebar-brand .name span{color:var(--amber);}
+  .compose-btn{
+    width:100%;padding:10px;border-radius:9px;background:var(--amber);color:var(--amber-ink);
+    font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .compose-btn:hover{filter:brightness(1.08);}
+
+  #nav-list{flex:1;overflow-y:auto;padding:10px 8px;}
+  .nav-label{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;padding:10px 8px 5px;}
+  .nav-item{
+    display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;margin-bottom:2px;
+    color:var(--text-muted);font-size:14px;font-weight:500;
+  }
+  .nav-item:hover{background:var(--bg-hover);color:var(--text-primary);}
+  .nav-item.active{background:var(--bg-elevated);color:var(--text-primary);}
+  .nav-item i{width:15px;text-align:center;font-size:13px;opacity:.75;}
+  .nav-item.active i{opacity:1;color:var(--amber);}
+  .nav-badge{margin-left:auto;background:var(--amber);color:var(--amber-ink);font-family:var(--font-mono);font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:8px;}
+
+  #user-footer{padding:12px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;gap:9px;}
+  #user-footer .initial{width:30px;height:30px;border-radius:50%;background:var(--amber-dim);color:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  #user-footer .info{flex:1;min-width:0;}
+  #user-footer .email{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #user-footer .role{font-size:10.5px;color:var(--pulse);font-family:var(--font-mono);}
+  #user-footer .signout{color:var(--text-faint);font-size:14px;}
+  #user-footer .signout:hover{color:var(--danger);}
+
+  /* ---------- MAIN AREA ---------- */
+  #main-area{display:flex;flex-direction:column;min-width:0;}
+  #topbar{
+    height:56px;flex-shrink:0;border-bottom:1px solid var(--border-subtle);
+    display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  }
+  #topbar .title{font-family:var(--font-display);font-weight:600;font-size:16px;}
+  .search-wrap{position:relative;width:260px;}
+  .search-wrap input{width:100%;padding:8px 12px 8px 32px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:9px;font-size:13px;}
+  .search-wrap input:focus{border-color:var(--border-strong);}
+  .search-wrap i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:12px;}
+  .refresh-btn{background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:8px;color:var(--text-muted);padding:7px 10px;font-size:12px;}
+  .refresh-btn:hover{color:var(--text-primary);border-color:var(--border-strong);}
+  .refresh-btn.spin i{animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  #content-split{flex:1;display:flex;overflow:hidden;}
+  #list-pane{width:340px;min-width:280px;border-right:1px solid var(--border-subtle);overflow-y:auto;flex-shrink:0;}
+  .mail-row{padding:13px 18px;border-bottom:1px solid var(--border-subtle);cursor:pointer;}
+  .mail-row:hover{background:var(--bg-elevated);}
+  .mail-row.active{background:var(--bg-elevated);border-left:2px solid var(--amber);padding-left:16px;}
+  .mr-top{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+  .mr-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+  .mr-from{font-size:13.5px;font-weight:600;color:var(--text-primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mr-from.read{font-weight:400;color:var(--text-muted);}
+  .mr-date{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);flex-shrink:0;}
+  .mr-subject{font-size:13px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;}
+  .mr-subject.bold{font-weight:600;color:var(--text-primary);}
+  .mr-snippet{font-size:12px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mr-pill{display:inline-block;font-family:var(--font-mono);font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:6px;margin-top:5px;letter-spacing:.04em;text-transform:uppercase;}
+  .mr-pill.sent{background:rgba(232,169,59,.1);color:var(--amber);border:1px solid rgba(232,169,59,.22);}
+  .mr-pill.delivered{background:rgba(45,212,191,.1);color:var(--pulse);border:1px solid rgba(45,212,191,.2);}
+  .list-empty{text-align:center;padding:50px 20px;color:var(--text-faint);}
+  .list-empty i{font-size:22px;display:block;margin-bottom:10px;opacity:.3;}
+  .list-empty p{font-size:12.5px;}
+
+  #detail-pane{flex:1;overflow-y:auto;}
+  .detail-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--border-strong);}
+  .detail-empty i{font-size:36px;}
+  .detail-empty p{font-size:12.5px;color:var(--text-faint);}
+  .detail-hero{padding:24px 28px 18px;border-bottom:1px solid var(--border-subtle);}
+  .detail-subject{font-family:var(--font-display);font-size:19px;font-weight:600;letter-spacing:-.01em;margin-bottom:14px;}
+  .detail-meta{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px;margin-bottom:10px;}
+  .dm-key{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;align-self:center;}
+  .dm-val{color:var(--text-muted);}
+  .dm-val strong{color:var(--text-primary);font-weight:600;}
+  .detail-date{font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);}
+  .detail-body{padding:24px 28px;}
+  .plain-body{font-size:14px;line-height:1.75;color:var(--text-muted);white-space:pre-wrap;word-break:break-word;}
+
+  /* ---------- COMPOSE MODAL ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(5,6,9,.72);display:none;align-items:flex-end;justify-content:flex-end;padding:18px;z-index:80;}
+  .modal-overlay.open{display:flex;}
+  .compose-modal{width:100%;max-width:480px;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:14px;display:flex;flex-direction:column;max-height:86vh;box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  .cm-head{padding:14px 18px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;}
+  .cm-title{font-family:var(--font-display);font-size:14px;font-weight:600;}
+  .cm-x{color:var(--text-faint);font-size:15px;}
+  .cm-x:hover{color:var(--text-primary);}
+  .cm-field{display:flex;align-items:center;border-bottom:1px solid var(--border-subtle);padding:11px 18px;gap:10px;}
+  .cm-label{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);min-width:50px;text-transform:uppercase;letter-spacing:.05em;}
+  .cm-field input,.cm-field select{flex:1;font-size:14px;color:var(--text-primary);}
+  .cm-field select option{background:var(--bg-elevated);}
+  #cm-body{flex:1;min-height:180px;padding:16px 18px;font-size:14px;line-height:1.7;resize:none;}
+  .cm-footer{display:flex;align-items:center;gap:10px;padding:13px 18px;border-top:1px solid var(--border-subtle);}
+  .cm-send{padding:10px 18px;background:var(--amber);color:var(--amber-ink);border-radius:9px;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px;}
+  .cm-send:hover{filter:brightness(1.08);}
+  .cm-send:disabled{opacity:.4;cursor:not-allowed;}
+  .cm-status{flex:1;font-size:12px;padding:6px 10px;border-radius:7px;display:none;}
+  .cm-status.ok{display:block;background:rgba(45,212,191,.1);color:var(--pulse);border:1px solid rgba(45,212,191,.2);}
+  .cm-status.err{display:block;background:rgba(248,113,113,.08);color:var(--danger);border:1px solid rgba(248,113,113,.2);}
+
+  /* ---------- ACCESS PANEL (owner only) ---------- */
+  .access-pane{padding:26px 28px;max-width:640px;display:flex;flex-direction:column;gap:24px;}
+  .access-block-title{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;padding-bottom:9px;border-bottom:1px solid var(--border-subtle);margin-bottom:12px;}
+  .af-input{width:100%;padding:10px 13px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:9px;color:var(--text-primary);font-size:13.5px;margin-bottom:10px;}
+  .af-input:focus{border-color:var(--border-strong);}
+  .af-hint{font-size:11.5px;color:var(--text-faint);margin:-4px 0 10px;}
+  .af-btn{padding:9px 16px;background:var(--amber);color:var(--amber-ink);border-radius:9px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:7px;}
+  .af-btn:hover{filter:brightness(1.08);}
+  .af-btn.secondary{background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border-subtle);}
+  .af-btn.secondary:hover{background:var(--bg-hover);}
+  .af-status{font-size:12px;padding:7px 11px;border-radius:7px;margin-top:8px;display:none;}
+  .af-status.ok{display:block;background:rgba(45,212,191,.1);color:var(--pulse);border:1px solid rgba(45,212,191,.2);}
+  .af-status.err{display:block;background:rgba(248,113,113,.08);color:var(--danger);border:1px solid rgba(248,113,113,.2);}
+
+  .role-toggle{display:flex;border:1px solid var(--border-subtle);border-radius:9px;overflow:hidden;margin-bottom:10px;}
+  .role-opt{flex:1;padding:8px;font-size:12px;font-weight:600;color:var(--text-muted);}
+  .role-opt.active{background:var(--bg-elevated);color:var(--amber);}
+
+  .user-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--border-subtle);border-radius:10px;margin-bottom:8px;}
+  .ur-email{font-size:13.5px;font-weight:600;margin-bottom:3px;}
+  .ur-addresses{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);}
+  .ur-role-chip{display:inline-block;font-family:var(--font-mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:6px;margin-top:6px;}
+  .ur-role-chip.admin{background:rgba(232,169,59,.1);color:var(--amber);border:1px solid rgba(232,169,59,.22);}
+  .ur-role-chip.user{background:rgba(255,255,255,.05);color:var(--text-muted);border:1px solid var(--border-subtle);}
+  .ur-actions{display:flex;gap:6px;flex-shrink:0;}
+  .ur-btn{padding:5px 11px;border-radius:7px;font-size:11.5px;}
+  .ur-revoke{border:1px solid rgba(248,113,113,.25);color:var(--danger);}
+  .ur-revoke:hover{background:rgba(248,113,113,.08);}
+  .ur-edit{border:1px solid var(--border-subtle);color:var(--text-muted);}
+  .ur-edit:hover{background:var(--bg-hover);color:var(--text-primary);}
+  .access-empty{font-size:12.5px;color:var(--text-faint);text-align:center;padding:20px;border:1px dashed var(--border-subtle);border-radius:9px;}
+
+  .pending-user-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border:1px solid rgba(232,169,59,.2);background:rgba(232,169,59,.04);border-radius:10px;margin-bottom:8px;}
+  .pu-email{font-size:13.5px;}
+  .pu-time{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);}
+  .pu-approve{padding:5px 12px;border:1px solid rgba(45,212,191,.3);color:var(--pulse);border-radius:7px;font-size:11.5px;}
+  .pu-approve:hover{background:rgba(45,212,191,.08);}
+  .pu-deny{padding:5px 10px;border:1px solid rgba(248,113,113,.2);color:var(--danger);border-radius:7px;font-size:11.5px;}
+  .pu-deny:hover{background:rgba(248,113,113,.06);}
+</style>
+</head>
+<body>
+
+<!-- ── GATE ── -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-brand">
+      <div class="wave-mark"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="gate-wordmark">JOIN<span>365</span> Mail</div>
+    </div>
+    <div class="gate-sub2">Access restricted to approved @join365.eu.cc accounts.</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" data-tab="login">Log in</button>
+      <button class="auth-tab" id="tab-signup" data-tab="signup">Request access</button>
+    </div>
+
+    <!-- LOG IN -->
+    <div id="pane-login">
+      <div class="gate-field"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="username"></div>
+      <div class="gate-field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="gate-msg err" id="login-error"></div>
+      <button class="gate-btn" id="login-btn">Log in</button>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="pane-signup" style="display:none;">
+      <div class="gate-field"><label>Email</label><input type="email" id="signup-email" placeholder="you@example.com" autocomplete="username"></div>
+      <div class="gate-field"><label>Password</label><input type="password" id="signup-password" placeholder="min. 6 characters" autocomplete="new-password"></div>
+      <div class="gate-field"><label>Confirm password</label><input type="password" id="signup-password2" placeholder="••••••••" autocomplete="new-password"></div>
+
+      <div class="req-block">
+        <div class="req-block-label">Route request to</div>
+        <label class="req-owner-row"><input type="radio" name="owner-choice" value="htmltools" checked> HTMLTools owner</label>
+        <label class="req-owner-row"><input type="radio" name="owner-choice" value="join365"> Join365 owner</label>
+      </div>
+
+      <div class="gate-msg err" id="signup-error" style="margin-top:10px;"></div>
+      <div class="gate-msg ok" id="signup-ok"></div>
+      <button class="gate-btn" id="signup-btn">Request access</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PENDING ── -->
+<div id="pending">
+  <div class="pending-card">
+    <i class="fas fa-hourglass-half pending-icon"></i>
+    <div class="pending-title">Waiting for approval</div>
+    <div class="pending-sub">Your request has been sent to an owner. You'll get access once they approve it and assign you addresses.</div>
+    <div class="pending-email" id="pending-email-label"></div>
+    <button class="pending-refresh" id="pending-refresh-btn"><i class="fas fa-rotate-right"></i> Check again</button>
+    <button class="pending-signout" id="pending-signout-btn">Sign out</button>
+  </div>
+</div>
+
+<!-- ── SHELL ── -->
+<div id="shell">
+  <div id="sidebar">
+    <div id="sidebar-top">
+      <div id="sidebar-brand">
+        <div class="wave-mark"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="name">JOIN<span>365</span></div>
+      </div>
+      <button class="compose-btn" id="compose-open-btn"><i class="fas fa-pen"></i> Compose</button>
+    </div>
+    <div id="nav-list">
+      <div class="nav-label">Mailbox</div>
+      <div class="nav-item active" id="nav-inbox" data-view="inbox"><i class="fas fa-inbox"></i> Inbox <span class="nav-badge" id="inbox-badge" style="display:none;"></span></div>
+      <div class="nav-item" id="nav-sent" data-view="sent"><i class="fas fa-paper-plane"></i> Sent</div>
+      <div id="nav-access-wrap" style="display:none;">
+        <div class="nav-label">Admin</div>
+        <div class="nav-item" id="nav-access" data-view="access"><i class="fas fa-user-shield"></i> Access</div>
+      </div>
+    </div>
+    <div id="user-footer">
+      <div class="initial" id="me-initial"></div>
+      <div class="info">
+        <div class="email" id="me-email"></div>
+        <div class="role" id="me-role"></div>
+      </div>
+      <button class="signout" id="signout-btn" title="Sign out"><i class="fas fa-right-from-bracket"></i></button>
+    </div>
+  </div>
+
+  <div id="main-area">
+    <div id="topbar">
+      <span class="title" id="topbar-title">Inbox</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="search-wrap" id="search-wrap"><i class="fas fa-search"></i><input type="text" id="search-input" placeholder="search mail…"></div>
+        <button class="refresh-btn" id="refresh-btn"><i class="fas fa-rotate-right"></i></button>
+      </div>
+    </div>
+    <div id="content-split">
+      <div id="list-pane"></div>
+      <div id="detail-pane"><div class="detail-empty"><i class="fas fa-envelope-open"></i><p>No message selected</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── COMPOSE ── -->
+<div class="modal-overlay" id="compose-overlay">
+  <div class="compose-modal">
+    <div class="cm-head">
+      <span class="cm-title">New Message</span>
+      <button class="cm-x" id="compose-close-btn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cm-field">
+      <span class="cm-label">From</span>
+      <select id="cm-from-select" style="display:none;"></select>
+      <input type="text" id="cm-from-input" placeholder="username@join365.eu.cc" autocomplete="off" style="display:none;">
+    </div>
+    <div class="cm-field"><span class="cm-label">To</span><input type="email" id="cm-to" placeholder="recipient@example.com"></div>
+    <div class="cm-field"><span class="cm-label">Subject</span><input type="text" id="cm-subject" placeholder="Subject…"></div>
+    <textarea id="cm-body" placeholder="Write your message…"></textarea>
+    <div class="cm-footer">
+      <button class="cm-send" id="cm-send-btn"><i class="fas fa-paper-plane"></i> Send</button>
+      <div class="cm-status" id="cm-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase (compat build so this stays a single plain-<script> file) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var WORKER = 'https://long-mountain-3fdf.join365-website.workers.dev/';
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyAOld48eda9m_rIJ_72wnMVUyJM1unDlzA",
+    authDomain: "join365-9a175.firebaseapp.com",
+    databaseURL: "https://join365-9a175-default-rtdb.firebaseio.com",
+    projectId: "join365-9a175",
+    storageBucket: "join365-9a175.firebasestorage.app",
+    messagingSenderId: "624922796690",
+    appId: "1:624922796690:web:2ca60637523e4aadcb3c4b",
+    measurementId: "G-3FKMNX91SH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var db = firebase.database();
+
+  var DOMAIN = 'join365.eu.cc';
+
+  // ---------- State ----------
+  var currentUser = null;   // firebase user
+  var access = null;        // {role, addresses}
+  var currentView = 'inbox';
+  var allEmails = [];
+  var currentEmail = null;
+  var accessListenerRef = null;
+  var pendingListenerRef = null;
+
+  function esc(s){
+    var d = document.createElement('div');
+    d.textContent = String(s == null ? '' : s);
+    return d.innerHTML;
+  }
+  function dbKey(email){ return email.replace(/\./g,'_').replace(/@/g,'__at__'); }
+  function fmtDate(iso){
+    if(!iso) return '';
+    var d = new Date(iso), now = new Date();
+    if(now - d < 86400000 && now.getDate() === d.getDate()) return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    if(now.getFullYear() === d.getFullYear()) return d.toLocaleDateString([], {month:'short',day:'numeric'});
+    return d.toLocaleDateString([], {month:'short',day:'numeric',year:'2-digit'});
+  }
+  function sanitiseUsername(s){
+    return s.trim().toLowerCase().replace(new RegExp('@' + DOMAIN.replace('.', '\\.') + '$','i'), '').replace(/\s+/g,'');
+  }
+
+  async function api(body){
+    var idToken = currentUser ? await currentUser.getIdToken() : null;
+    var r = await fetch(WORKER, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(Object.assign({idToken: idToken}, body))
+    });
+    return r.json();
+  }
+
+  function showScreen(name){
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('pending').classList.remove('show');
+    document.getElementById('shell').classList.remove('active');
+    if(name === 'gate') document.getElementById('gate').classList.remove('hidden');
+    else if(name === 'pending') document.getElementById('pending').classList.add('show');
+    else if(name === 'shell') document.getElementById('shell').classList.add('active');
+  }
+
+  function cleanupListeners(){
+    if(accessListenerRef){ accessListenerRef.off(); accessListenerRef = null; }
+    if(pendingListenerRef){ pendingListenerRef.off(); pendingListenerRef = null; }
+  }
+
+  // ---------- Auth tabs ----------
+  document.getElementById('tab-login').addEventListener('click', function(){ switchTab('login'); });
+  document.getElementById('tab-signup').addEventListener('click', function(){ switchTab('signup'); });
+  function switchTab(tab){
+    var isLogin = tab === 'login';
+    document.getElementById('tab-login').classList.toggle('active', isLogin);
+    document.getElementById('tab-signup').classList.toggle('active', !isLogin);
+    document.getElementById('pane-login').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('pane-signup').style.display = isLogin ? 'none' : 'block';
+  }
+
+  function friendlyAuthError(err){
+    var code = (err && err.code) || '';
+    if(code === 'auth/invalid-email') return 'That email address looks invalid.';
+    if(code === 'auth/user-not-found') return 'No account with that email.';
+    if(code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Incorrect email or password.';
+    if(code === 'auth/email-already-in-use') return 'That email is already registered.';
+    if(code === 'auth/weak-password') return 'Password must be at least 6 characters.';
+    if(code === 'auth/too-many-requests') return 'Too many attempts. Try again later.';
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  // ---------- Login ----------
+  document.getElementById('login-btn').addEventListener('click', doLogin);
+  document.getElementById('login-password').addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
+  function doLogin(){
+    var errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    var email = document.getElementById('login-email').value.trim();
+    var pass = document.getElementById('login-password').value;
+    if(!email || !pass){ errEl.textContent = 'Enter your email and password.'; return; }
+    var btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    auth.signInWithEmailAndPassword(email, pass).catch(function(err){
+      errEl.textContent = friendlyAuthError(err);
+    }).finally(function(){
+      btn.disabled = false; btn.textContent = 'Log in';
+    });
+  }
+
+  // ---------- Signup / request access ----------
+  document.getElementById('signup-btn').addEventListener('click', doSignup);
+  document.getElementById('signup-password2').addEventListener('keydown', function(e){ if(e.key === 'Enter') doSignup(); });
+  function doSignup(){
+    var errEl = document.getElementById('signup-error');
+    var okEl = document.getElementById('signup-ok');
+    errEl.textContent = ''; okEl.textContent = '';
+    var email = document.getElementById('signup-email').value.trim().toLowerCase();
+    var pass = document.getElementById('signup-password').value;
+    var pass2 = document.getElementById('signup-password2').value;
+    var ownerChoice = document.querySelector('input[name="owner-choice"]:checked').value;
+    if(!email){ errEl.textContent = 'Enter an email address.'; return; }
+    if(pass.length < 6){ errEl.textContent = 'Password must be at least 6 characters.'; return; }
+    if(pass !== pass2){ errEl.textContent = 'Passwords do not match.'; return; }
+    var btn = document.getElementById('signup-btn');
+    btn.disabled = true; btn.textContent = 'Requesting…';
+    auth.createUserWithEmailAndPassword(email, pass).then(function(cred){
+      return db.ref('mailPending/' + dbKey(email)).set({
+        email: email, requestedOwner: ownerChoice, createdAt: Date.now()
+      });
+    }).then(function(){
+      okEl.textContent = 'Request sent! Waiting for owner approval…';
+    }).catch(function(err){
+      errEl.textContent = friendlyAuthError(err);
+    }).finally(function(){
+      btn.disabled = false; btn.textContent = 'Request access';
+    });
+  }
+
+  // ---------- Sign out ----------
+  document.getElementById('signout-btn').addEventListener('click', doSignOut);
+  document.getElementById('pending-signout-btn').addEventListener('click', doSignOut);
+  function doSignOut(){ cleanupListeners(); auth.signOut(); }
+
+  // ---------- Auth state ----------
+  auth.onAuthStateChanged(async function(user){
+    if(!user){
+      currentUser = null; access = null;
+      showScreen('gate');
+      return;
+    }
+    currentUser = user;
+    var email = user.email.toLowerCase();
+
+    var res = await api({type: 'check_access'});
+    if(res.success && res.hasAccess){
+      access = {role: res.role, addresses: res.addresses || []};
+      enterShell();
+
+      // watch for revocation / role changes live
+      var key = dbKey(email);
+      accessListenerRef = db.ref('mailAccess/' + key);
+      accessListenerRef.on('value', function(snap){
+        if(!snap.exists() && access.role !== 'owner'){
+          cleanupListeners();
+          auth.signOut();
+          alert('Your access has been revoked.');
+          return;
+        }
+      });
+      return;
+    }
+
+    // not approved yet — pending
+    var pendKey = dbKey(email);
+    var pendSnap = await db.ref('mailPending/' + pendKey).once('value');
+    if(!pendSnap.exists()){
+      await db.ref('mailPending/' + pendKey).set({email: email, requestedOwner: 'join365', createdAt: Date.now()});
+    }
+    showScreen('pending');
+    document.getElementById('pending-email-label').textContent = email;
+
+    pendingListenerRef = db.ref('mailAccess/' + pendKey);
+    pendingListenerRef.on('value', function(snap){
+      if(snap.exists()){
+        location.reload();
+      }
+    });
+  });
+
+  document.getElementById('pending-refresh-btn').addEventListener('click', async function(){
+    var btn = document.getElementById('pending-refresh-btn');
+    btn.classList.add('spin');
+    var res = await api({type: 'check_access'});
+    if(res.success && res.hasAccess){
+      location.reload();
+    } else {
+      btn.classList.remove('spin');
+    }
+  });
+
+  function enterShell(){
+    showScreen('shell');
+    document.getElementById('me-email').textContent = currentUser.email;
+    document.getElementById('me-initial').textContent = (currentUser.email[0] || '?').toUpperCase();
+    document.getElementById('me-role').textContent = access.role === 'owner' ? 'owner' : (access.role === 'admin-all' ? 'admin' : 'member');
+    document.getElementById('nav-access-wrap').style.display = access.role === 'owner' ? 'block' : 'none';
+    rebuildFromControl();
+    switchView('inbox');
+  }
+
+  // ---------- From control (compose) ----------
+  function rebuildFromControl(){
+    var sel = document.getElementById('cm-from-select');
+    var inp = document.getElementById('cm-from-input');
+    var canFreeType = access.role === 'owner' || access.role === 'admin-all';
+    if(canFreeType){
+      sel.style.display = 'none';
+      inp.style.display = 'block';
+    } else {
+      inp.style.display = 'none';
+      sel.style.display = 'block';
+      sel.innerHTML = '';
+      access.addresses.forEach(function(addr){
+        var opt = document.createElement('option');
+        opt.value = addr + '@' + DOMAIN;
+        opt.textContent = addr + '@' + DOMAIN;
+        sel.appendChild(opt);
+      });
+    }
+  }
+  function getFromAddress(){
+    var canFreeType = access.role === 'owner' || access.role === 'admin-all';
+    if(canFreeType){
+      var v = document.getElementById('cm-from-input').value.trim().toLowerCase();
+      if(v && v.indexOf('@') === -1) v = v + '@' + DOMAIN;
+      return v;
+    }
+    return document.getElementById('cm-from-select').value;
+  }
+
+  // ---------- Views ----------
+  document.getElementById('nav-inbox').addEventListener('click', function(){ switchView('inbox'); });
+  document.getElementById('nav-sent').addEventListener('click', function(){ switchView('sent'); });
+  document.getElementById('nav-access').addEventListener('click', function(){ switchView('access'); });
+  document.getElementById('refresh-btn').addEventListener('click', function(){ switchView(currentView); });
+  document.getElementById('search-input').addEventListener('input', function(){ renderList(this.value.trim() || undefined); });
+
+  function switchView(view){
+    currentView = view;
+    document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+    var navEl = document.getElementById('nav-' + view);
+    if(navEl) navEl.classList.add('active');
+    document.getElementById('topbar-title').textContent = {inbox:'Inbox', sent:'Sent', access:'Access'}[view] || view;
+    document.getElementById('search-wrap').style.display = view === 'access' ? 'none' : 'flex';
+    clearDetail();
+    if(view === 'inbox') loadInbox();
+    else if(view === 'sent') loadSent();
+    else if(view === 'access') loadAccess();
+  }
+
+  function clearDetail(){
+    currentEmail = null;
+    document.getElementById('detail-pane').innerHTML = '<div class="detail-empty"><i class="fas fa-envelope-open"></i><p>No message selected</p></div>';
+  }
+
+  function spin(on){ document.getElementById('refresh-btn').classList.toggle('spin', on); }
+
+  async function loadInbox(){
+    spin(true);
+    document.getElementById('list-pane').innerHTML = '<div class="list-empty"><i class="fas fa-circle-notch fa-spin"></i><p>Loading…</p></div>';
+    var res = await api({type:'get_inbox'});
+    spin(false);
+    if(!res.success){ showListError(res.error); return; }
+    allEmails = (res.emails || []).sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+    renderList();
+  }
+
+  async function loadSent(){
+    spin(true);
+    document.getElementById('list-pane').innerHTML = '<div class="list-empty"><i class="fas fa-circle-notch fa-spin"></i><p>Loading…</p></div>';
+    var res = await api({type:'get_sent'});
+    spin(false);
+    if(!res.success){ showListError(res.error); return; }
+    allEmails = (res.emails || []).sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+    renderList();
+  }
+
+  function showListError(msg){
+    document.getElementById('list-pane').innerHTML = '<div class="list-empty"><i class="fas fa-triangle-exclamation"></i><p>' + esc(msg || 'Something went wrong.') + '</p></div>';
+  }
+
+  function renderList(q){
+    var el = document.getElementById('list-pane');
+    var list = allEmails;
+    if(q){
+      var lq = q.toLowerCase();
+      list = list.filter(function(e){
+        return [e.from, e.subject, e.snippet, e.to].some(function(f){ return (f||'').toLowerCase().indexOf(lq) !== -1; });
+      });
+    }
+    if(!list.length){
+      el.innerHTML = '<div class="list-empty"><i class="fas fa-inbox"></i><p>Nothing here.</p></div>';
+      updateBadge(0);
+      return;
+    }
+    if(currentView === 'inbox') updateBadge(list.filter(function(e){ return !e.read; }).length);
+    else updateBadge(0);
+    el.innerHTML = '';
+    list.forEach(function(email){
+      var unread = currentView === 'inbox' && !email.read;
+      var row = document.createElement('div');
+      row.className = 'mail-row' + (currentEmail && currentEmail.id === email.id ? ' active' : '');
+      var fromDisplay = currentView === 'sent' ? (Array.isArray(email.to) ? email.to.join(', ') : email.to) : email.from;
+      var pillHtml = currentView === 'sent' ? '<div class="mr-pill sent">sent</div>' : '';
+      row.innerHTML =
+        '<div class="mr-top">' + (unread ? '<span class="mr-dot"></span>' : '') +
+          '<span class="mr-from' + (unread ? '' : ' read') + '">' + esc(fromDisplay) + '</span>' +
+          '<span class="mr-date">' + fmtDate(email.date) + '</span></div>' +
+        '<div class="mr-subject' + (unread ? ' bold' : '') + '">' + esc(email.subject || '(no subject)') + '</div>' +
+        '<div class="mr-snippet">' + esc(email.snippet || '') + '</div>' + pillHtml;
+      row.addEventListener('click', function(){ openEmail(email, row); });
+      el.appendChild(row);
+    });
+  }
+
+  function updateBadge(n){
+    var b = document.getElementById('inbox-badge');
+    if(n > 0){ b.textContent = n > 99 ? '99+' : n; b.style.display = 'inline-block'; }
+    else b.style.display = 'none';
+  }
+
+  async function openEmail(email, row){
+    document.querySelectorAll('.mail-row').forEach(function(r){ r.classList.remove('active'); });
+    row.classList.add('active');
+    currentEmail = email;
+    if(currentView === 'inbox' && !email.read){
+      email.read = true;
+      renderList(document.getElementById('search-input').value.trim() || undefined);
+    }
+    var pane = document.getElementById('detail-pane');
+    pane.innerHTML = '<div class="detail-empty"><i class="fas fa-circle-notch fa-spin"></i><p>Loading…</p></div>';
+    var res = await api({type:'get_email', id: email.id});
+    var full = (res.success && res.email) ? res.email : email;
+
+    var toVal = Array.isArray(full.to) ? full.to.join(', ') : (full.to || '');
+    var dateStr = full.date ? new Date(full.date).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '';
+    var body = full.html || full.text || '';
+
+    pane.innerHTML =
+      '<div class="detail-hero">' +
+        '<div class="detail-subject">' + esc(full.subject || '(no subject)') + '</div>' +
+        '<div class="detail-meta">' +
+          '<span class="dm-key">From</span><span class="dm-val"><strong>' + esc(full.from || '') + '</strong></span>' +
+          '<span class="dm-key">To</span><span class="dm-val">' + esc(toVal) + '</span>' +
+        '</div>' +
+        '<span class="detail-date">' + dateStr + '</span>' +
+      '</div>' +
+      '<div class="detail-body" id="detail-body"></div>';
+
+    var bodyEl = document.getElementById('detail-body');
+    if(body){
+      if(full.html){
+        var frame = document.createElement('iframe');
+        frame.style.cssText = 'width:100%;border:none;border-radius:8px;background:#fff;min-height:260px;display:block;';
+        frame.sandbox = 'allow-same-origin allow-popups allow-popups-to-escape-sandbox';
+        bodyEl.appendChild(frame);
+        var doc = frame.contentDocument || frame.contentWindow.document;
+        var injected = body.indexOf('<head>') !== -1 ? body.replace('<head>', '<head><base target="_blank">') : '<base target="_blank">' + body;
+        doc.open(); doc.write(injected); doc.close();
+        setTimeout(function(){
+          try {
+            frame.contentDocument.querySelectorAll('a').forEach(function(a){ a.target = '_blank'; a.rel = 'noopener noreferrer'; });
+            frame.style.height = (frame.contentDocument.body.scrollHeight + 30) + 'px';
+          } catch(e){}
+        }, 250);
+      } else {
+        var linked = body.replace(/(https?:\/\/[^\s<>"]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+        bodyEl.innerHTML = '<div class="plain-body">' + linked + '</div>';
+      }
+    } else {
+      bodyEl.innerHTML = '<p style="font-size:13px;color:var(--text-faint);">No content.</p>';
+    }
+  }
+
+  // ---------- Access panel (owner only) ----------
+  var accessDataRef = null, pendingDataRef = null;
+  var _accessSnap = {}, _pendingSnap = {};
+  function loadAccess(){
+    document.getElementById('list-pane').innerHTML = '<div class="list-empty"><i class="fas fa-user-shield"></i><p>Manage in panel →</p></div>';
+    if(accessDataRef) accessDataRef.off();
+    if(pendingDataRef) pendingDataRef.off();
+    accessDataRef = db.ref('mailAccess');
+    accessDataRef.on('value', function(snap){ _accessSnap = snap.val() || {}; if(currentView === 'access') renderAccessPane(); });
+    pendingDataRef = db.ref('mailPending');
+    pendingDataRef.on('value', function(snap){ _pendingSnap = snap.val() || {}; if(currentView === 'access') renderAccessPane(); });
+  }
+
+  var grantRole = 'user';
+  window.setGrantRole = function(role){
+    grantRole = role;
+    document.querySelectorAll('.role-opt').forEach(function(el){ el.classList.toggle('active', el.dataset.role === role); });
+    var addrRow = document.getElementById('ac-addr-row');
+    if(addrRow) addrRow.style.display = role === 'admin-all' ? 'none' : 'block';
+  };
+
+  function renderAccessPane(){
+    var entries = Object.entries(_accessSnap);
+    var pendingEntries = Object.entries(_pendingSnap);
+    var pane = document.getElementById('detail-pane');
+
+    pane.innerHTML =
+      '<div class="access-pane">' +
+        (pendingEntries.length > 0 ?
+          '<div class="access-block">' +
+            '<div class="access-block-title">Pending Requests — ' + pendingEntries.length + '</div>' +
+            pendingEntries.map(function(pair){
+              var key = pair[0], val = pair[1];
+              return '<div class="pending-user-row"><div><div class="pu-email">' + esc(val.email) +
+                '</div><div class="pu-time">' + (val.createdAt ? new Date(val.createdAt).toLocaleString() : '') +
+                (val.requestedOwner ? ' · requested ' + esc(val.requestedOwner) + ' owner' : '') + '</div></div>' +
+                '<div style="display:flex;gap:6px;"><button class="pu-approve" data-approve="' + key + '" data-email="' + esc(val.email) + '">Approve</button>' +
+                '<button class="pu-deny" data-deny="' + key + '">Deny</button></div></div>';
+            }).join('') +
+          '</div>' : '') +
+
+        '<div class="access-block">' +
+          '<div class="access-block-title">Grant Access</div>' +
+          '<input type="email" id="ac-email" class="af-input" placeholder="user@example.com">' +
+          '<div class="role-toggle">' +
+            '<button class="role-opt active" data-role="user" onclick="setGrantRole(\'user\')">Restricted</button>' +
+            '<button class="role-opt" data-role="admin-all" onclick="setGrantRole(\'admin-all\')">Admin (all)</button>' +
+          '</div>' +
+          '<div id="ac-addr-row">' +
+            '<input type="text" id="ac-addresses" class="af-input" placeholder="support,billing,hello (any @' + DOMAIN + ' usernames)">' +
+            '<div class="af-hint">Comma-separated usernames — assign 1 or more addresses this user can use.</div>' +
+          '</div>' +
+          '<button class="af-btn" id="grant-access-btn"><i class="fas fa-plus"></i> Grant Access</button>' +
+          '<button class="af-btn secondary" id="allow-all-btn" style="margin-left:8px;"><i class="fas fa-unlock"></i> Allow All</button>' +
+          '<div class="af-status" id="af-status"></div>' +
+        '</div>' +
+
+        '<div class="access-block">' +
+          '<div class="access-block-title">Active Users — ' + entries.length + '</div>' +
+          '<div id="ac-list">' +
+            (entries.length === 0 ? '<div class="access-empty">No users granted access yet.</div>' :
+              entries.map(function(pair){
+                var key = pair[0], val = pair[1];
+                var roleLabel = val.role === 'admin-all' ? 'admin-all' : 'user';
+                var addrDisplay = val.role === 'admin-all' ? 'all addresses' : (val.addresses || []).map(function(a){ return a + '@' + DOMAIN; }).join(' · ');
+                return '<div class="user-row"><div><div class="ur-email">' + esc(val.email) + '</div>' +
+                  '<div class="ur-addresses">' + esc(addrDisplay) + '</div>' +
+                  '<span class="ur-role-chip ' + (roleLabel === 'admin-all' ? 'admin' : 'user') + '">' + roleLabel + '</span></div>' +
+                  '<div class="ur-actions"><button class="ur-btn ur-edit" data-edit="' + key + '">Edit</button>' +
+                  '<button class="ur-btn ur-revoke" data-revoke="' + key + '" data-email="' + esc(val.email) + '">Revoke</button></div></div>';
+              }).join('')) +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.getElementById('grant-access-btn').addEventListener('click', function(){ grantAccess(null); });
+    document.getElementById('allow-all-btn').addEventListener('click', function(){ grantAccess('admin-all'); });
+    pane.querySelectorAll('[data-approve]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.getElementById('ac-email').value = btn.getAttribute('data-email');
+        window._approveKey = btn.getAttribute('data-approve');
+        document.getElementById('ac-email').scrollIntoView({behavior:'smooth'});
+      });
+    });
+    pane.querySelectorAll('[data-deny]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var key = btn.getAttribute('data-deny');
+        if(!confirm('Deny this access request?')) return;
+        await db.ref('mailPending/' + key).remove();
+      });
+    });
+    pane.querySelectorAll('[data-revoke]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var key = btn.getAttribute('data-revoke');
+        var email = btn.getAttribute('data-email');
+        if(!confirm('Revoke access for ' + email + '?')) return;
+        await db.ref('mailAccess/' + key).remove();
+      });
+    });
+    pane.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var key = btn.getAttribute('data-edit');
+        var data = _accessSnap[key];
+        if(!data) return;
+        var newAddrs = prompt(
+          'Edit addresses for ' + data.email + '\nCurrent: ' + (data.addresses || []).join(', ') +
+          '\n\nEnter comma-separated usernames, or type "all" for admin access to all addresses:'
+        );
+        if(newAddrs === null) return;
+        var payload = {email: data.email};
+        if(newAddrs.trim().toLowerCase() === 'all'){
+          payload.role = 'admin-all';
+        } else {
+          var addresses = newAddrs.split(',').map(sanitiseUsername).filter(function(s){ return s.length > 0; });
+          if(!addresses.length){ alert('No valid addresses entered.'); return; }
+          payload.role = 'user';
+          payload.addresses = addresses;
+        }
+        await db.ref('mailAccess/' + key).set(payload);
+      });
+    });
+  }
+
+  async function grantAccess(forceRole){
+    var emailVal = document.getElementById('ac-email').value.trim().toLowerCase();
+    var addrsRaw = (document.getElementById('ac-addresses') && document.getElementById('ac-addresses').value.trim()) || '';
+    var statusEl = document.getElementById('af-status');
+    statusEl.className = 'af-status'; statusEl.textContent = '';
+    if(!emailVal){ statusEl.textContent = 'Enter a user email.'; statusEl.className = 'af-status err'; return; }
+
+    var role = forceRole || grantRole;
+    var payload = {email: emailVal, role: role};
+    if(role === 'user'){
+      if(!addrsRaw){ statusEl.textContent = 'Enter at least one address.'; statusEl.className = 'af-status err'; return; }
+      var addresses = addrsRaw.split(',').map(sanitiseUsername).filter(function(s){ return s.length > 0; });
+      if(!addresses.length){ statusEl.textContent = 'No valid addresses found.'; statusEl.className = 'af-status err'; return; }
+      payload.addresses = addresses;
+    }
+
+    var key = dbKey(emailVal);
+    try {
+      await db.ref('mailAccess/' + key).set(payload);
+      if(window._approveKey){ await db.ref('mailPending/' + window._approveKey).remove(); window._approveKey = null; }
+      else { await db.ref('mailPending/' + key).remove(); }
+      statusEl.textContent = 'Access granted to ' + emailVal; statusEl.className = 'af-status ok';
+      document.getElementById('ac-email').value = '';
+      if(document.getElementById('ac-addresses')) document.getElementById('ac-addresses').value = '';
+    } catch(e){
+      statusEl.textContent = e.message; statusEl.className = 'af-status err';
+    }
+  }
+
+  // ---------- Compose ----------
+  document.getElementById('compose-open-btn').addEventListener('click', openCompose);
+  document.getElementById('compose-close-btn').addEventListener('click', closeCompose);
+  document.getElementById('compose-overlay').addEventListener('click', function(e){
+    if(e.target === document.getElementById('compose-overlay')) closeCompose();
+  });
+  function openCompose(){
+    rebuildFromControl();
+    document.getElementById('cm-to').value = '';
+    document.getElementById('cm-subject').value = '';
+    document.getElementById('cm-body').value = '';
+    document.getElementById('cm-status').className = 'cm-status';
+    document.getElementById('compose-overlay').classList.add('open');
+    setTimeout(function(){ document.getElementById('cm-to').focus(); }, 80);
+  }
+  function closeCompose(){ document.getElementById('compose-overlay').classList.remove('open'); }
+
+  document.getElementById('cm-send-btn').addEventListener('click', cmSend);
+  async function cmSend(){
+    var from = getFromAddress();
+    var to = document.getElementById('cm-to').value.trim();
+    var subject = document.getElementById('cm-subject').value.trim();
+    var bodyText = document.getElementById('cm-body').value.trim();
+    var btn = document.getElementById('cm-send-btn');
+    var st = document.getElementById('cm-status');
+    st.className = 'cm-status'; st.textContent = '';
+
+    if(!from){ st.textContent = 'Choose a sender address.'; st.className = 'cm-status err'; return; }
+    if(!to){ st.textContent = 'Enter a recipient.'; st.className = 'cm-status err'; return; }
+    if(!subject){ st.textContent = 'Enter a subject.'; st.className = 'cm-status err'; return; }
+    if(!bodyText){ st.textContent = 'Write a message.'; st.className = 'cm-status err'; return; }
+
+    if(access.role === 'user'){
+      var fromUser = from.replace('@' + DOMAIN, '').toLowerCase();
+      if(access.addresses.indexOf(fromUser) === -1){
+        st.textContent = 'You can only send from your assigned addresses.'; st.className = 'cm-status err'; return;
+      }
+    }
+
+    var html = '<div style="font-family:sans-serif;font-size:14px;line-height:1.7;color:#111;max-width:600px;">' +
+      esc(bodyText).replace(/\n/g,'<br>') + '</div>';
+
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sending…';
+    try {
+      var res = await api({type:'send_email', from:from, to:to, subject:subject, html:html});
+      if(res.success){
+        st.textContent = 'Sent from ' + from; st.className = 'cm-status ok';
+        setTimeout(closeCompose, 1400);
+        if(currentView === 'sent') loadSent();
+      } else {
+        st.textContent = res.error || 'Failed to send.'; st.className = 'cm-status err';
+      }
+    } catch(e){
+      st.textContent = e.message; st.className = 'cm-status err';
+    }
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+  }
+
+})();
+</script>
+</body>
+</html>
