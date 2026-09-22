@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Folio — write your book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-database-compat.js"></script>
+
+<style>
+/* ---------- reset ---------- */
+*,*::before,*::after{box-sizing:border-box;}
+html,body{min-height:100%;}
+body{margin:0;-webkit-font-smoothing:antialiased;}
+img{max-width:100%;}
+button{font:inherit;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important;}
+}
+
+/* ---------- tokens ---------- */
+:root{
+  --ink-900:#1B2430; --ink-700:#2B3444; --ink-600:#3A4353;
+  --paper-050:#FAF7F0; --paper-100:#F1ECDF;
+  --brass-500:#A9822F; --brass-600:#8C6B23;
+  --moss-500:#52664F; --rust-500:#A24936;
+  --rule:#D8D0BF;
+
+  --bg:var(--paper-050);
+  --surface:#FFFFFF;
+  --surface-2:var(--paper-100);
+  --text:var(--ink-900);
+  --text-dim:#5B6472;
+  --accent:var(--brass-500);
+  --accent-strong:var(--brass-600);
+  --border:var(--rule);
+  --danger:var(--rust-500);
+  --success:var(--moss-500);
+  --shadow:0 8px 24px rgba(27,36,48,.10);
+
+  --font-display:'Fraunces', serif;
+  --font-ui:'Inter', system-ui, -apple-system, sans-serif;
+
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="sepia"]){
+    --bg:var(--ink-900);
+    --surface:var(--ink-700);
+    --surface-2:var(--ink-600);
+    --text:var(--paper-050);
+    --text-dim:#9AA3B2;
+    --accent:#D3AE5C;
+    --accent-strong:#E4C27C;
+    --border:#3A4353;
+    --shadow:0 8px 28px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:var(--ink-900);
+  --surface:var(--ink-700);
+  --surface-2:var(--ink-600);
+  --text:var(--paper-050);
+  --text-dim:#9AA3B2;
+  --accent:#D3AE5C;
+  --accent-strong:#E4C27C;
+  --border:#3A4353;
+  --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+:root[data-theme="sepia"]{
+  --bg:#F2E8D5;
+  --surface:#FBF3E2;
+  --surface-2:#EADEC4;
+  --text:#3B2F22;
+  --text-dim:#7A6A54;
+  --accent:#8C6B23;
+  --accent-strong:#6E5219;
+  --border:#E0D2B4;
+  --shadow:0 8px 24px rgba(59,47,34,.14);
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-ui);
+  transition:background .25s ease, color .25s ease;
+}
+
+/* ---------- utility ---------- */
+.hidden{display:none!important;}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+button:focus-visible, input:focus-visible, textarea:focus-visible, [contenteditable]:focus-visible, a:focus-visible{
+  outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;
+}
+.btn{
+  border:1px solid var(--border); background:var(--surface); color:var(--text);
+  padding:.55rem 1rem; border-radius:8px; cursor:pointer; font-size:.9rem; font-weight:500;
+  transition:border-color .15s ease, transform .1s ease;
+}
+.btn:hover{border-color:var(--accent);}
+.btn:active{transform:translateY(1px);}
+.btn-primary{
+  background:var(--accent); border-color:var(--accent); color:var(--ink-900);
+}
+.btn-primary:hover{background:var(--accent-strong); border-color:var(--accent-strong);}
+.btn-ghost{background:transparent; border-color:transparent;}
+.btn-ghost:hover{border-color:var(--border);}
+.btn-danger{color:var(--danger); border-color:var(--danger); background:transparent;}
+.btn-danger:hover{background:var(--danger); color:#fff;}
+.btn-icon{padding:.5rem; width:2.25rem; height:2.25rem; display:inline-flex; align-items:center; justify-content:center;}
+input[type=text], input[type=email], input[type=password], select{
+  width:100%; padding:.6rem .75rem; border-radius:8px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font-family:var(--font-ui); font-size:.92rem;
+}
+label{font-size:.8rem; color:var(--text-dim); display:block; margin-bottom:.3rem;}
+
+/* ---------- auth screen (real website landing, not a phone lock card) ---------- */
+#auth-screen{
+  min-height:100vh;
+  display:flex; flex-direction:column;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(169,130,47,.12), transparent 40%),
+    var(--ink-900);
+}
+.site-header{
+  padding:1.25rem 2rem; padding-top:calc(1.25rem + env(safe-area-inset-top,0px));
+  display:flex; justify-content:center;
+}
+.site-header-inner{
+  width:100%; max-width:1240px; display:flex; align-items:center; justify-content:space-between;
+}
+.site-header .wordmark{margin:0; font-size:1.3rem;}
+.site-header a.btn{color:var(--paper-050); border-color:var(--ink-600);}
+.hero{
+  flex:1; width:100%; max-width:1240px; margin:0 auto; box-sizing:border-box;
+  padding:2rem 2rem 5rem;
+  display:grid; grid-template-columns:1fr 400px; gap:4.5rem; align-items:center;
+}
+.hero-copy h1{
+  font-family:var(--font-display); color:var(--paper-050); font-weight:500;
+  font-size:clamp(2rem,4vw,3.1rem); line-height:1.14; margin:0 0 1.1rem;
+}
+.hero-copy p.lede{
+  color:#B7BEC9; font-size:1.08rem; line-height:1.65; max-width:46ch; margin:0 0 1.9rem;
+}
+.hero-features{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.65rem;}
+.hero-features li{color:#C9CFD8; font-size:.94rem; display:flex; gap:.65rem; align-items:baseline;}
+.hero-features li::before{content:'—'; color:var(--accent); flex:0 0 auto;}
+.site-footer{
+  text-align:center; color:#6C7686; font-size:.8rem;
+  padding:1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom,0px)); border-top:1px solid var(--ink-600);
+}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr; gap:2.5rem; padding-top:.5rem;}
+}
+.auth-card{
+  width:100%;
+  background:var(--ink-700); border:1px solid var(--ink-600);
+  border-radius:14px; padding:2.25rem 1.9rem;
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
+}
+.wordmark{
+  font-family:var(--font-display); font-weight:600; font-size:1.9rem; color:var(--paper-050);
+  margin:0 0 .15rem; letter-spacing:.01em;
+}
+.tagline{color:#9AA3B2; font-size:.88rem; margin:0 0 1.6rem;}
+.auth-card label{color:#9AA3B2;}
+.auth-card input{background:var(--ink-900); border-color:var(--ink-600); color:var(--paper-050);}
+.field{margin-bottom:1rem;}
+.auth-actions{display:flex; flex-direction:column; gap:.6rem; margin-top:1.4rem;}
+.auth-switch{
+  text-align:center; margin-top:1.1rem; font-size:.85rem; color:#9AA3B2;
+}
+.auth-switch button{
+  background:none; border:none; color:var(--accent); cursor:pointer; font-weight:600; padding:0;
+}
+.auth-error{
+  background:rgba(162,73,54,.15); border:1px solid var(--danger); color:#F3B5A9;
+  padding:.6rem .75rem; border-radius:8px; font-size:.82rem; margin-bottom:1rem;
+}
+
+/* ---------- app shell ---------- */
+#app{display:none; min-height:100vh;}
+#app.active{display:block;}
+header.topbar{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; gap:.75rem;
+  padding:.65rem 1.25rem; padding-top:calc(.65rem + env(safe-area-inset-top,0px));
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.brand{
+  font-family:var(--font-display); font-weight:600; font-size:1.15rem; letter-spacing:.01em;
+  display:flex; align-items:center; gap:.4rem; white-space:nowrap;
+}
+.brand-mark{color:var(--accent);}
+#menu-toggle{display:none;}
+.book-title-field{
+  flex:1; min-width:0;
+  background:transparent; border:1px solid transparent; color:var(--text);
+  font-family:var(--font-display); font-size:1.05rem; font-weight:500;
+  padding:.4rem .6rem; border-radius:6px;
+}
+.book-title-field:hover, .book-title-field:focus{border-color:var(--border); background:var(--surface-2);}
+.status-pill{
+  font-size:.72rem; color:var(--text-dim); white-space:nowrap; display:flex; align-items:center; gap:.35rem;
+}
+.status-dot{width:6px; height:6px; border-radius:50%; background:var(--text-dim);}
+.status-dot.saved{background:var(--success);}
+.status-dot.saving{background:var(--accent); animation:pulse 1s ease-in-out infinite;}
+.status-dot.offline{background:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.topbar-actions{display:flex; gap:.4rem; align-items:center;}
+
+.layout{
+  display:flex; align-items:flex-start;
+  max-width:1560px; margin:0 auto; width:100%;
+}
+aside.sidebar{
+  flex:0 0 260px; width:260px;
+  border-right:1px solid var(--border);
+  background:var(--surface);
+  display:flex; flex-direction:column;
+  position:sticky; top:calc(3.55rem + env(safe-area-inset-top,0px));
+  max-height:calc(100vh - 3.55rem - env(safe-area-inset-top,0px));
+  overflow-y:auto;
+}
+.sidebar-section{padding:1rem; border-bottom:1px solid var(--border);}
+.sidebar-section h2{
+  font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-dim);
+  margin:0 0 .6rem; font-weight:600;
+}
+.sidebar-section.grow{flex:1;}
+.book-list, .chapter-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.15rem;}
+.book-list li, .chapter-list li{display:flex;}
+.list-item{
+  flex:1; text-align:left; background:none; border:none; color:var(--text);
+  padding:.5rem .55rem; border-radius:7px; cursor:pointer; font-size:.88rem;
+  display:flex; align-items:center; gap:.5rem; min-width:0;
+}
+.list-item span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.list-item:hover{background:var(--surface-2);}
+.list-item.active{background:var(--surface-2); color:var(--accent-strong); font-weight:600;}
+.chapter-list .list-item{font-size:.84rem; padding-left:.6rem;}
+.chapter-num{color:var(--text-dim); font-variant-numeric:tabular-nums; font-size:.78rem;}
+.add-row{
+  width:100%; margin-top:.4rem; text-align:left; background:none; border:1px dashed var(--border);
+  color:var(--text-dim); padding:.45rem .55rem; border-radius:7px; cursor:pointer; font-size:.84rem;
+}
+.add-row:hover{border-color:var(--accent); color:var(--accent-strong);}
+.empty-note{color:var(--text-dim); font-size:.82rem; padding:.3rem .1rem;}
+
+main.workspace{
+  min-width:0; flex:1; display:flex; flex-direction:column;
+  background:var(--surface-2);
+}
+.toolbar{
+  position:sticky; top:calc(3.55rem + env(safe-area-inset-top,0px)); z-index:30;
+  display:flex; flex-wrap:wrap; gap:.2rem; align-items:center;
+  padding:.5rem .75rem; border-bottom:1px solid var(--border); background:var(--surface);
+}
+.toolbar-group{display:flex; gap:.15rem; padding-right:.5rem; margin-right:.5rem; border-right:1px solid var(--border);}
+.toolbar-group:last-child{border-right:none;}
+.tbtn{
+  border:1px solid transparent; background:none; color:var(--text); width:2.05rem; height:2.05rem;
+  border-radius:6px; cursor:pointer; font-size:.92rem; display:flex; align-items:center; justify-content:center;
+}
+.tbtn:hover{background:var(--surface-2); border-color:var(--border);}
+.tbtn.active{background:var(--accent); color:var(--ink-900); border-color:var(--accent);}
+.tbtn.wide{width:auto; padding:0 .6rem; font-size:.8rem; font-weight:600;}
+
+.editor-scroll{flex:1; padding:2.5rem 2rem 8rem;}
+.page{
+  max-width:var(--page-width, 700px); margin:0 auto;
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  box-shadow:var(--shadow);
+  padding:3rem 3.2rem;
+}
+.chapter-title-field{
+  width:100%; border:none; background:transparent; color:var(--text);
+  font-family:var(--font-display); font-weight:600; font-size:1.7rem; margin-bottom:1.4rem;
+  padding:0; outline-offset:6px;
+}
+.editor-body{
+  min-height:50vh; outline:none;
+  font-family:var(--content-font, 'Lora', serif);
+  font-size:var(--content-size, 1.08rem);
+  line-height:var(--content-leading, 1.75);
+  color:var(--text);
+}
+.editor-body p{margin:0 0 1em;}
+.editor-body h1{font-family:var(--font-display); font-size:1.55em; margin:1.2em 0 .5em;}
+.editor-body h2{font-family:var(--font-display); font-size:1.3em; margin:1.1em 0 .5em;}
+.editor-body h3{font-family:var(--font-display); font-size:1.1em; margin:1em 0 .4em;}
+.editor-body blockquote{
+  margin:1em 0; padding:.2em 1em; border-left:3px solid var(--accent); color:var(--text-dim); font-style:italic;
+}
+.editor-body ul, .editor-body ol{margin:0 0 1em; padding-left:1.4em;}
+.editor-body a{color:var(--accent-strong);}
+.editor-body img{border-radius:6px; margin:.5em 0;}
+.editor-body:empty::before{content:attr(data-placeholder); color:var(--text-dim); pointer-events:none;}
+
+.page-footer{
+  max-width:var(--page-width, 700px); margin:.75rem auto 0; display:flex; justify-content:space-between;
+  font-size:.78rem; color:var(--text-dim); padding:0 .3rem;
+}
+
+.center-note{
+  min-height:60vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.75rem;
+  color:var(--text-dim); text-align:center; padding:2rem;
+}
+.center-note h2{font-family:var(--font-display); color:var(--text); font-weight:500; margin:0;}
+
+/* ---------- modal ---------- */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(27,36,48,.5); display:flex; align-items:center; justify-content:center;
+  padding:1rem; z-index:50;
+}
+.modal{
+  width:100%; max-width:420px; background:var(--surface); border-radius:12px; border:1px solid var(--border);
+  padding:1.5rem; box-shadow:var(--shadow); max-height:90vh; overflow-y:auto;
+}
+.modal h3{font-family:var(--font-display); margin:0 0 1rem; font-size:1.2rem;}
+.modal .field{margin-bottom:1rem;}
+.modal-actions{display:flex; justify-content:flex-end; gap:.5rem; margin-top:1.4rem;}
+.swatches{display:flex; gap:.5rem;}
+.swatch{
+  flex:1; padding:.6rem .3rem; border-radius:8px; border:1px solid var(--border); cursor:pointer;
+  font-size:.78rem; text-align:center; background:var(--surface-2); color:var(--text);
+}
+.swatch.active{border-color:var(--accent); color:var(--accent-strong); font-weight:600;}
+.range-row{display:flex; align-items:center; gap:.6rem;}
+.range-row input[type=range]{flex:1;}
+.range-val{font-size:.78rem; color:var(--text-dim); min-width:2.4em; text-align:right;}
+
+/* ---------- toast ---------- */
+#toast-host{position:fixed; bottom:1rem; left:50%; transform:translateX(-50%); z-index:80; display:flex; flex-direction:column; gap:.4rem; align-items:center; padding-bottom:env(safe-area-inset-bottom,0px);}
+.toast{
+  background:var(--ink-900); color:var(--paper-050); padding:.6rem 1rem; border-radius:8px; font-size:.85rem;
+  box-shadow:0 6px 18px rgba(0,0,0,.3); opacity:0; transform:translateY(6px); transition:opacity .2s ease, transform .2s ease;
+}
+.toast.show{opacity:1; transform:translateY(0);}
+.toast.error{background:var(--danger);}
+
+/* ---------- mobile ---------- */
+.sidebar-close{display:none;}
+@media (max-width:820px){
+  aside.sidebar{
+    position:fixed; top:0; left:0; bottom:0; width:280px; z-index:60;
+    transform:translateX(-100%); transition:transform .2s ease;
+    padding-top:env(safe-area-inset-top,0px);
+    box-shadow:0 0 40px rgba(0,0,0,.3);
+  }
+  aside.sidebar.open{transform:translateX(0);}
+  #menu-toggle{display:inline-flex;}
+  .sidebar-close{display:inline-flex;}
+  .page{padding:2rem 1.2rem;}
+  .editor-scroll{padding:1.25rem .75rem 5rem;}
+  .brand-text{display:none;}
+  #sidebar-scrim{
+    position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:55; display:none;
+  }
+  #sidebar-scrim.open{display:block;}
+}
+
+/* ---------- print ---------- */
+@media print{
+  body *{visibility:hidden;}
+  #print-area, #print-area *{visibility:visible;}
+  #print-area{position:absolute; top:0; left:0; width:100%;}
+  .print-chapter{page-break-before:always; padding:1in;}
+  .print-chapter:first-child{page-break-before:auto;}
+  .print-book-title{font-family:'Fraunces', serif; font-size:2rem; margin-bottom:2rem;}
+  .print-chapter h2{font-family:'Fraunces', serif;}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= AUTH SCREEN (website landing + sign in) ================= -->
+<div id="auth-screen">
+  <header class="site-header">
+    <div class="site-header-inner">
+      <p class="wordmark" style="margin:0;"><span class="brand-mark">Fo</span>lio</p>
+      <a href="#signin-panel" class="btn btn-ghost">Sign in</a>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-copy">
+      <h1>A quiet place to write your book.</h1>
+      <p class="lede">Folio is a distraction-free writing workspace: chapters, formatting, and settings that stay out of your way — saved automatically as you type.</p>
+      <ul class="hero-features">
+        <li>Organize a book into chapters, reorder and rename freely</li>
+        <li>Rich formatting — headings, lists, quotes, links, images</li>
+        <li>Reading themes, fonts and page width tuned to your eyes</li>
+        <li>Autosaves in real time; print or export whenever you like</li>
+      </ul>
+    </div>
+
+    <div class="auth-card" id="signin-panel">
+    <p class="tagline" id="auth-tagline">Sign in to open your library.</p>
+    <div class="auth-error hidden" id="auth-error"></div>
+
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </div>
+      <div class="auth-actions">
+        <button type="submit" class="btn btn-primary">Sign in</button>
+      </div>
+    </form>
+
+    <form id="signup-form" class="hidden">
+      <div class="field">
+        <label for="signup-name">Your name</label>
+        <input type="text" id="signup-name" required autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="auth-actions">
+        <button type="submit" class="btn btn-primary">Create account</button>
+      </div>
+    </form>
+
+    <p class="auth-switch">
+      <span id="switch-to-signup-wrap">New here? <button type="button" id="switch-to-signup">Create an account</button></span>
+      <span id="switch-to-login-wrap" class="hidden">Already have an account? <button type="button" id="switch-to-login">Sign in</button></span>
+    </p>
+    </div>
+  </div>
+
+  <footer class="site-footer">You'll be asked to sign in each time you visit — nothing is remembered between visits on this device.</footer>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+  <header class="topbar">
+    <button class="btn btn-icon btn-ghost" id="menu-toggle" aria-label="Toggle library">☰</button>
+    <span class="brand"><span class="brand-mark" style="font-family:var(--font-display); font-weight:600;">Fo</span><span class="brand-text" style="font-family:var(--font-display); font-weight:600;">lio</span></span>
+    <input type="text" class="book-title-field hidden" id="book-title-field" placeholder="Untitled book">
+    <span class="status-pill hidden" id="status-pill"><span class="status-dot" id="status-dot"></span><span id="status-text">All changes saved</span></span>
+    <div class="topbar-actions">
+      <button class="btn btn-icon btn-ghost hidden" id="open-settings" title="Book settings" aria-label="Book settings">Aa</button>
+      <button class="btn btn-icon btn-ghost hidden" id="open-export" title="Export" aria-label="Export">⇩</button>
+      <button class="btn btn-ghost" id="sign-out-btn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div id="sidebar-scrim"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-section" style="display:flex; align-items:center; justify-content:space-between;">
+        <h2 style="margin:0;">Library</h2>
+        <button class="btn btn-icon btn-ghost sidebar-close" id="sidebar-close" aria-label="Close">✕</button>
+      </div>
+      <div class="sidebar-section grow">
+        <ul class="book-list" id="book-list"></ul>
+        <button class="add-row" id="new-book-btn">+ New book</button>
+      </div>
+      <div class="sidebar-section" id="chapter-section" style="max-height:38%; overflow-y:auto; display:none;">
+        <h2>Chapters</h2>
+        <ul class="chapter-list" id="chapter-list"></ul>
+        <button class="add-row" id="new-chapter-btn">+ Add chapter</button>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <div class="toolbar hidden" id="toolbar">
+        <div class="toolbar-group">
+          <button class="tbtn" data-cmd="bold" title="Bold"><b>B</b></button>
+          <button class="tbtn" data-cmd="italic" title="Italic"><i>I</i></button>
+          <button class="tbtn" data-cmd="underline" title="Underline"><u>U</u></button>
+          <button class="tbtn" data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tbtn wide" data-block="H1" title="Heading 1">H1</button>
+          <button class="tbtn wide" data-block="H2" title="Heading 2">H2</button>
+          <button class="tbtn wide" data-block="H3" title="Heading 3">H3</button>
+          <button class="tbtn wide" data-block="P" title="Paragraph">¶</button>
+          <button class="tbtn" data-block="BLOCKQUOTE" title="Quote">"</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tbtn" data-cmd="insertUnorderedList" title="Bulleted list">•—</button>
+          <button class="tbtn" data-cmd="insertOrderedList" title="Numbered list">1.</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tbtn" data-cmd="justifyLeft" title="Align left">⟸</button>
+          <button class="tbtn" data-cmd="justifyCenter" title="Align center">⟺</button>
+          <button class="tbtn" data-cmd="justifyFull" title="Justify">☰</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tbtn" id="link-btn" title="Insert link">🔗</button>
+          <button class="tbtn" id="image-btn" title="Insert image">🖼</button>
+          <input type="file" id="image-input" accept="image/*" class="hidden">
+        </div>
+        <div class="toolbar-group">
+          <button class="tbtn" data-cmd="undo" title="Undo">↺</button>
+          <button class="tbtn" data-cmd="redo" title="Redo">↻</button>
+          <button class="tbtn" id="clear-format-btn" title="Clear formatting">Tx</button>
+        </div>
+      </div>
+
+      <div class="editor-scroll" id="editor-scroll">
+        <div class="center-note" id="empty-state">
+          <h2>Nothing open yet</h2>
+          <p>Choose a book from the library, or start a new one.</p>
+          <button class="btn btn-primary" id="empty-new-book-btn">Start a new book</button>
+        </div>
+
+        <div id="editor-wrap" class="hidden">
+          <div class="page">
+            <input type="text" class="chapter-title-field" id="chapter-title-field" placeholder="Chapter title">
+            <div class="editor-body" id="editor-body" contenteditable="true" data-placeholder="Start writing…"></div>
+          </div>
+          <div class="page-footer">
+            <span id="word-count">0 words</span>
+            <span id="reading-time">~0 min read</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal-backdrop hidden" id="settings-modal">
+  <div class="modal">
+    <h3>Book settings</h3>
+
+    <div class="field">
+      <label>Theme</label>
+      <div class="swatches" id="theme-swatches">
+        <button class="swatch" data-theme="light">Paper</button>
+        <button class="swatch" data-theme="sepia">Sepia</button>
+        <button class="swatch" data-theme="dark">Ink</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="font-select">Content font</label>
+      <select id="font-select">
+        <option value="'Lora', serif">Lora (serif)</option>
+        <option value="'Source Serif 4', serif">Source Serif (serif)</option>
+        <option value="Georgia, serif">Georgia (serif)</option>
+        <option value="'Inter', sans-serif">Inter (sans)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Text size</label>
+      <div class="range-row">
+        <input type="range" id="font-size-range" min="14" max="24" step="1">
+        <span class="range-val" id="font-size-val">18px</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Line spacing</label>
+      <div class="range-row">
+        <input type="range" id="line-height-range" min="130" max="220" step="5">
+        <span class="range-val" id="line-height-val">1.75</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Page width</label>
+      <div class="range-row">
+        <input type="range" id="page-width-range" min="520" max="900" step="20">
+        <span class="range-val" id="page-width-val">700px</span>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="close-settings">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= EXPORT MODAL ================= -->
+<div class="modal-backdrop hidden" id="export-modal">
+  <div class="modal">
+    <h3>Export book</h3>
+    <p style="color:var(--text-dim); font-size:.88rem; margin-top:-.4rem;">Choose how you'd like to take this book with you.</p>
+    <div class="modal-actions" style="justify-content:stretch; flex-direction:column;">
+      <button class="btn btn-primary" id="export-print-btn">Print / Save as PDF</button>
+      <button class="btn" id="export-text-btn">Download as text file</button>
+      <button class="btn btn-ghost" id="close-export">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DIALOGS (rename/delete/new) ================= -->
+<div class="modal-backdrop hidden" id="prompt-modal">
+  <div class="modal">
+    <h3 id="prompt-title">Title</h3>
+    <div class="field" id="prompt-field-wrap">
+      <input type="text" id="prompt-input">
+    </div>
+    <p id="prompt-message" style="color:var(--text-dim); font-size:.88rem;"></p>
+    <div class="modal-actions">
+      <button class="btn" id="prompt-cancel">Cancel</button>
+      <button class="btn btn-primary" id="prompt-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="print-area"></div>
+<div id="toast-host"></div>
+
+<script>
+/* ============================================================
+   Folio — book writing workspace, backed by Firebase
+   (Realtime Database + Email/Password auth)
+   ============================================================ */
+
+// ---------- Firebase init ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyAOld48eda9m_rIJ_72wnMVUyJM1unDlzA",
+  authDomain: "join365-9a175.firebaseapp.com",
+  databaseURL: "https://join365-9a175-default-rtdb.firebaseio.com/",
+  projectId: "join365-9a175",
+  storageBucket: "join365-9a175.firebasestorage.app",
+  messagingSenderId: "624922796690",
+  appId: "1:624922796690:web:2ca60637523e4aadcb3c4b"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+// Never remember a session between visits — every fresh load of the site asks for sign-in again.
+auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(() => {});
+
+// ---------- runtime capability (optional, only exists on claude.ai) ----------
+let downloadsCap = null;
+if (window.claude && typeof window.claude.use === 'function') {
+  window.claude.use('downloads').then(d => { downloadsCap = d; }).catch(() => {});
+}
+
+// ---------- state ----------
+const state = {
+  uid: null,
+  books: {},           // bookId -> book object (with .chapters)
+  bookOrder: [],
+  currentBookId: null,
+  currentChapterId: null,
+  booksRef: null,
+  bookListenerAttached: false,
+  activeBookRef: null,
+  activeBookHandler: null,
+  saveTimer: null,
+  savingCount: 0,
+  authMode: 'login'
+};
+
+// ---------- small helpers ----------
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+function toast(msg, isError=false){
+  const host = $('#toast-host');
+  const el = document.createElement('div');
+  el.className = 'toast' + (isError ? ' error' : '');
+  el.textContent = msg;
+  host.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); }, 3200);
+}
+
+function debounce(fn, ms){
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+function newId(path){
+  return db.ref(path).push().key;
+}
+
+function setSavingState(kind){
+  const dot = $('#status-dot'), text = $('#status-text');
+  if (kind === 'saving'){ dot.className = 'status-dot saving'; text.textContent = 'Saving…'; }
+  else if (kind === 'saved'){ dot.className = 'status-dot saved'; text.textContent = 'All changes saved'; }
+  else if (kind === 'offline'){ dot.className = 'status-dot offline'; text.textContent = 'Offline — changes will sync later'; }
+}
+
+// connection status
+db.ref('.info/connected').on('value', snap => {
+  if (snap.val() === false) setSavingState('offline');
+  else if (state.savingCount === 0) setSavingState('saved');
+});
+
+// ---------- prompt modal (rename / confirm-delete / new-item) ----------
+function showPrompt({title, message='', withInput=true, initial='', confirmLabel='Confirm', onConfirm}){
+  const modal = $('#prompt-modal');
+  $('#prompt-title').textContent = title;
+  $('#prompt-message').textContent = message;
+  $('#prompt-field-wrap').classList.toggle('hidden', !withInput);
+  $('#prompt-input').value = initial;
+  $('#prompt-confirm').textContent = confirmLabel;
+  modal.classList.remove('hidden');
+  if (withInput) setTimeout(() => $('#prompt-input').focus(), 30);
+
+  const confirmBtn = $('#prompt-confirm');
+  const cancelBtn = $('#prompt-cancel');
+  function cleanup(){
+    modal.classList.add('hidden');
+    confirmBtn.removeEventListener('click', onOk);
+    cancelBtn.removeEventListener('click', onCancel);
+  }
+  function onOk(){
+    const val = withInput ? $('#prompt-input').value.trim() : true;
+    if (withInput && !val) return;
+    cleanup();
+    onConfirm(val);
+  }
+  function onCancel(){ cleanup(); }
+  confirmBtn.addEventListener('click', onOk);
+  cancelBtn.addEventListener('click', onCancel);
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+$('#switch-to-signup').addEventListener('click', () => {
+  state.authMode = 'signup';
+  $('#login-form').classList.add('hidden');
+  $('#signup-form').classList.remove('hidden');
+  $('#switch-to-signup-wrap').classList.add('hidden');
+  $('#switch-to-login-wrap').classList.remove('hidden');
+  $('#auth-tagline').textContent = 'Start your first book in a minute.';
+  $('#auth-error').classList.add('hidden');
+});
+$('#switch-to-login').addEventListener('click', () => {
+  state.authMode = 'login';
+  $('#signup-form').classList.add('hidden');
+  $('#login-form').classList.remove('hidden');
+  $('#switch-to-login-wrap').classList.add('hidden');
+  $('#switch-to-signup-wrap').classList.remove('hidden');
+  $('#auth-tagline').textContent = 'A quiet place to write your book.';
+  $('#auth-error').classList.add('hidden');
+});
+
+function authErrorMessage(err){
+  const map = {
+    'auth/invalid-email': 'That email address doesn\u2019t look right.',
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/wrong-password': 'That password doesn\u2019t match.',
+    'auth/invalid-credential': 'Email or password is incorrect.',
+    'auth/email-already-in-use': 'An account already exists for that email.',
+    'auth/weak-password': 'Use a password with at least 6 characters.',
+    'auth/network-request-failed': 'Network error — check your connection.'
+  };
+  return map[err.code] || err.message || 'Something went wrong. Please try again.';
+}
+
+$('#login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#auth-error').classList.add('hidden');
+  const email = $('#login-email').value.trim();
+  const pw = $('#login-password').value;
+  try{
+    await auth.signInWithEmailAndPassword(email, pw);
+  }catch(err){
+    $('#auth-error').textContent = authErrorMessage(err);
+    $('#auth-error').classList.remove('hidden');
+  }
+});
+
+$('#signup-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#auth-error').classList.add('hidden');
+  const name = $('#signup-name').value.trim();
+  const email = $('#signup-email').value.trim();
+  const pw = $('#signup-password').value;
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email, pw);
+    await cred.user.updateProfile({ displayName: name });
+    await db.ref('users/' + cred.user.uid + '/profile').set({
+      name: name, email: email, createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+  }catch(err){
+    $('#auth-error').textContent = authErrorMessage(err);
+    $('#auth-error').classList.remove('hidden');
+  }
+});
+
+$('#sign-out-btn').addEventListener('click', () => auth.signOut());
+
+auth.onAuthStateChanged(user => {
+  if (user){
+    state.uid = user.uid;
+    $('#auth-screen').style.display = 'none';
+    $('#app').classList.add('active');
+    attachBookList();
+  } else {
+    state.uid = null;
+    detachAll();
+    resetUi();
+    $('#auth-screen').style.display = 'flex';
+    $('#app').classList.remove('active');
+  }
+});
+
+function detachAll(){
+  if (state.booksRef) { state.booksRef.off(); state.booksRef = null; }
+  if (state.activeBookRef && state.activeBookHandler){ state.activeBookRef.off('value', state.activeBookHandler); }
+  state.activeBookRef = null; state.activeBookHandler = null;
+  state.books = {}; state.bookOrder = [];
+  state.currentBookId = null; state.currentChapterId = null;
+}
+
+function resetUi(){
+  $('#book-list').innerHTML = '';
+  $('#chapter-list').innerHTML = '';
+  $('#chapter-section').style.display = 'none';
+  $('#book-title-field').classList.add('hidden');
+  $('#open-settings').classList.add('hidden');
+  $('#open-export').classList.add('hidden');
+  $('#status-pill').classList.add('hidden');
+  $('#toolbar').classList.add('hidden');
+  $('#editor-wrap').classList.add('hidden');
+  $('#empty-state').classList.remove('hidden');
+}
+
+// ============================================================
+// BOOK LIST
+// ============================================================
+function attachBookList(){
+  state.booksRef = db.ref('users/' + state.uid + '/books');
+  state.booksRef.on('value', snap => {
+    const val = snap.val() || {};
+    state.books = val;
+    state.bookOrder = Object.keys(val).sort((a,b) => (val[b].updatedAt||0) - (val[a].updatedAt||0));
+    renderBookList();
+    // keep open book's title field in sync if renamed elsewhere
+    if (state.currentBookId && val[state.currentBookId]){
+      const titleField = $('#book-title-field');
+      if (document.activeElement !== titleField){
+        titleField.value = val[state.currentBookId].title || '';
+      }
+      renderChapterList();
+    } else if (state.currentBookId && !val[state.currentBookId]){
+      // current book got deleted elsewhere
+      closeBook();
+    }
+  });
+}
+
+function renderBookList(){
+  const list = $('#book-list');
+  list.innerHTML = '';
+  if (state.bookOrder.length === 0){
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="empty-note">No books yet</span>';
+    list.appendChild(li);
+    return;
+  }
+  state.bookOrder.forEach(id => {
+    const book = state.books[id];
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'list-item' + (id === state.currentBookId ? ' active' : '');
+    btn.innerHTML = '<span>' + escapeHtml(book.title || 'Untitled book') + '</span>';
+    btn.addEventListener('click', () => openBook(id));
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+$('#new-book-btn').addEventListener('click', createBook);
+$('#empty-new-book-btn').addEventListener('click', createBook);
+
+async function createBook(){
+  const id = newId('users/' + state.uid + '/books');
+  const now = firebase.database.ServerValue.TIMESTAMP;
+  const chapterId = newId('users/' + state.uid + '/books/' + id + '/chapters');
+  await db.ref('users/' + state.uid + '/books/' + id).set({
+    title: 'Untitled book',
+    createdAt: now,
+    updatedAt: now,
+    settings: { theme: 'light', font: "'Lora', serif", fontSize: 18, lineHeight: 175, pageWidth: 700 },
+    chapters: {
+      [chapterId]: { title: 'Chapter 1', content: '', order: 0, updatedAt: now }
+    }
+  });
+  openBook(id, chapterId);
+  toast('New book created');
+}
+
+function closeBook(){
+  if (state.activeBookRef && state.activeBookHandler){ state.activeBookRef.off('value', state.activeBookHandler); }
+  state.activeBookRef = null; state.activeBookHandler = null;
+  state.currentBookId = null; state.currentChapterId = null;
+  resetUi();
+}
+
+// ============================================================
+// OPEN BOOK / CHAPTERS
+// ============================================================
+function openBook(bookId, preferredChapterId){
+  if (state.activeBookRef && state.activeBookHandler){ state.activeBookRef.off('value', state.activeBookHandler); }
+  state.currentBookId = bookId;
+  state.currentChapterId = null;
+
+  state.activeBookRef = db.ref('users/' + state.uid + '/books/' + bookId);
+  state.activeBookHandler = snap => {
+    const book = snap.val();
+    if (!book) return;
+    state.books[bookId] = book;
+    renderBookList();
+    renderChapterList();
+    applyBookSettings(book.settings || {});
+
+    const chapters = book.chapters || {};
+    const orderedIds = Object.keys(chapters).sort((a,b) => (chapters[a].order||0) - (chapters[b].order||0));
+
+    if (!state.currentChapterId){
+      const wantId = preferredChapterId && chapters[preferredChapterId] ? preferredChapterId : orderedIds[0];
+      if (wantId){ selectChapter(wantId, chapters[wantId]); }
+      else { $('#empty-state').classList.remove('hidden'); $('#editor-wrap').classList.add('hidden'); }
+    } else if (chapters[state.currentChapterId]){
+      // sync title field if changed remotely and not focused
+      const tField = $('#chapter-title-field');
+      if (document.activeElement !== tField){
+        tField.value = chapters[state.currentChapterId].title || '';
+      }
+    } else {
+      // current chapter removed elsewhere
+      const nextId = orderedIds[0];
+      if (nextId) selectChapter(nextId, chapters[nextId]);
+      else { state.currentChapterId = null; $('#empty-state').classList.remove('hidden'); $('#editor-wrap').classList.add('hidden'); }
+    }
+
+    const titleField = $('#book-title-field');
+    if (document.activeElement !== titleField) titleField.value = book.title || '';
+  };
+  state.activeBookRef.on('value', state.activeBookHandler);
+
+  $('#book-title-field').classList.remove('hidden');
+  $('#open-settings').classList.remove('hidden');
+  $('#open-export').classList.remove('hidden');
+  $('#status-pill').classList.remove('hidden');
+  $('#toolbar').classList.remove('hidden');
+  $('#chapter-section').style.display = 'block';
+  closeSidebarMobile();
+}
+
+function renderChapterList(){
+  const book = state.books[state.currentBookId];
+  const list = $('#chapter-list');
+  list.innerHTML = '';
+  if (!book){ return; }
+  const chapters = book.chapters || {};
+  const orderedIds = Object.keys(chapters).sort((a,b) => (chapters[a].order||0) - (chapters[b].order||0));
+  if (orderedIds.length === 0){
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="empty-note">No chapters yet</span>';
+    list.appendChild(li);
+    return;
+  }
+  orderedIds.forEach((cid, idx) => {
+    const ch = chapters[cid];
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'list-item' + (cid === state.currentChapterId ? ' active' : '');
+    btn.innerHTML = '<span class="chapter-num">' + (idx+1) + '</span><span>' + escapeHtml(ch.title || 'Untitled chapter') + '</span>';
+    btn.addEventListener('click', () => selectChapter(cid, ch));
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+function selectChapter(chapterId, chapterData){
+  state.currentChapterId = chapterId;
+  $('#empty-state').classList.add('hidden');
+  $('#editor-wrap').classList.remove('hidden');
+  $('#chapter-title-field').value = (chapterData && chapterData.title) || '';
+  $('#editor-body').innerHTML = (chapterData && chapterData.content) || '';
+  updateWordCount();
+  renderChapterList();
+  closeSidebarMobile();
+}
+
+$('#new-chapter-btn').addEventListener('click', async () => {
+  if (!state.currentBookId) return;
+  const book = state.books[state.currentBookId];
+  const chapters = book.chapters || {};
+  const order = Object.keys(chapters).length;
+  const id = newId('users/' + state.uid + '/books/' + state.currentBookId + '/chapters');
+  const now = firebase.database.ServerValue.TIMESTAMP;
+  await db.ref('users/' + state.uid + '/books/' + state.currentBookId + '/chapters/' + id).set({
+    title: 'Chapter ' + (order + 1), content: '', order, updatedAt: now
+  });
+  await db.ref('users/' + state.uid + '/books/' + state.currentBookId + '/updatedAt').set(now);
+  selectChapter(id, { title: 'Chapter ' + (order + 1), content: '' });
+});
+
+// rename / delete book via title field context (long text field itself is the rename control)
+$('#book-title-field').addEventListener('input', debounce(async () => {
+  if (!state.currentBookId) return;
+  const val = $('#book-title-field').value.trim() || 'Untitled book';
+  markSaving();
+  await db.ref('users/' + state.uid + '/books/' + state.currentBookId).update({
+    title: val, updatedAt: firebase.database.ServerValue.TIMESTAMP
+  });
+  markSaved();
+}, 500));
+
+$('#chapter-title-field').addEventListener('input', debounce(async () => {
+  if (!state.currentBookId || !state.currentChapterId) return;
+  const val = $('#chapter-title-field').value.trim() || 'Untitled chapter';
+  markSaving();
+  await db.ref('users/' + state.uid + '/books/' + state.currentBookId + '/chapters/' + state.currentChapterId).update({
+    title: val, updatedAt: firebase.database.ServerValue.TIMESTAMP
+  });
+  markSaved();
+}, 500));
+
+// right-click style controls kept simple: double-click a book/chapter row to rename, use delete buttons via long-press replaced by simple secondary buttons
+$('#book-list').addEventListener('dblclick', e => {
+  const btn = e.target.closest('.list-item');
+  if (!btn) return;
+  const idx = Array.from($('#book-list').children).indexOf(btn.closest('li'));
+  const id = state.bookOrder[idx];
+  if (!id) return;
+  showPrompt({
+    title: 'Book options',
+    withInput: false,
+    message: 'Rename from the title bar above once open, or delete this book.',
+    confirmLabel: 'Delete book',
+    onConfirm: () => {
+      showPrompt({
+        title: 'Delete this book?',
+        withInput: false,
+        message: 'This permanently removes "' + (state.books[id].title || 'Untitled book') + '" and all its chapters.',
+        confirmLabel: 'Delete',
+        onConfirm: async () => {
+          await db.ref('users/' + state.uid + '/books/' + id).remove();
+          if (id === state.currentBookId) closeBook();
+          toast('Book deleted');
+        }
+      });
+    }
+  });
+});
+
+$('#chapter-list').addEventListener('dblclick', e => {
+  const btn = e.target.closest('.list-item');
+  if (!btn) return;
+  const book = state.books[state.currentBookId];
+  const chapters = book.chapters || {};
+  const orderedIds = Object.keys(chapters).sort((a,b) => (chapters[a].order||0) - (chapters[b].order||0));
+  const idx = Array.from($('#chapter-list').children).indexOf(btn.closest('li'));
+  const cid = orderedIds[idx];
+  if (!cid) return;
+  showPrompt({
+    title: 'Delete this chapter?',
+    withInput: false,
+    message: 'This permanently removes "' + (chapters[cid].title || 'Untitled chapter') + '".',
+    confirmLabel: 'Delete',
+    onConfirm: async () => {
+      await db.ref('users/' + state.uid + '/books/' + state.currentBookId + '/chapters/' + cid).remove();
+      if (cid === state.currentChapterId) state.currentChapterId = null;
+      toast('Chapter deleted');
+    }
+  });
+});
+
+// ============================================================
+// EDITOR TOOLBAR
+// ============================================================
+$$('.tbtn[data-cmd]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.execCommand(btn.dataset.cmd, false, null);
+    $('#editor-body').focus();
+    scheduleChapterSave();
+  });
+});
+$$('.tbtn[data-block]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.execCommand('formatBlock', false, btn.dataset.block === 'P' ? 'P' : btn.dataset.block);
+    $('#editor-body').focus();
+    scheduleChapterSave();
+  });
+});
+$('#link-btn').addEventListener('click', () => {
+  const url = prompt('Link URL:');
+  if (url) document.execCommand('createLink', false, url);
+  $('#editor-body').focus();
+  scheduleChapterSave();
+});
+$('#clear-format-btn').addEventListener('click', () => {
+  document.execCommand('removeFormat', false, null);
+  scheduleChapterSave();
+});
+$('#image-btn').addEventListener('click', () => $('#image-input').click());
+$('#image-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 1.5 * 1024 * 1024){
+    toast('That image is a bit large for smooth syncing — try one under 1.5MB.', true);
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.execCommand('insertImage', false, reader.result);
+    scheduleChapterSave();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+const editorBody = $('#editor-body');
+editorBody.addEventListener('input', () => { scheduleChapterSave(); updateWordCount(); });
+
+function updateWordCount(){
+  const text = editorBody.innerText.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  $('#word-count').textContent = words + (words === 1 ? ' word' : ' words');
+  $('#reading-time').textContent = '~' + Math.max(1, Math.round(words / 200)) + ' min read';
+}
+
+function markSaving(){
+  state.savingCount++;
+  setSavingState('saving');
+}
+function markSaved(){
+  state.savingCount = Math.max(0, state.savingCount - 1);
+  if (state.savingCount === 0) setSavingState('saved');
+}
+
+const scheduleChapterSave = debounce(async () => {
+  if (!state.currentBookId || !state.currentChapterId) return;
+  markSaving();
+  try{
+    const now = firebase.database.ServerValue.TIMESTAMP;
+    await db.ref('users/' + state.uid + '/books/' + state.currentBookId + '/chapters/' + state.currentChapterId).update({
+      content: editorBody.innerHTML, updatedAt: now
+    });
+    await db.ref('users/' + state.uid + '/books/' + state.currentBookId + '/updatedAt').set(now);
+  }catch(err){
+    toast('Couldn\u2019t save just now — will retry.', true);
+  }
+  markSaved();
+}, 900);
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function applyBookSettings(settings){
+  const root = document.documentElement;
+  const theme = settings.theme || 'light';
+  root.setAttribute('data-theme', theme);
+  root.style.setProperty('--content-font', settings.font || "'Lora', serif");
+  root.style.setProperty('--content-size', (settings.fontSize || 18) + 'px');
+  root.style.setProperty('--content-leading', (settings.lineHeight || 175) / 100);
+  root.style.setProperty('--page-width', (settings.pageWidth || 700) + 'px');
+
+  $$('#theme-swatches .swatch').forEach(s => s.classList.toggle('active', s.dataset.theme === theme));
+  $('#font-select').value = settings.font || "'Lora', serif";
+  $('#font-size-range').value = settings.fontSize || 18;
+  $('#font-size-val').textContent = (settings.fontSize || 18) + 'px';
+  $('#line-height-range').value = settings.lineHeight || 175;
+  $('#line-height-val').textContent = ((settings.lineHeight || 175) / 100).toFixed(2);
+  $('#page-width-range').value = settings.pageWidth || 700;
+  $('#page-width-val').textContent = (settings.pageWidth || 700) + 'px';
+}
+
+async function updateBookSettings(patch){
+  if (!state.currentBookId) return;
+  const book = state.books[state.currentBookId];
+  const merged = Object.assign({}, book.settings || {}, patch);
+  applyBookSettings(merged);
+  await db.ref('users/' + state.uid + '/books/' + state.currentBookId + '/settings').update(patch);
+}
+
+$('#open-settings').addEventListener('click', () => $('#settings-modal').classList.remove('hidden'));
+$('#close-settings').addEventListener('click', () => $('#settings-modal').classList.add('hidden'));
+$('#theme-swatches').addEventListener('click', e => {
+  const btn = e.target.closest('.swatch');
+  if (!btn) return;
+  updateBookSettings({ theme: btn.dataset.theme });
+});
+$('#font-select').addEventListener('change', e => updateBookSettings({ font: e.target.value }));
+$('#font-size-range').addEventListener('input', e => {
+  $('#font-size-val').textContent = e.target.value + 'px';
+  document.documentElement.style.setProperty('--content-size', e.target.value + 'px');
+});
+$('#font-size-range').addEventListener('change', e => updateBookSettings({ fontSize: Number(e.target.value) }));
+$('#line-height-range').addEventListener('input', e => {
+  $('#line-height-val').textContent = (Number(e.target.value)/100).toFixed(2);
+  document.documentElement.style.setProperty('--content-leading', Number(e.target.value)/100);
+});
+$('#line-height-range').addEventListener('change', e => updateBookSettings({ lineHeight: Number(e.target.value) }));
+$('#page-width-range').addEventListener('input', e => {
+  $('#page-width-val').textContent = e.target.value + 'px';
+  document.documentElement.style.setProperty('--page-width', e.target.value + 'px');
+});
+$('#page-width-range').addEventListener('change', e => updateBookSettings({ pageWidth: Number(e.target.value) }));
+
+// ============================================================
+// EXPORT
+// ============================================================
+$('#open-export').addEventListener('click', () => $('#export-modal').classList.remove('hidden'));
+$('#close-export').addEventListener('click', () => $('#export-modal').classList.add('hidden'));
+
+function buildPrintHtml(){
+  const book = state.books[state.currentBookId];
+  const chapters = book.chapters || {};
+  const orderedIds = Object.keys(chapters).sort((a,b) => (chapters[a].order||0) - (chapters[b].order||0));
+  let html = '<h1 class="print-book-title">' + escapeHtml(book.title || 'Untitled book') + '</h1>';
+  orderedIds.forEach(id => {
+    const ch = chapters[id];
+    html += '<div class="print-chapter"><h2>' + escapeHtml(ch.title || 'Untitled chapter') + '</h2>' + (ch.content || '') + '</div>';
+  });
+  return html;
+}
+
+$('#export-print-btn').addEventListener('click', () => {
+  $('#print-area').innerHTML = buildPrintHtml();
+  $('#export-modal').classList.add('hidden');
+  setTimeout(() => window.print(), 80);
+});
+
+function stripHtml(html){
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return d.innerText;
+}
+
+async function saveFile(filename, content, mime){
+  if (downloadsCap && typeof downloadsCap.save === 'function'){
+    try{
+      await downloadsCap.save({ filename, data: content });
+      return true;
+    }catch(err){ /* fall through to browser download */ }
+  }
+  try{
+    const blob = new Blob([content], { type: mime || 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return true;
+  }catch(err){
+    return false;
+  }
+}
+
+$('#export-text-btn').addEventListener('click', async () => {
+  const book = state.books[state.currentBookId];
+  const chapters = book.chapters || {};
+  const orderedIds = Object.keys(chapters).sort((a,b) => (chapters[a].order||0) - (chapters[b].order||0));
+  let text = (book.title || 'Untitled book') + '\n' + '='.repeat((book.title||'Untitled book').length) + '\n\n';
+  orderedIds.forEach(id => {
+    const ch = chapters[id];
+    text += (ch.title || 'Untitled chapter') + '\n' + '-'.repeat((ch.title||'Untitled chapter').length) + '\n\n';
+    text += stripHtml(ch.content || '') + '\n\n';
+  });
+  const ok = await saveFile((book.title || 'book').replace(/[^a-z0-9\-_ ]/gi,'').trim() + '.txt', text, 'text/plain');
+  $('#export-modal').classList.add('hidden');
+  toast(ok ? 'Book downloaded' : 'Couldn\u2019t download — try Print instead', !ok);
+});
+
+// ============================================================
+// MOBILE SIDEBAR
+// ============================================================
+function closeSidebarMobile(){
+  $('#sidebar').classList.remove('open');
+  $('#sidebar-scrim').classList.remove('open');
+}
+$('#menu-toggle').addEventListener('click', () => {
+  $('#sidebar').classList.add('open');
+  $('#sidebar-scrim').classList.add('open');
+});
+$('#sidebar-close').addEventListener('click', closeSidebarMobile);
+$('#sidebar-scrim').addEventListener('click', closeSidebarMobile);
+
+// ============================================================
+// keyboard shortcuts inside editor
+// ============================================================
+editorBody.addEventListener('keydown', e => {
+  if (!(e.metaKey || e.ctrlKey)) return;
+  const key = e.key.toLowerCase();
+  if (key === 'b'){ e.preventDefault(); document.execCommand('bold'); scheduleChapterSave(); }
+  else if (key === 'i'){ e.preventDefault(); document.execCommand('italic'); scheduleChapterSave(); }
+  else if (key === 'u'){ e.preventDefault(); document.execCommand('underline'); scheduleChapterSave(); }
+});
+</script>
+</body>
+</html>
