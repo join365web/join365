@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video365 - Create & Edit Videos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    min-height: 100vh;
+  }
+
+  /* NAVBAR */
+  .navbar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #e94560;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 20px rgba(233,69,96,0.3);
+  }
+
+  .logo {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #e94560, #0f3460);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+
+  .logo span { color: #e94560; -webkit-text-fill-color: #e94560; }
+
+  .nav-links { display: flex; gap: 20px; align-items: center; }
+
+  .nav-btn {
+    background: transparent;
+    border: 2px solid #e94560;
+    color: #e94560;
+    padding: 8px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    background: #e94560;
+    color: #fff;
+  }
+
+  .nav-btn.primary {
+    background: #e94560;
+    color: #fff;
+  }
+
+  /* AUTH SCREEN */
+  .auth-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 70px);
+    padding: 40px 20px;
+  }
+
+  .auth-container {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #e94560;
+    border-radius: 20px;
+    padding: 50px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(233,69,96,0.2);
+  }
+
+  .auth-title {
+    font-size: 32px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #e94560, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .auth-subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 35px;
+    font-size: 14px;
+  }
+
+  .auth-tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #333;
+  }
+
+  .auth-tab {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .auth-tab.active {
+    background: #e94560;
+    color: #fff;
+  }
+
+  .form-group { margin-bottom: 20px; }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ccc;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    transition: border-color 0.3s;
+    outline: none;
+  }
+
+  .form-group input:focus { border-color: #e94560; }
+
+  .auth-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #e94560, #c73652);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+  }
+
+  .auth-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(233,69,96,0.4);
+  }
+
+  .auth-divider {
+    text-align: center;
+    margin: 20px 0;
+    color: #555;
+    position: relative;
+  }
+
+  .auth-divider::before, .auth-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 42%;
+    height: 1px;
+    background: #333;
+  }
+
+  .auth-divider::before { left: 0; }
+  .auth-divider::after { right: 0; }
+
+  .google-btn {
+    width: 100%;
+    padding: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #444;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .google-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: #e94560;
+  }
+
+  .error-msg {
+    background: rgba(233,69,96,0.15);
+    border: 1px solid #e94560;
+    color: #e94560;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .success-msg {
+    background: rgba(34,197,94,0.15);
+    border: 1px solid #22c55e;
+    color: #22c55e;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: none;
+  }
+
+  /* MAIN APP */
+  .app-screen { display: none; }
+
+  /* DASHBOARD */
+  .dashboard { padding: 40px 30px; max-width: 1400px; margin: 0 auto; }
+
+  .welcome-banner {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #e94560;
+    border-radius: 20px;
+    padding: 35px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 40px rgba(233,69,96,0.1);
+  }
+
+  .welcome-text h1 {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+
+  .welcome-text h1 span { color: #e94560; }
+  .welcome-text p { color: #888; font-size: 16px; }
+
+  .action-btns { display: flex; gap: 15px; }
+
+  .btn-create {
+    background: linear-gradient(135deg, #e94560, #c73652);
+    border: none;
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(233,69,96,0.4);
+  }
+
+  .btn-upload {
+    background: transparent;
+    border: 2px solid #e94560;
+    color: #e94560;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-upload:hover {
+    background: rgba(233,69,96,0.1);
+  }
+
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a4a;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .stat-card:hover {
+    border-color: #e94560;
+    transform: translateY(-3px);
+  }
+
+  .stat-icon { font-size: 32px; margin-bottom: 10px; }
+  .stat-value { font-size: 28px; font-weight: 900; color: #e94560; }
+  .stat-label { color: #888; font-size: 13px; margin-top: 5px; }
+
+  /* VIDEO GRID */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .section-title span { color: #e94560; }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+  }
+
+  .video-card {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a4a;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .video-card:hover {
+    border-color: #e94560;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(233,69,96,0.2);
+  }
+
+  .video-thumb {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, #0f3460, #e94560);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    position: relative;
+  }
+
+  .video-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .video-duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.8);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .video-info { padding: 15px; }
+  .video-title { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+  .video-meta { color: #888; font-size: 12px; display: flex; gap: 10px; }
+
+  .video-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .vid-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .vid-btn.edit {
+    background: rgba(233,69,96,0.15);
+    color: #e94560;
+    border: 1px solid #e94560;
+  }
+
+  .vid-btn.edit:hover { background: #e94560; color: #fff; }
+
+  .vid-btn.delete {
+    background: rgba(239,68,68,0.1);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+  }
+
+  .vid-btn.delete:hover { background: #ef4444; color: #fff; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: #555;
+  }
+
+  .empty-state .icon { font-size: 64px; margin-bottom: 20px; }
+  .empty-state h3 { font-size: 22px; font-weight: 700; margin-bottom: 10px; color: #888; }
+
+  /* EDITOR SCREEN */
+  .editor-screen {
+    display: none;
+    padding: 20px 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .editor-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .back-btn {
+    background: transparent;
+    border: 2px solid #e94560;
+    color: #e94560;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .back-btn:hover { background: #e94560; color: #fff; }
+
+  .editor-title-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 12px 18px;
+    outline: none;
+  }
+
+  .editor-title-input:focus { border-color: #e94560; }
+
+  .save-btn {
+    background: linear-gradient(135deg, #e94560, #c73652);
+    border: none;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .save-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(233,69,96,0.4); }
+
+  /* EDITOR LAYOUT */
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 25px;
+  }
+
+  .editor-main { display: flex; flex-direction: column; gap: 20px; }
+
+  /* VIDEO PREVIEW */
+  .video-preview {
+    background: #000;
+    border-radius: 15px;
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #2a2a4a;
+  }
+
+  .preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .preview-placeholder {
+    text-align: center;
+    color: #555;
+  }
+
+  .preview-placeholder .icon { font-size: 64px; margin-bottom: 15px; }
+
+  .video-controls {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a4a;
+    border-radius: 15px;
+    padding: 20px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e94560, #a855f7);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s;
+  }
+
+  .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .ctrl-btn {
+    background: rgba(233,69,96,0.1);
+    border: 1px solid #e94560;
+    color: #e94560;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover { background: #e94560; color: #fff; }
+  .ctrl-btn.play-btn { width: 50px; height: 50px; font-size: 20px; }
+
+  .time-display { color: #ccc; font-size: 14px; font-family: monospace; }
+  .volume-slider { flex: 1; max-width: 120px; accent-color: #e94560; }
+
+  /* TIMELINE */
+  .timeline-section {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a4a;
+    border-radius: 15px;
+    padding: 20px;
+  }
+
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+
+  .timeline-title { font-size: 16px; font-weight: 700; }
+
+  .timeline-controls { display: flex; gap: 10px; }
+
+  .tl-btn {
+    background: rgba(233,69,96,0.1);
+    border: 1px solid #e94560;
+    color: #e94560;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tl-btn:hover { background: #e94560; color: #fff; }
+
+  .timeline-track {
+    background: #0a0a0a;
+    border-radius: 10px;
+    padding: 15px;
+    min-height: 80px;
+    border: 1px dashed #333;
+    position: relative;
+    overflow-x: auto;
+  }
+
+  .track-label {
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .track-row {
+    display: flex;
+    gap: 5px;
+    min-height: 40px;
+    align-items: center;
+  }
+
+  .track-clip {
+    height: 36px;
+    background: linear-gradient(135deg, rgba(233,69,96,0.3), rgba(168,85,247,0.3));
+    border: 1px solid #e94560;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    cursor: grab;
+    color: #fff;
+    min-width: 80px;
+    position: relative;
+  }
+
+  .clip-resize {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: e-resize;
+    background: rgba(233,69,96,0.5);
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* EDITOR SIDEBAR */
+  .editor-sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+  .sidebar-panel {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #2a2a4a;
+    border-radius: 15px;
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #e94560;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .upload-zone {
+    border: 2px dashed #444;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #888;
+  }
+
+  .upload-zone:hover {
+    border-color: #e94560;
+    background: rgba(233,69,96,0.05);
+    color: #e94560;
+  }
+
+  .upload-zone .icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-zone p { font-size: 13px; }
+  .upload-zone input { display: none; }
+
+  /* EFFECTS */
+  .effects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .effect-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #ccc;
+    font-size: 11px;
+  }
+
+  .effect-btn:hover, .effect-btn.active {
+    border-color: #e94560;
+    background: rgba(233,69,96,0.1);
+    color: #e94560;
+  }
+
+  .effect-btn .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* TEXT OVERLAY */
+  .text-overlay-form { display: flex; flex-direction: column; gap: 10px; }
+
+  .form-row { display: flex; gap: 8px; }
+
+  .mini-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .mini-input:focus { border-color: #e94560; }
+
+  .mini-select {
+    flex: 1;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .add-text-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #e94560, #c73652);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .add-text-btn:hover { opacity: 0.9; }
+
+  /* TRANSITIONS */
+  .transitions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .trans-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #ccc;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .trans-btn:hover, .trans-btn.active {
+    border-color: #e94560;
+    background: rgba(233,69,96,0.1);
+    color: #e94560;
+  }
+
+  /* EXPORT */
+  .export-options { display: flex; flex-direction: column; gap: 10px; }
+
+  .export-option {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .export-option:hover {
+    border-color: #e94560;
+    background: rgba(233,69,96,0.05);
+  }
+
+  .export-option.selected {
+    border-color: #e94560;
+    background: rgba(233,69,96,0.1);
+  }
+
+  .export-label { font-size: 13px; font-weight: 600; }
+  .export-desc { font-size: 11px; color: #888; }
+
+  .export-radio {
+    width: 18px;
+    height: 18px;
+    accent-color: #e94560;
+  }
+
+  .export-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #e94560, #c73652);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 5px;
+  }
+
+  .export-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(233,69,96,0.4); }
+
+  /* UPLOAD MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #e94560;
+    border-radius: 20px;
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 25px;
+    color: #e94560;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  .big-upload-zone {
+    border: 2px dashed #444;
+    border-radius: 15px;
+    padding: 50px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+  }
+
+  .big-upload-zone:hover, .big-upload-zone.dragover {
+    border-color: #e94560;
+    background: rgba(233,69,96,0.05);
+  }
+
+  .big-upload-zone .icon { font-size: 56px; margin-bottom: 15px; }
+  .big-upload-zone h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .big-upload-zone p { color: #888; font-size: 13px; }
+  .big-upload-zone input { display: none; }
+
+  /* LOADING */
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(233,69,96,0.2);
+    border-top-color: #e94560;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 15px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* USER MENU */
+  .user-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e94560, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .user-name { font-size: 14px; font-weight: 600; color: #ccc; }
+
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 10px;
+    min-width: 160px;
+    display: none;
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .dropdown.open { display: block; }
+
+  .dropdown-item {
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-item:hover { background: rgba(233,69,96,0.1); color: #e94560; }
+
+  /* NOTIFICATION */
+  .notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #e94560;
+    border-radius: 12px;
+    padding: 15px 20px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 9999;
+    transform: translateX(200%);
+    transition: transform 0.4s;
+    max-width: 300px;
+  }
+
+  .notification.show { transform: translateX(0); }
+  .notification.success { border-color: #22c55e; }
+  .notification.error { border-color: #ef4444; }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .editor-layout { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .navbar { padding: 12px 15px; }
+    .dashboard { padding: 20px 15px; }
+    .welcome-banner { flex-direction: column; gap: 20px; }
+    .action-btns { width: 100%; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .video-grid { grid-template-columns: 1fr; }
+  }
+
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+  }
+
+  .loading-overlay.hide { display: none; }
+  .loading-text { color: #e94560; font-size: 18px; font-weight: 700; margin-top: 15px; }
+
+  /* Clip items in media panel */
+  .media-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .media-item:hover { border-color: #e94560; background: rgba(233,69,96,0.05); }
+  .media-item .thumb { width: 50px; height: 36px; background: #0f3460; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .media-item .info { flex: 1; }
+  .media-item .info .name { font-size: 12px; font-weight: 600; }
+  .media-item .info .dur { font-size: 11px; color: #888; }
+
+  /* Color correction sliders */
+  .slider-group { margin-bottom: 12px; }
+  .slider-group label { font-size: 12px; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .slider-group input[type=range] { width: 100%; accent-color: #e94560; }
+
+  /* Audio tracks */
+  .audio-track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #333;
+  }
+
+  .audio-icon { font-size: 20px; }
+  .audio-info { flex: 1; font-size: 12px; }
+  .audio-vol { width: 60px; accent-color: #e94560; }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading Video365...</div>
+</div>
+
+<!-- Notification -->
+<div class="notification" id="notification"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="logo">Video<span>365</span></div>
+  <div class="nav-links" id="navLinks">
+    <button class="nav-btn" id="navSignIn" onclick="showAuth('login')">Sign In</button>
+    <button class="nav-btn primary" id="navSignUp" onclick="showAuth('signup')">Get Started</button>
+  </div>
+</nav>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-container">
+    <div class="auth-title">Video365</div>
+    <p class="auth-subtitle">Professional video creation & editing</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+
+    <div class="error-msg" id="authError"></div>
+    <div class="success-msg" id="authSuccess"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Your password" />
+      </div>
+      <button class="auth-submit" onclick="handleLogin()">Sign In</button>
+      <div class="auth-divider">or</div>
+      <button class="google-btn" onclick="handleGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,19.001,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm" style="display:none;">
+      <div class="form-group">
+        <label>Display Name</label>
+        <input type="text" id="signupName" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="Min. 6 characters" />
+      </div>
+      <button class="auth-submit" onclick="handleSignup()">Create Account</button>
+      <div class="auth-divider">or</div>
+      <button class="google-btn" onclick="handleGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,19.001,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+        Sign up with Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app-screen" id="appScreen">
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboardView">
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h1>Welcome back, <span id="userDisplayName">Creator</span>! 🎬</h1>
+        <p>Create and edit stunning videos up to 30 minutes long</p>
+      </div>
+      <div class="action-btns">
+        <button class="btn-upload" onclick="openUploadModal()">📁 Upload Video</button>
+        <button class="btn-create" onclick="createNewProject()">✨ New Project</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🎬</div>
+        <div class="stat-value" id="statVideos">0</div>
+        <div class="stat-label">Total Videos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-value" id="statDuration">0m</div>
+        <div class="stat-label">Total Duration</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✏️</div>
+        <div class="stat-value" id="statDrafts">0</div>
+        <div class="stat-label">Drafts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📤</div>
+        <div class="stat-value" id="statExported">0</div>
+        <div class="stat-label">Exported</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">My <span>Videos</span></div>
+    </div>
+    <div class="video-grid" id="videoGrid">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">🎥</div>
+        <h3>No videos yet</h3>
+        <p>Upload a video or create a new project to get started!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="editor-screen" id="editorView">
+    <div class="editor-header">
+      <button class="back-btn" onclick="backToDashboard()">← Dashboard</button>
+      <input type="text" class="editor-title-input" id="projectTitle" placeholder="Untitled Project" />
+      <button class="save-btn" onclick="saveProject()">💾 Save</button>
+    </div>
+
+    <div class="editor-layout">
+      <div class="editor-main">
+
+        <!-- Preview -->
+        <div class="video-preview" id="videoPreview">
+          <div class="preview-placeholder" id="previewPlaceholder">
+            <div class="icon">🎬</div>
+            <p>Add media to start editing</p>
+          </div>
+          <video class="preview-video" id="previewVideo" style="display:none;" controls></video>
+        </div>
+
+        <!-- Controls -->
+        <div class="video-controls">
+          <div class="progress-bar" id="progressBar" onclick="seekVideo(event)">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="controls-row">
+            <button class="ctrl-btn" onclick="skipBack()">⏮</button>
+            <button class="ctrl-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+            <button class="ctrl-btn" onclick="skipForward()">⏭</button>
+            <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+            <span>🔊</span>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1" oninput="setVolume(this.value)">
+            <button class="ctrl-btn" onclick="toggleMute()">🔇</button>
+            <button class="ctrl-btn" onclick="toggleFullscreen()">⛶</button>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-section">
+          <div class="timeline-header">
+            <div class="timeline-title">📽️ Timeline</div>
+            <div class="timeline-controls">
+              <button class="tl-btn" onclick="splitClip()">✂️ Split</button>
+              <button class="tl-btn" onclick="deleteClip()">🗑 Delete</button>
+              <button class="tl-btn" onclick="addAudioTrack()">🎵 Audio</button>
+            </div>
+          </div>
+          <div class="timeline-track">
+            <div class="track-label">VIDEO</div>
+            <div class="track-row" id="videoTrack"></div>
+          </div>
+          <div class="timeline-track" style="margin-top:10px;">
+            <div class="track-label">AUDIO</div>
+            <div class="track-row" id="audioTrack"></div>
+          </div>
+          <div class="timeline-track" style="margin-top:10px;">
+            <div class="track-label">TEXT</div>
+            <div class="track-row" id="textTrack"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="editor-sidebar">
+
+        <!-- Media -->
+        <div class="sidebar-panel">
+          <div class="panel-title">📁 Media</div>
+          <div class="upload-zone" onclick="document.getElementById('mediaUpload').click()">
+            <div class="icon">⬆️</div>
+            <p>Click to upload video/audio</p>
+            <input type="file" id="mediaUpload" accept="video/*,audio/*" onchange="handleMediaUpload(event)" />
+          </div>
+          <div id="mediaList" style="margin-top:10px;"></div>
+        </div>
+
+        <!-- Effects -->
+        <div class="sidebar-panel">
+          <div class="panel-title">✨ Filters & Effects</div>
+          <div class="effects-grid" id="effectsGrid">
+            <div class="effect-btn" onclick="applyEffect('none',this)"><span class="icon">🎬</span>None</div>
+            <div class="effect-btn" onclick="applyEffect('grayscale',this)"><span class="icon">⬛</span>B&W</div>
+            <div class="effect-btn" onclick="applyEffect('sepia',this)"><span class="icon">🟤</span>Sepia</div>
+            <div class="effect-btn" onclick="applyEffect('saturate',this)"><span class="icon">🎨</span>Vivid</div>
+            <div class="effect-btn" onclick="applyEffect('contrast',this)"><span class="icon">🌓</span>Contrast</div>
+            <div class="effect-btn" onclick="applyEffect('brightness',this)"><span class="icon">☀️</span>Bright</div>
+            <div class="effect-btn" onclick="applyEffect('blur',this)"><span class="icon">🌫️</span>Blur</div>
+            <div class="effect-btn" onclick="applyEffect('hue',this)"><span class="icon">🌈</span>Hue</div>
+            <div class="effect-btn" onclick="applyEffect('invert',this)"><span class="icon">🔄</span>Invert</div>
+          </div>
+        </div>
+
+        <!-- Color Correction -->
+        <div class="sidebar-panel">
+          <div class="panel-title">🎨 Color Correction</div>
+          <div class="slider-group">
+            <label>Brightness <span id="brightnessVal">100%</span></label>
+            <input type="range" min="0" max="200" value="100" oninput="updateFilter('brightness',this.value,'brightnessVal','%')">
+          </div>
+          <div class="slider-group">
+            <label>Contrast <span id="contrastVal">100%</span></label>
+            <input type="range" min="0" max="200" value="100" oninput="updateFilter('contrast',this.value,'contrastVal','%')">
+          </div>
+          <div class="slider-group">
+            <label>Saturation <span id="saturationVal">100%</span></label>
+            <input type="range" min="0" max="200" value="100" oninput="updateFilter('saturation',this.value,'saturationVal','%')">
+          </div>
+          <div class="slider-group">
+            <label>Hue Rotate <span id="hueVal">0°</span></label>
+            <input type="range" min="0" max="360" value="0" oninput="updateFilter('hue',this.value,'hueVal','°')">
+          </div>
+        </div>
+
+        <!-- Text Overlay -->
+        <div class="sidebar-panel">
+          <div class="panel-title">📝 Text Overlay</div>
+          <div class="text-overlay-form">
+            <input type="text" class="mini-input" id="textContent" placeholder="Enter text..." />
+            <div class="form-row">
+              <input type="number" class="mini-input" id="textSize" placeholder="Size" value="32" style="width:70px;flex:none;" />
+              <input type="color" id="textColor" value="#ffffff" style="width:45px;height:38px;border:1px solid #333;border-radius:8px;background:transparent;cursor:pointer;" />
+              <select class="mini-select" id="textFont">
+                <option>Arial</option>
+                <option>Georgia</option>
+                <option>Impact</option>
+                <option>Courier</option>
+                <option>Verdana</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <input type="number" class="mini-input" placeholder="Start (s)" id="textStart" value="0" />
+              <input type="number" class="mini-input" placeholder="End (s)" id="textEnd" value="5" />
+            </div>
+            <button class="add-text-btn" onclick
