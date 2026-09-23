@@ -1,826 +1,504 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video365 - Create & Edit Videos</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; }
-  
-  /* NAV */
-  nav { background: #111; border-bottom: 2px solid #e63946; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-  .nav-logo { font-size: 1.5rem; font-weight: 800; color: #e63946; letter-spacing: 1px; }
-  .nav-logo span { color: #fff; }
-  .nav-right { display: flex; align-items: center; gap: 12px; }
-  .nav-btn { background: #e63946; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: background 0.2s; }
-  .nav-btn:hover { background: #c1121f; }
-  .nav-btn.outline { background: transparent; border: 2px solid #e63946; color: #e63946; }
-  .nav-btn.outline:hover { background: #e63946; color: #fff; }
-  .user-info { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #ccc; }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #e63946; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join365 Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d14;
+      --bg-2: #101826;
+      --panel: #121d2d;
+      --panel-2: #18263a;
+      --line: #2b3b50;
+      --line-soft: rgba(255,255,255,0.06);
+      --text: #edf3ff;
+      --muted: #a7b4c7;
+      --faint: #73839b;
+      --orange: #ff6b47;
+      --teal: #2dd4bf;
+      --gold: #e8a93b;
+      --violet: #a78bfa;
+      --blue: #60a5fa;
+      --danger: #f87171;
+      --success: #34d399;
+      --shadow: 0 20px 50px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
 
-  /* AUTH OVERLAY */
-  .auth-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; display: flex; align-items: center; justify-content: center; }
-  .auth-box { background: #111; border: 2px solid #e63946; border-radius: 14px; padding: 40px; width: 100%; max-width: 400px; text-align: center; }
-  .auth-box h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
-  .auth-box h2 span { color: #e63946; }
-  .auth-box p { color: #aaa; margin-bottom: 24px; font-size: 0.9rem; }
-  .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
-  .auth-tab { flex: 1; padding: 10px; background: #1a1a1a; border: 2px solid #333; border-radius: 8px; cursor: pointer; color: #aaa; font-weight: 600; transition: all 0.2s; }
-  .auth-tab.active { background: #e63946; border-color: #e63946; color: #fff; }
-  .auth-input { width: 100%; padding: 12px 14px; background: #1a1a1a; border: 2px solid #333; border-radius: 8px; color: #fff; font-size: 0.95rem; margin-bottom: 12px; outline: none; transition: border 0.2s; }
-  .auth-input:focus { border-color: #e63946; }
-  .auth-submit { width: 100%; padding: 13px; background: #e63946; border: none; border-radius: 8px; color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-  .auth-submit:hover { background: #c1121f; }
-  .auth-error { color: #ff6b6b; font-size: 0.85rem; margin-bottom: 10px; display: none; }
-  .auth-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: #555; font-size: 0.8rem; }
-  .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: #333; }
-  .google-btn { width: 100%; padding: 12px; background: #1a1a1a; border: 2px solid #333; border-radius: 8px; color: #fff; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: border 0.2s; }
-  .google-btn:hover { border-color: #e63946; }
-  .skip-btn { margin-top: 14px; background: none; border: none; color: #555; cursor: pointer; font-size: 0.82rem; text-decoration: underline; }
-  .skip-btn:hover { color: #aaa; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255,107,71,0.18), transparent 28%),
+        radial-gradient(circle at 100% 0%, rgba(97,170,255,0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+    }
 
-  /* MAIN */
-  .main { display: none; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
-  .main.visible { display: block; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
 
-  /* HERO */
-  .hero { text-align: center; padding: 40px 20px 30px; }
-  .hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
-  .hero h1 span { color: #e63946; }
-  .hero p { color: #aaa; font-size: 1rem; margin-bottom: 28px; }
-  .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .btn-primary { background: #e63946; color: #fff; border: none; padding: 13px 28px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: background 0.2s; }
-  .btn-primary:hover { background: #c1121f; }
-  .btn-secondary { background: transparent; color: #e63946; border: 2px solid #e63946; padding: 11px 26px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; }
-  .btn-secondary:hover { background: #e63946; color: #fff; }
+    .hidden { display: none !important; }
 
-  /* SECTIONS */
-  .section-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; border-left: 4px solid #e63946; padding-left: 12px; }
+    .shell {
+      position: relative;
+      min-height: 100vh;
+    }
 
-  /* UPLOAD AREA */
-  .upload-zone { border: 2px dashed #333; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: border 0.2s, background 0.2s; margin-bottom: 24px; }
-  .upload-zone:hover, .upload-zone.dragover { border-color: #e63946; background: rgba(230,57,70,0.05); }
-  .upload-zone .icon { font-size: 3rem; margin-bottom: 12px; }
-  .upload-zone p { color: #aaa; margin-bottom: 8px; }
-  .upload-zone small { color: #555; }
-  #fileInput { display: none; }
+    .auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(5,8,13,.55);
+    }
 
-  /* EDITOR */
-  .editor-section { display: none; background: #111; border-radius: 14px; padding: 24px; margin-bottom: 24px; border: 1px solid #222; }
-  .editor-section.visible { display: block; }
-  .video-preview-wrap { position: relative; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
-  #previewVideo { width: 100%; max-height: 400px; display: block; }
-  .video-controls { display: flex; align-items: center; gap: 10px; padding: 10px 0; flex-wrap: wrap; }
-  .ctrl-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
-  .ctrl-btn:hover { background: #e63946; border-color: #e63946; }
-  .ctrl-btn.active { background: #e63946; border-color: #e63946; }
-  .time-display { color: #aaa; font-size: 0.85rem; margin-left: auto; font-family: monospace; }
+    .auth-card {
+      width: min(420px, 100%);
+      background: rgba(18,29,45,.96);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 28px 26px;
+    }
 
-  /* TIMELINE */
-  .timeline-wrap { background: #0d0d0d; border-radius: 8px; padding: 12px; margin-bottom: 16px; border: 1px solid #222; }
-  .timeline-label { font-size: 0.75rem; color: #555; margin-bottom: 6px; }
-  .timeline-bar { position: relative; height: 48px; background: #1a1a1a; border-radius: 6px; cursor: pointer; overflow: hidden; }
-  .timeline-fill { position: absolute; left: 0; top: 0; height: 100%; background: linear-gradient(90deg, #e63946, #ff6b6b); border-radius: 6px; pointer-events: none; }
-  .timeline-playhead { position: absolute; top: 0; width: 2px; height: 100%; background: #fff; pointer-events: none; }
-  .trim-left { position: absolute; top: 0; width: 8px; height: 100%; background: #e63946; cursor: ew-resize; border-radius: 4px 0 0 4px; z-index: 2; }
-  .trim-right { position: absolute; top: 0; right: 0; width: 8px; height: 100%; background: #e63946; cursor: ew-resize; border-radius: 0 4px 4px 0; z-index: 2; }
-  .trim-region { position: absolute; top: 0; height: 100%; background: rgba(230,57,70,0.15); border: 2px solid #e63946; border-radius: 4px; pointer-events: none; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      font-size: 22px;
+    }
 
-  /* TOOLS GRID */
-  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
-  .tool-card { background: #111; border: 1px solid #222; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
-  .tool-card:hover { border-color: #e63946; background: rgba(230,57,70,0.05); transform: translateY(-2px); }
-  .tool-card .ti { font-size: 2rem; margin-bottom: 8px; }
-  .tool-card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
-  .tool-card p { font-size: 0.75rem; color: #666; }
+    .brand-mark {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 22px;
+      margin-right: 2px;
+    }
 
-  /* PROPERTIES PANEL */
-  .props-panel { background: #0d0d0d; border: 1px solid #222; border-radius: 10px; padding: 18px; margin-bottom: 20px; display: none; }
-  .props-panel.visible { display: block; }
-  .props-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; color: #e63946; }
-  .prop-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-  .prop-label { font-size: 0.82rem; color: #aaa; min-width: 80px; }
-  .prop-input { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: #fff; padding: 7px 10px; font-size: 0.85rem; flex: 1; outline: none; min-width: 80px; }
-  .prop-input:focus { border-color: #e63946; }
-  .prop-slider { flex: 1; accent-color: #e63946; min-width: 100px; }
-  .prop-select { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: #fff; padding: 7px 10px; font-size: 0.85rem; outline: none; }
-  .prop-select:focus { border-color: #e63946; }
+    .brand-mark i {
+      display: block;
+      width: 3px;
+      border-radius: 2px;
+      background: var(--orange);
+    }
 
-  /* TEXT OVERLAY CANVAS */
-  .canvas-wrap { position: relative; display: inline-block; width: 100%; }
-  #overlayCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    .brand-mark i:nth-child(1) { height: 40%; }
+    .brand-mark i:nth-child(2) { height: 100%; }
+    .brand-mark i:nth-child(3) { height: 65%; }
+    .brand-mark i:nth-child(4) { height: 100%; }
+    .brand-mark i:nth-child(5) { height: 30%; }
 
-  /* FILTER STRIPS */
-  .filter-strip { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; margin-bottom: 16px; }
-  .filter-chip { flex-shrink: 0; padding: 7px 16px; background: #1a1a1a; border: 1px solid #333; border-radius: 20px; cursor: pointer; font-size: 0.82rem; color: #ccc; transition: all 0.2s; white-space: nowrap; }
-  .filter-chip:hover, .filter-chip.active { background: #e63946; border-color: #e63946; color: #fff; }
+    .brand span { color: var(--orange); }
 
-  /* EXPORT */
-  .export-section { background: #111; border: 1px solid #222; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-  .export-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-  .export-opt { flex: 1; min-width: 120px; background: #1a1a1a; border: 2px solid #333; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
-  .export-opt:hover, .export-opt.selected { border-color: #e63946; background: rgba(230,57,70,0.08); }
-  .export-opt h4 { font-size: 0.9rem; margin-bottom: 4px; }
-  .export-opt p { font-size: 0.75rem; color: #666; }
-  .progress-bar { height: 8px; background: #1a1a1a; border-radius: 4px; overflow: hidden; margin: 12px 0; display: none; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #e63946, #ff6b6b); width: 0%; transition: width 0.3s; border-radius: 4px; }
-  .progress-text { font-size: 0.82rem; color: #aaa; text-align: center; }
+    .tagline {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0 0 18px;
+    }
 
-  /* MY VIDEOS */
-  .videos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 30px; }
-  .video-card { background: #111; border: 1px solid #222; border-radius: 10px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
-  .video-card:hover { border-color: #e63946; transform: translateY(-3px); }
-  .video-thumb { width: 100%; height: 140px; background: linear-gradient(135deg, #1a1a1a, #0d0d0d); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; overflow: hidden; }
-  .video-thumb video { width: 100%; height: 100%; object-fit: cover; }
-  .video-thumb-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
-  .video-card:hover .video-thumb-overlay { opacity: 1; }
-  .play-icon { font-size: 2.5rem; }
-  .video-info { padding: 12px; }
-  .video-info h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .video-info p { font-size: 0.75rem; color: #666; }
-  .video-actions { display: flex; gap: 6px; padding: 0 12px 12px; }
-  .vid-act-btn { flex: 1; padding: 6px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: #ccc; font-size: 0.75rem; cursor: pointer; text-align: center; transition: all 0.2s; }
-  .vid-act-btn:hover { border-color: #e63946; color: #e63946; }
+    .field { margin-bottom: 14px; }
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
 
-  /* TABS */
-  .tab-bar { display: flex; gap: 4px; background: #111; border-radius: 10px; padding: 4px; margin-bottom: 24px; border: 1px solid #222; overflow-x: auto; }
-  .tab { padding: 10px 20px; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: #aaa; transition: all 0.2s; white-space: nowrap; }
-  .tab.active { background: #e63946; color: #fff; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
 
-  /* TOAST */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: #e63946; color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
-  .toast.show { transform: translateY(0); opacity: 1; }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(255,107,71,.7);
+      box-shadow: 0 0 0 3px rgba(255,107,71,.12);
+    }
 
-  /* LOADING */
-  .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #333; border-top: 3px solid #e63946; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
 
-  /* RESPONSIVE */
-  @media (max-width: 600px) {
-    .hero h1 { font-size: 1.8rem; }
-    .tools-grid { grid-template-columns: repeat(2, 1fr); }
-    .tab { padding: 8px 14px; font-size: 0.8rem; }
-  }
-</style>
+    .auth-actions { margin-top: 10px; }
+    .primary-btn, .secondary-btn, .ghost-btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 700;
+      transition: .16s ease;
+    }
+
+    .primary-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--orange), #ff7d58);
+      color: #1c120c;
+      border-color: rgba(255,255,255,.08);
+    }
+
+    .primary-btn:hover { filter: brightness(1.08); }
+    .secondary-btn {
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-color: var(--line);
+    }
+    .ghost-btn {
+      background: transparent;
+      color: var(--muted);
+      border-color: var(--line);
+    }
+
+    .auth-switch {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .auth-switch button {
+      border: none;
+      background: none;
+      color: var(--orange);
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .auth-error {
+      background: rgba(248,113,113,.08);
+      border: 1px solid rgba(248,113,113,.5);
+      color: #ffc9c9;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .app {
+      display: none;
+      min-height: 100vh;
+      background: rgba(7,11,17,.7);
+    }
+
+    .app.active { display: block; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(16,24,38,.9);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar-left, .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.045em;
+      font-size: 18px;
+    }
+
+    .brand-mini .accent { color: var(--orange); }
+
+    .topbar-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: calc(100vh - 77px);
+    }
+
+    .sidebar {
+      background: rgba(15,22,31,.94);
+      border-right: 1px solid var(--line);
+      padding: 18px 14px;
+    }
+
+    .sidebar-section {
+      margin-bottom: 18px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--faint);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .project-item {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      text-align: left;
+      transition: .15s ease;
+    }
+
+    .project-item.active {
+      border-color: rgba(255,107,71,.7);
+      background: rgba(255,107,71,.08);
+    }
+
+    .project-item:hover {
+      background: rgba(255,255,255,.04);
+    }
+
+    .project-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .stat .label {
+      display: block;
+      color: var(--faint);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin-bottom: 8px;
+    }
+
+    .stat .value {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .panel h3 {
+      margin: 0 0 16px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 18px;
+      letter-spacing: -.03em;
+    }
+
+    .project-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .range-row input[type="range"] {
+      width: 100%;
+      min-width: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .range-value {
+      min-width: 52px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .scene {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      border-radius: 12px;
+    }
+
+    .scene-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255,107,71,.08);
+      color: var(--orange);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .scene-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .scene-title {
+      font-weight: 700;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scene-time {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .render-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .progress-wrap {
+      height: 12px;
+      width: 100%;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--orange), var(--teal));
+      transition: width .3s ease;
+    }
+
+    .progress-status {
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 18px;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      padding: 18px 12px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .workspace { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .stats { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-
-<!-- NAV -->
-<nav>
-  <div class="nav-logo">Video<span>365</span></div>
-  <div class="nav-right" id="navRight">
-    <button class="nav-btn outline" onclick="showAuth('login')">Sign In</button>
-    <button class="nav-btn" onclick="showAuth('signup')">Sign Up</button>
-  </div>
-</nav>
-
-<!-- AUTH OVERLAY -->
-<div class="auth-overlay" id="authOverlay">
-  <div class="auth-box">
-    <h2>Welcome to <span>Video365</span></h2>
-    <p>Create and edit videos up to 30 minutes long</p>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Sign In</button>
-      <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
-    <div id="authError" class="auth-error"></div>
-    <input class="auth-input" type="email" id="authEmail" placeholder="Email address">
-    <input class="auth-input" type="password" id="authPassword" placeholder="Password">
-    <input class="auth-input" type="text" id="authName" placeholder="Display name" style="display:none">
-    <button class="auth-submit" id="authSubmitBtn" onclick="handleAuth()">Sign In</button>
-    <div class="auth-divider">or</div>
-    <button class="google-btn" onclick="handleGoogle()">
-      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      Continue with Google
-    </button>
-    <button class="skip-btn" onclick="skipAuth()">Continue without account</button>
-  </div>
-</div>
-
-<!-- MAIN APP -->
-<div class="main" id="mainApp">
-  <div class="hero">
-    <h1>Create & Edit <span>Videos</span></h1>
-    <p>Professional video editing — up to 30 minutes long</p>
-    <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('fileInput').click()">📤 Upload Video</button>
-      <button class="btn-secondary" onclick="switchTab('create')">🎬 New Project</button>
-    </div>
-  </div>
-
-  <!-- TABS -->
-  <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('studio')" id="tab-studio">🎬 Studio</div>
-    <div class="tab" onclick="switchTab('create')" id="tab-create">➕ New</div>
-    <div class="tab" onclick="switchTab('myvideos')" id="tab-myvideos">📁 My Videos</div>
-    <div class="tab" onclick="switchTab('export')" id="tab-export">📤 Export</div>
-  </div>
-
-  <!-- STUDIO TAB -->
-  <div class="tab-content active" id="content-studio">
-    <div class="section-title">Video Editor</div>
-    <input type="file" id="fileInput" accept="video/*" onchange="loadVideo(event)">
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
-      <div class="icon">🎬</div>
-      <p>Drop your video here or click to upload</p>
-      <small>Supports MP4, MOV, AVI, WebM — up to 30 minutes</small>
-    </div>
-
-    <!-- EDITOR -->
-    <div class="editor-section" id="editorSection">
-      <div class="canvas-wrap">
-        <div class="video-preview-wrap">
-          <video id="previewVideo" controls></video>
-          <canvas id="overlayCanvas"></canvas>
-        </div>
-      </div>
-
-      <div class="video-controls">
-        <button class="ctrl-btn" onclick="togglePlay()" id="playBtn">▶ Play</button>
-        <button class="ctrl-btn" onclick="skipBack()">⏮ -5s</button>
-        <button class="ctrl-btn" onclick="skipFwd()">+5s ⏭</button>
-        <button class="ctrl-btn" onclick="toggleMute()" id="muteBtn">🔊 Mute</button>
-        <button class="ctrl-btn" onclick="setSpeed(0.5)">0.5x</button>
-        <button class="ctrl-btn" onclick="setSpeed(1)" class="active">1x</button>
-        <button class="ctrl-btn" onclick="setSpeed(1.5)">1.5x</button>
-        <button class="ctrl-btn" onclick="setSpeed(2)">2x</button>
-        <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
-      </div>
-
-      <!-- TIMELINE -->
-      <div class="timeline-wrap">
-        <div class="timeline-label">Timeline — drag handles to trim</div>
-        <div class="timeline-bar" id="timelineBar" onclick="seekVideo(event)">
-          <div class="trim-region" id="trimRegion"></div>
-          <div class="timeline-fill" id="timelineFill" style="width:0%"></div>
-          <div class="timeline-playhead" id="playhead" style="left:0%"></div>
-          <div class="trim-left" id="trimLeft" title="Trim Start"></div>
-          <div class="trim-right" id="trimRight" title="Trim End"></div>
-        </div>
-      </div>
-
-      <!-- FILTER STRIP -->
-      <div class="section-title" style="margin-top:10px">Filters</div>
-      <div class="filter-strip">
-        <div class="filter-chip active" onclick="applyFilter('none',this)">None</div>
-        <div class="filter-chip" onclick="applyFilter('grayscale(100%)',this)">B&W</div>
-        <div class="filter-chip" onclick="applyFilter('sepia(80%)',this)">Sepia</div>
-        <div class="filter-chip" onclick="applyFilter('saturate(200%)',this)">Vivid</div>
-        <div class="filter-chip" onclick="applyFilter('contrast(150%)',this)">Contrast</div>
-        <div class="filter-chip" onclick="applyFilter('brightness(130%)',this)">Bright</div>
-        <div class="filter-chip" onclick="applyFilter('hue-rotate(90deg)',this)">Cool</div>
-        <div class="filter-chip" onclick="applyFilter('hue-rotate(270deg)',this)">Warm</div>
-        <div class="filter-chip" onclick="applyFilter('invert(80%)',this)">Invert</div>
-        <div class="filter-chip" onclick="applyFilter('blur(2px)',this)">Blur</div>
-      </div>
-
-      <!-- TOOLS -->
-      <div class="section-title">Edit Tools</div>
-      <div class="tools-grid">
-        <div class="tool-card" onclick="showTool('text')">
-          <div class="ti">✏️</div>
-          <h3>Text Overlay</h3>
-          <p>Add titles & captions</p>
-        </div>
-        <div class="tool-card" onclick="showTool('trim')">
-          <div class="ti">✂️</div>
-          <h3>Trim / Cut</h3>
-          <p>Cut start & end</p>
-        </div>
-        <div class="tool-card" onclick="showTool('speed')">
-          <div class="ti">⚡</div>
-          <h3>Speed</h3>
-          <p>Slow mo or fast</p>
-        </div>
-        <div class="tool-card" onclick="showTool('volume')">
-          <div class="ti">🔊</div>
-          <h3>Volume</h3>
-          <p>Adjust audio</p>
-        </div>
-        <div class="tool-card" onclick="showTool('crop')">
-          <div class="ti">🔲</div>
-          <h3>Crop</h3>
-          <p>Adjust aspect ratio</p>
-        </div>
-        <div class="tool-card" onclick="showTool('rotate')">
-          <div class="ti">🔄</div>
-          <h3>Rotate</h3>
-          <p>Flip & rotate</p>
-        </div>
-        <div class="tool-card" onclick="showTool('thumbnail')">
-          <div class="ti">🖼️</div>
-          <h3>Thumbnail</h3>
-          <p>Capture frame</p>
-        </div>
-        <div class="tool-card" onclick="showTool('brightness')">
-          <div class="ti">☀️</div>
-          <h3>Color</h3>
-          <p>Brightness & contrast</p>
-        </div>
-      </div>
-
-      <!-- PROPS PANEL -->
-      <div class="props-panel" id="propsPanel">
-        <h3 id="propsPanelTitle">Properties</h3>
-        <div id="propsContent"></div>
-      </div>
-
-      <!-- SAVE -->
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        <button class="btn-primary" onclick="saveProject()">💾 Save Project</button>
-        <button class="btn-secondary" onclick="switchTab('export')">📤 Export Video</button>
-        <button class="ctrl-btn" onclick="resetEditor()">🗑️ Clear</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- NEW TAB -->
-  <div class="tab-content" id="content-create">
-    <div class="section-title">New Project</div>
-    <div class="props-panel visible" style="display:block">
-      <h3>Project Settings</h3>
-      <div class="prop-row">
-        <span class="prop-label">Title</span>
-        <input class="prop-input" id="projTitle" placeholder="My Awesome Video" value="Untitled Project">
-      </div>
-      <div class="prop-row">
-        <span class="prop-label">Resolution</span>
-        <select class="prop-select" id="projRes">
-          <option value="1920x1080">1080p (1920×1080)</option>
-          <option value="1280x720">720p (1280×720)</option>
-          <option value="854x480">480p (854×480)</option>
-          <option value="3840x2160">4K (3840×2160)</option>
-        </select>
-      </div>
-      <div class="prop-row">
-        <span class="prop-label">Aspect Ratio</span>
-        <select class="prop-select" id="projAR">
-          <option value="16:9">16:9 Landscape</option>
-          <option value="9:16">9:16 Portrait</option>
-          <option value="1:1">1:1 Square</option>
-          <option value="4:3">4:3 Classic</option>
-        </select>
-      </div>
-      <div class="prop-row">
-        <span class="prop-label">Frame Rate</span>
-        <select class="prop-select">
-          <option>30 fps</option>
-          <option>60 fps</option>
-          <option>24 fps</option>
-        </select>
-      </div>
-      <div class="prop-row">
-        <span class="prop-label">Max Length</span>
-        <span style="color:#e63946;font-weight:700">30 Minutes</span>
-      </div>
-      <button class="btn-primary" onclick="createProject()" style="margin-top:12px">🎬 Create Project & Upload</button>
-    </div>
-
-    <div class="section-title" style="margin-top:24px">Templates</div>
-    <div class="tools-grid">
-      <div class="tool-card" onclick="useTemplate('vlog')">
-        <div class="ti">📹</div>
-        <h3>Vlog</h3>
-        <p>Personal & lifestyle</p>
-      </div>
-      <div class="tool-card" onclick="useTemplate('tutorial')">
-        <div class="ti">📚</div>
-        <h3>Tutorial</h3>
-        <p>How-to & education</p>
-      </div>
-      <div class="tool-card" onclick="useTemplate('gaming')">
-        <div class="ti">🎮</div>
-        <h3>Gaming</h3>
-        <p>Gameplay & streams</p>
-      </div>
-      <div class="tool-card" onclick="useTemplate('music')">
-        <div class="ti">🎵</div>
-        <h3>Music Video</h3>
-        <p>Visual & lyric videos</p>
-      </div>
-      <div class="tool-card" onclick="useTemplate('news')">
-        <div class="ti">📰</div>
-        <h3>News / Talk</h3>
-        <p>Professional segments</p>
-      </div>
-      <div class="tool-card" onclick="useTemplate('shorts')">
-        <div class="ti">⚡</div>
-        <h3>Shorts</h3>
-        <p>Vertical short clips</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- MY VIDEOS TAB -->
-  <div class="tab-content" id="content-myvideos">
-    <div class="section-title">My Videos</div>
-    <div id="videosGrid" class="videos-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#555">
-        <div style="font-size:3rem;margin-bottom:12px">🎬</div>
-        <p>No videos yet. Upload or create one!</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- EXPORT TAB -->
-  <div class="tab-content" id="content-export">
-    <div class="section-title">Export Video</div>
-    <div class="export-section">
-      <p style="color:#aaa;margin-bottom:16px">Choose export format and quality</p>
-      <div class="export-row">
-        <div class="export-opt selected" onclick="selectExport(this,'mp4')">
-          <h4>MP4</h4>
-          <p>Universal</p>
-        </div>
-        <div class="export-opt" onclick="selectExport(this,'webm')">
-          <h4>WebM</h4>
-          <p>Web-optimized</p>
-        </div>
-        <div class="export-opt" onclick="selectExport(this,'gif')">
-          <h4>GIF</h4>
-          <p>Animated</p>
-        </div>
-      </div>
-      <div class="export-row">
-        <div class="export-opt selected" onclick="selectQuality(this,'1080p')">
-          <h4>1080p HD</h4>
-          <p>Best quality</p>
-        </div>
-        <div class="export-opt" onclick="selectQuality(this,'720p')">
-          <h4>720p</h4>
-          <p>Balanced</p>
-        </div>
-        <div class="export-opt" onclick="selectQuality(this,'480p')">
-          <h4>480p</h4>
-          <p>Smaller file</p>
-        </div>
-      </div>
-      <div class="prop-row" style="margin-bottom:16px">
-        <span class="prop-label">File Name</span>
-        <input class="prop-input" id="exportName" value="video365-export">
-      </div>
-      <div class="progress-bar" id="exportProgress">
-        <div class="progress-fill" id="exportFill"></div>
-      </div>
-      <div class="progress-text" id="exportText"></div>
-      <button class="btn-primary" onclick="exportVideo()" style="margin-top:10px">📤 Export & Download</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAOld48eda9m_rIJ_72wnMVUyJM1unDlzA",
-  authDomain: "join365-9a175.firebaseapp.com",
-  databaseURL: "https://join365-9a175-default-rtdb.firebaseio.com/",
-  projectId: "join365-9a175",
-  storageBucket: "join365-9a175.firebasestorage.app",
-  messagingSenderId: "624922796690",
-  appId: "1:624922796690:web:2ca60637523e4aadcb3c4b"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-const googleProvider = new GoogleAuthProvider();
-
-window._auth = auth;
-window._db = db;
-window._ref = ref;
-window._set = set;
-window._push = push;
-window._get = get;
-
-// Auth state
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    window._currentUser = user;
-    enterApp(user);
-  }
-});
-
-window.handleAuth = async function() {
-  const email = document.getElementById('authEmail').value.trim();
-  const pass = document.getElementById('authPassword').value;
-  const name = document.getElementById('authName').value.trim();
-  const isLogin = document.getElementById('loginTab').classList.contains('active');
-  const errEl = document.getElementById('authError');
-  errEl.style.display = 'none';
-
-  if (!email || !pass) { errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; return; }
-
-  try {
-    if (isLogin) {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } else {
-      if (!name) { errEl.textContent = 'Please enter a display name.'; errEl.style.display = 'block'; return; }
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await updateProfile(cred.user, { displayName: name });
-      await set(ref(db, 'users/' + cred.user.uid), { name, email, created: Date.now() });
-    }
-  } catch(e) {
-    errEl.textContent = e.message.replace('Firebase: ','').replace(/\(auth.*\)/,'');
-    errEl.style.display = 'block';
-  }
-};
-
-window.handleGoogle = async function() {
-  try {
-    await signInWithPopup(auth, googleProvider);
-  } catch(e) {
-    const errEl = document.getElementById('authError');
-    errEl.textContent = 'Google sign-in failed. Try email instead.';
-    errEl.style.display = 'block';
-  }
-};
-
-window.saveProjectToDb = async function(data) {
-  if (!window._currentUser) return;
-  const uid = window._currentUser.uid;
-  await push(ref(db, 'projects/' + uid), data);
-};
-
-window.loadUserProjects = function() {
-  if (!window._currentUser) return;
-  const uid = window._currentUser.uid;
-  // load from db if needed
-};
-</script>
-
-<script>
-// ---- GLOBAL STATE ----
-let currentVideo = null;
-let trimStart = 0;
-let trimEnd = 1;
-let isDraggingLeft = false;
-let isDraggingRight = false;
-let currentFilter = 'none';
-let currentTool = null;
-let textOverlays = [];
-let projectTitle = 'Untitled Project';
-let savedProjects = JSON.parse(localStorage.getItem('v365_projects') || '[]');
-let exportFormat = 'mp4';
-let exportQuality = '1080p';
-let volume = 1;
-let currentRotation = 0;
-let brightnessVal = 100;
-let contrastVal = 100;
-let saturationVal = 100;
-
-// ---- AUTH ----
-function showAuth(tab) {
-  document.getElementById('authOverlay').style.display = 'flex';
-  switchAuthTab(tab);
-}
-
-function switchAuthTab(tab) {
-  document.getElementById('loginTab').classList.toggle('active', tab === 'login');
-  document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
-  document.getElementById('authSubmitBtn').textContent = tab === 'login' ? 'Sign In' : 'Create Account';
-  document.getElementById('authName').style.display = tab === 'signup' ? 'block' : 'none';
-  document.getElementById('authError').style.display = 'none';
-}
-
-function skipAuth() {
-  document.getElementById('authOverlay').style.display = 'none';
-  document.getElementById('mainApp').classList.add('visible');
-}
-
-function enterApp(user) {
-  document.getElementById('authOverlay').style.display = 'none';
-  document.getElementById('mainApp').classList.add('visible');
-  const initials = (user.displayName || user.email || 'U')[0].toUpperCase();
-  document.getElementById('navRight').innerHTML = `
-    <div class="user-info">
-      <div class="avatar">${initials}</div>
-      <span>${user.displayName || user.email}</span>
-    </div>
-    <button class="nav-btn outline" onclick="signOutUser()">Sign Out</button>
-  `;
-  loadSavedVideos();
-  toast('Welcome to Video365! 🎬');
-}
-
-function signOutUser() {
-  if (window._auth) window._auth.signOut();
-  window._currentUser = null;
-  document.getElementById('navRight').innerHTML = `
-    <button class="nav-btn outline" onclick="showAuth('login')">Sign In</button>
-    <button class="nav-btn" onclick="showAuth('signup')">Sign Up</button>
-  `;
-  document.getElementById('mainApp').classList.remove('visible');
-  document.getElementById('authOverlay').style.display = 'flex';
-}
-
-// ---- TABS ----
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.getElementById('content-' + tab).classList.add('active');
-}
-
-// ---- UPLOAD ----
-function dragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
-function dragLeave(e) { document.getElementById('uploadZone').classList.remove('dragover'); }
-function dropFile(e) {
-  e.preventDefault();
-  document.getElementById('uploadZone').classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('video/')) loadVideoFile(file);
-  else toast('Please drop a valid video file.');
-}
-
-function loadVideo(e) {
-  const file = e.target.files[0];
-  if (file) loadVideoFile(file);
-}
-
-function loadVideoFile(file) {
-  const duration = 30 * 60; // 30 min max check happens after load
-  const url = URL.createObjectURL(file);
-  currentVideo = { file, url, name: file.name };
-  const vid = document.getElementById('previewVideo');
-  vid.src = url;
-  vid.onloadedmetadata = () => {
-    if (vid.duration > 1800) {
-      toast('⚠️ Video exceeds 30 minutes! Trimming will be limited.');
-    }
-    trimStart = 0;
-    trimEnd = vid.duration;
-    updateTrimHandles();
-    updateTimeDisplay();
-    projectTitle = file.name.replace(/\.[^/.]+$/, '');
-    document.getElementById('projTitle').value = projectTitle;
-    showEditor();
-    toast('Video loaded: ' + file.name);
-  };
-}
-
-function showEditor() {
-  document.getElementById('uploadZone').style.display = 'none';
-  document.getElementById('editorSection').classList.add('visible');
-}
-
-function resetEditor() {
-  document.getElementById('uploadZone').style.display = 'block';
-  document.getElementById('editorSection').classList.remove('visible');
-  document.getElementById('previewVideo').src = '';
-  currentVideo = null;
-  textOverlays = [];
-  currentFilter = 'none';
-  currentRotation = 0;
-  applyVideoStyles();
-}
-
-// ---- PLAYBACK ----
-function togglePlay() {
-  const vid = document.getElementById('previewVideo');
-  if (vid.paused) { vid.play(); document.getElementById('playBtn').textContent = '⏸ Pause'; }
-  else { vid.pause(); document.getElementById('playBtn').textContent = '▶ Play'; }
-}
-
-function skipBack() { document.getElementById('previewVideo').currentTime = Math.max(0, document.getElementById('previewVideo').currentTime - 5); }
-function skipFwd() { document.getElementById('previewVideo').currentTime = Math.min(document.getElementById('previewVideo').duration, document.getElementById('previewVideo').currentTime + 5); }
-function toggleMute() {
-  const vid = document.getElementById('previewVideo');
-  vid.muted = !vid.muted;
-  document.getElementById('muteBtn').textContent = vid.muted ? '🔇 Unmute' : '🔊 Mute';
-}
-function setSpeed(s) { document.getElementById('previewVideo').playbackRate = s; toast('Speed: ' + s + 'x'); }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const vid = document.getElementById('previewVideo');
-  if (vid) {
-    vid.addEventListener('timeupdate', () => {
-      updateTimeDisplay();
-      updatePlayhead();
-      // enforce trim
-      if (vid.currentTime < trimStart) vid.currentTime = trimStart;
-      if (vid.currentTime >= trimEnd) { vid.pause(); vid.currentTime = trimStart; document.getElementById('playBtn').textContent = '▶ Play'; }
-    });
-  }
-
-  // Trim drag events
-  const trimL = document.getElementById('trimLeft');
-  const trimR = document.getElementById('trimRight');
-  if (trimL) trimL.addEventListener('mousedown', (e) => { isDraggingLeft = true; e.preventDefault(); });
-  if (trimR) trimR.addEventListener('mousedown', (e) => { isDraggingRight = true; e.preventDefault(); });
-  document.addEventListener('mousemove', handleTrimDrag);
-  document.addEventListener('mouseup', () => { isDraggingLeft = false; isDraggingRight = false; });
-  document.addEventListener('touchmove', handleTrimTouch, { passive: false });
-  document.addEventListener('touchend', () => { isDraggingLeft = false; isDraggingRight = false; });
-  if (trimL) trimL.addEventListener('touchstart', (e) => { isDraggingLeft = true; e.preventDefault(); });
-  if (trimR) trimR.addEventListener('touchstart', (e) => { isDraggingRight = true; e.preventDefault(); });
-});
-
-function updateTimeDisplay() {
-  const vid = document.getElementById('previewVideo');
-  if (!vid.duration) return;
-  document.getElementById('timeDisplay').textContent = formatTime(vid.currentTime) + ' / ' + formatTime(vid.duration);
-}
-
-function formatTime(s) {
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return m + ':' + (sec < 10 ? '0' : '') + sec;
-}
-
-function updatePlayhead() {
-  const vid = document.getElementById('previewVideo');
-  if (!vid.duration) return;
-  const pct = (vid.currentTime / vid.duration) * 100;
-  document.getElementById('playhead').style.left = pct + '%';
-  document.getElementById('timelineFill').style.width = pct + '%';
-}
-
-function seekVideo(e) {
-  const vid = document.getElementById('previewVideo');
-  if (!vid.duration) return;
-  const bar = document.getElementById('timelineBar');
-  const rect = bar.getBoundingClientRect();
-  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  vid.currentTime = pct * vid.duration;
-}
-
-// ---- TRIM ----
-function handleTrimDrag(e) {
-  if (!isDraggingLeft && !isDraggingRight) return;
-  const vid = document.getElementById('previewVideo');
-  if (!vid.duration) return;
-  const bar = document.getElementById('timelineBar');
-  const rect = bar.getBoundingClientRect();
-  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  if (isDraggingLeft) {
-    trimStart = Math.min(pct * vid.duration, trimEnd - 1);
-    vid.currentTime = trimStart;
-  }
-  if (isDraggingRight) {
-    trimEnd = Math.max(pct * vid.duration, trimStart + 1);
-    vid.currentTime = trimEnd;
-  }
-  updateTrimHandles();
-}
-
-function handleTrimTouch(e) {
-  if (!isDraggingLeft && !isDraggingRight) return;
-  e.preventDefault();
-  const touch = e.touches[0];
-  handleTrimDrag({ clientX: touch.clientX });
-}
-
-function updateTrimHandles() {
-  const vid = document.getElementById('previewVideo');
-  if (!vid.duration) return;
-  const leftPct = (trimStart / vid.duration) * 100;
-  const rightPct = (trimEnd / vid.duration) * 100;
-  document.getElementById('trimLeft').style.left = leftPct + '%';
-  document.getElementById('trimRight').style.left = (rightPct - 1) + '%';
-  const region = document.getElementById('trimRegion');
-  region.style.left = leftPct + '%';
-  region.style.width = (rightPct - leftPct) + '%';
-}
-
-// ---- FILTERS ----
-function applyFilter(filter, el) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  if (el) el.classList.add('active');
-  applyVideoStyles();
-}
-
-function applyVideoStyles() {
-  const vid = document.getElementById('previewVideo');
-  let filterStr = currentFilter === 'none' ? '' : currentFilter;
-  if (brightnessVal !== 100 || contrastVal !== 100 || saturationVal !== 100) {
-    filterStr = (filterStr ? filterStr + ' ' : '') + `brightness(${brightnessVal}%) contrast(${contrastVal}%) saturate(${saturationVal}%)`;
-  }
-  vid.style.filter = filterStr;
-  vid.style.transform = `rotate(${currentRotation}deg)`;
-}
-
-// ---- TOOLS ----
-function showTool(tool) {
-  currentTool = tool;
-  const panel = document.getElementById('propsPanel');
-  const title = document.getElementById('propsPanelTitle');
-  const content = document.getElementById('propsContent');
-  panel.classList.add('visible');
-
-  if (tool === 'text') {
-    title.textContent = '✏️ Text Overlay';
-    content.innerHTML = `
-      <div class="prop-row"><span class="prop-label">Text</span><input class="prop-input" id="textContent" placeholder="Your text here..." value="Video365"></div>
-      <div class="prop-row"><span class="prop-label">Size</span><input class="prop-slider" type="range" id="textSize" min="12" max="120" value="36" oninput="updateTextPreview()"><span id="textSizeVal">36</span>px</div>
-      <div class="prop-row"><span class="prop-label">Color
+  <div class="shell">
+    <div id="auth-screen" class="auth-screen">
+      <div class="auth-card">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+          JOIN<span>365</span>*
