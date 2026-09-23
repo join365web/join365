@@ -501,4 +501,681 @@
           <div class="brand-mark" aria-hidden="true">
             <i></i><i></i><i></i><i></i><i></i>
           </div>
-          JOIN<span>365</span>*
+          JOIN<span>365</span>
+        </div>
+
+        <p class="tagline">Sign in to create and manage studio projects up to 30 minutes long.</p>
+
+        <div id="auth-error" class="auth-error"></div>
+
+        <form id="login-form">
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input id="login-email" type="email" autocomplete="email" placeholder="Email" required />
+          </div>
+
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" autocomplete="current-password" placeholder="Password" required />
+          </div>
+
+          <div class="auth-actions">
+            <button type="submit" class="primary-btn">Log in</button>
+          </div>
+        </form>
+
+        <form id="signup-form" class="hidden">
+          <div class="field">
+            <label for="signup-name">Creator name</label>
+            <input id="signup-name" type="text" placeholder="Your name" autocomplete="name" required />
+          </div>
+
+          <div class="field">
+            <label for="signup-email">Email</label>
+            <input id="signup-email" type="email" placeholder="Email" autocomplete="email" required />
+          </div>
+
+          <div class="field">
+            <label for="signup-password">Password</label>
+            <input id="signup-password" type="password" placeholder="Choose a password" autocomplete="new-password" required />
+          </div>
+
+          <div class="auth-actions">
+            <button type="submit" class="primary-btn">Create account</button>
+          </div>
+        </form>
+
+        <div class="auth-switch">
+          <span id="switch-to-signup-wrap">
+            New here? <button type="button" id="switch-to-signup">Create an account</button>
+          </span>
+          <span id="switch-to-login-wrap" class="hidden">
+            Already have an account? <button type="button" id="switch-to-login">Sign in</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div id="app" class="app">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="brand-mini">
+            <div class="brand-mark" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            JOIN<span class="accent">365</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="topbar-btn" id="new-project-btn" type="button">+ New project</button>
+          <button class="topbar-btn" id="sign-out-btn" type="button">Sign out</button>
+        </div>
+      </div>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="sidebar-section">
+            <div class="sidebar-title">Projects</div>
+            <div id="project-list" class="project-list"></div>
+          </div>
+        </aside>
+
+        <main class="content">
+          <div id="stats" class="stats">
+            <div class="stat">
+              <div class="label">Total runtime</div>
+              <div id="runtime-total" class="value">0m</div>
+            </div>
+            <div class="stat">
+              <div class="label">Scenes</div>
+              <div id="scene-total" class="value">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Drafts</div>
+              <div id="draft-total" class="value">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Render status</div>
+              <div id="render-status" class="value">Ready</div>
+            </div>
+          </div>
+
+          <div class="workspace">
+            <div class="panel">
+              <div class="project-form">
+                <div class="row">
+                  <div>
+                    <label for="project-title">Project title</label>
+                    <input id="project-title" type="text" placeholder="Untitled video" />
+                  </div>
+                  <div>
+                    <label for="project-category">Category</label>
+                    <select id="project-category">
+                      <option value="Tutorial">Tutorial</option>
+                      <option value="Podcast">Podcast</option>
+                      <option value="Interview">Interview</option>
+                      <option value="Product">Product</option>
+                      <option value="Documentary">Documentary</option>
+                      <option value="Lifestyle">Lifestyle</option>
+                      <option value="Vlog">Vlog</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label for="project-format">Format</label>
+                    <select id="project-format">
+                      <option value="16:9">16:9</option>
+                      <option value="9:16">9:16</option>
+                      <option value="1:1">1:1</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label for="project-duration">Duration</label>
+                    <div class="range-row">
+                      <input id="project-duration" type="range" min="1" max="30" value="8" />
+                      <div id="project-duration-value" class="range-value">8m</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="project-script">Script</label>
+                  <textarea id="project-script" placeholder="Paste your script or outline here..."></textarea>
+                </div>
+
+                <div>
+                  <label for="project-voice">Voice profile</label>
+                  <select id="project-voice">
+                    <option value="Narration">Narration</option>
+                    <option value="Warm">Warm</option>
+                    <option value="Energetic">Energetic</option>
+                    <option value="Cinematic">Cinematic</option>
+                    <option value="Calm">Calm</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="project-cover">Cover image</label>
+                  <input id="project-cover" type="file" accept="image/*" />
+                </div>
+
+                <div class="row">
+                  <div>
+                    <button type="button" id="save-project-btn" class="secondary-btn">Save draft</button>
+                  </div>
+                  <div>
+                    <button type="button" id="generate-plan-btn" class="primary-btn">Generate video plan</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Render queue</h3>
+              </div>
+
+              <div class="render-box">
+                <div class="progress-wrap">
+                  <div id="render-progress" class="progress-bar"></div>
+                </div>
+
+                <div id="render-status-text" class="progress-status">Ready to generate</div>
+
+                <button id="render-btn" type="button" class="primary-btn">Start render</button>
+              </div>
+
+              <div class="panel-header" style="margin-top: 18px;">
+                <h3>Video timeline</h3>
+              </div>
+
+              <div id="timeline" class="timeline"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOld48eda9m_rIJ_72wnMVUyJM1unDlzA",
+      authDomain: "join365-9a175.firebaseapp.com",
+      databaseURL: "https://join365-9a175-default-rtdb.firebaseio.com/",
+      projectId: "join365-9a175",
+      storageBucket: "join365-9a175.firebasestorage.app",
+      messagingSenderId: "624922796690",
+      appId: "1:624922796690:web:2ca60637523e4aadcb3c4b",
+      measurementId: "G-3FKMNX91SH"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const state = {
+      uid: null,
+      projects: [],
+      currentProjectId: null,
+      renderTimer: null
+    };
+
+    const els = {
+      authScreen: document.getElementById('auth-screen'),
+      app: document.getElementById('app'),
+      loginForm: document.getElementById('login-form'),
+      signupForm: document.getElementById('signup-form'),
+      authError: document.getElementById('auth-error'),
+      projectList: document.getElementById('project-list'),
+      runtimeTotal: document.getElementById('runtime-total'),
+      sceneTotal: document.getElementById('scene-total'),
+      draftTotal: document.getElementById('draft-total'),
+      renderStatus: document.getElementById('render-status'),
+      projectTitle: document.getElementById('project-title'),
+      projectCategory: document.getElementById('project-category'),
+      projectFormat: document.getElementById('project-format'),
+      projectDuration: document.getElementById('project-duration'),
+      projectDurationValue: document.getElementById('project-duration-value'),
+      projectScript: document.getElementById('project-script'),
+      projectVoice: document.getElementById('project-voice'),
+      projectCover: document.getElementById('project-cover'),
+      saveProjectBtn: document.getElementById('save-project-btn'),
+      generatePlanBtn: document.getElementById('generate-plan-btn'),
+      renderBtn: document.getElementById('render-btn'),
+      renderProgress: document.getElementById('render-progress'),
+      renderStatusText: document.getElementById('render-status-text'),
+      timeline: document.getElementById('timeline')
+    };
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(() => {});
+
+    function showError(msg) {
+      els.authError.textContent = msg;
+      els.authError.style.display = 'block';
+    }
+
+    function clearError() {
+      els.authError.textContent = '';
+      els.authError.style.display = 'none';
+    }
+
+    function safeId() {
+      return db.ref('studio').push().key;
+    }
+
+    function durationLabel(minutes) {
+      return `${minutes}m`;
+    }
+
+    function toArray(obj) {
+      return obj ? Object.keys(obj).map(key => ({ id: key, ...obj[key] })) : [];
+    }
+
+    function createSceneList(scriptText, durationMinutes) {
+      const text = (scriptText || '').trim();
+      if (!text) return [];
+
+      const paragraphs = text.split(/\n+/).filter(Boolean);
+      const scenes = [];
+
+      for (let i = 0; i < paragraphs.length; i++) {
+        const p = paragraphs[i];
+        const cleaned = p.replace(/\s+/g, ' ').trim();
+        const words = cleaned.split(/\s+/).length;
+        const perMinute = 150;
+        const estimatedSeconds = Math.min(Math.max(Math.round((words / perMinute) * 60), 10), 60);
+        const sceneSeconds = Math.min(Math.round((estimatedSeconds * durationMinutes) / Math.max(paragraphs.length, 1)), 60);
+        scenes.push({
+          title: `Scene ${i + 1}`,
+          text: cleaned,
+          duration: Math.max(8, Math.min(sceneSeconds, 45))
+        });
+      }
+
+      return scenes;
+    }
+
+    function currentProject() {
+      return state.projects.find(p => p.id === state.currentProjectId) || null;
+    }
+
+    function setProjectForm(project) {
+      const p = project || {
+        title: '',
+        category: 'Tutorial',
+        format: '16:9',
+        duration: 8,
+        script: '',
+        voice: 'Narration'
+      };
+
+      els.projectTitle.value = p.title || '';
+      els.projectCategory.value = p.category || 'Tutorial';
+      els.projectFormat.value = p.format || '16:9';
+      els.projectDuration.value = p.duration || 8;
+      els.projectDurationValue.textContent = durationLabel(p.duration || 8);
+      els.projectScript.value = p.script || '';
+      els.projectVoice.value = p.voice || 'Narration';
+    }
+
+    function renderStats() {
+      const totalRuntime = state.projects.reduce((sum, p) => sum + Number(p.duration || 0), 0);
+      const totalScenes = state.projects.reduce((sum, p) => sum + Number(p.scenes ? p.scenes.length : 0), 0);
+      const draftCount = state.projects.length;
+
+      els.runtimeTotal.textContent = `${totalRuntime}m`;
+      els.sceneTotal.textContent = String(totalScenes);
+      els.draftTotal.textContent = String(draftCount);
+      els.renderStatus.textContent = state.projects.some(p => p.status === 'rendering') ? 'Processing' : 'Ready';
+    }
+
+    function renderProjectList() {
+      const list = els.projectList;
+      list.innerHTML = '';
+
+      if (!state.projects.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No projects yet. Create your first one.';
+        list.appendChild(empty);
+        return;
+      }
+
+      state.projects.forEach(project => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'project-item' + (project.id === state.currentProjectId ? ' active' : '');
+        item.innerHTML = `
+          <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${project.title || 'Untitled video'}</div>
+          <div class="project-meta">${project.category || 'General'} • ${project.duration || 0}m</div>
+        `;
+        item.addEventListener('click', () => selectProject(project.id));
+        list.appendChild(item);
+      });
+    }
+
+    function selectProject(id) {
+      state.currentProjectId = id;
+      const project = currentProject();
+      if (!project) return;
+
+      renderProjectList();
+      setProjectForm(project);
+      renderTimeline(project.scenes || []);
+      updateRenderStatus(project.status || 'ready', project.progress || 0);
+    }
+
+    function renderTimeline(scenes) {
+      const container = els.timeline;
+      container.innerHTML = '';
+
+      if (!scenes.length) {
+        container.innerHTML = '<div class=\"empty-state\">Generate a video plan to see scenes.</div>';
+        return;
+      }
+
+      scenes.forEach((scene, index) => {
+        const el = document.createElement('div');
+        el.className = 'scene';
+        el.innerHTML = `
+          <div class="scene-index">${index + 1}</div>
+          <div class="scene-main">
+            <div class="scene-title">${scene.title || `Scene ${index + 1}`}</div>
+            <div class="scene-text" style="color:var(--muted);font-size:12px;line-height:1.5;">${(scene.text || '').slice(0, 140)}</div>
+            <div class="scene-time">${scene.duration || 0}s</div>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function saveProjectToDatabase(project) {
+      if (!state.uid) return Promise.resolve();
+
+      const ref = db.ref(`users/${state.uid}/studio/projects/${project.id}`);
+      return ref.set(project);
+    }
+
+    function saveCurrentProject() {
+      const project = {
+        id: state.currentProjectId || safeId(),
+        title: els.projectTitle.value.trim() || 'Untitled video',
+        category: els.projectCategory.value,
+        format: els.projectFormat.value,
+        duration: Number(els.projectDuration.value || 8),
+        script: els.projectScript.value.trim(),
+        voice: els.projectVoice.value,
+        updatedAt: Date.now(),
+        status: 'ready',
+        progress: 0
+      };
+
+      if (!state.currentProjectId) {
+        state.currentProjectId = project.id;
+      }
+
+      const scenes = createSceneList(project.script, project.duration);
+      project.scenes = scenes;
+
+      const ref = db.ref(`users/${state.uid}/studio/projects/${project.id}`);
+      return ref.set(project).then(() => {
+        loadProjects();
+      });
+    }
+
+    function generatePlan() {
+      const title = els.projectTitle.value.trim() || 'Untitled video';
+      const script = els.projectScript.value.trim();
+      const duration = Number(els.projectDuration.value || 8);
+
+      if (!script) {
+        alert('Add a script or outline before generating a plan.');
+        return;
+      }
+
+      const scenes = createSceneList(script, duration);
+
+      const project = {
+        id: state.currentProjectId || safeId(),
+        title,
+        category: els.projectCategory.value,
+        format: els.projectFormat.value,
+        duration,
+        script,
+        voice: els.projectVoice.value,
+        status: 'ready',
+        progress: 0,
+        scenes,
+        updatedAt: Date.now()
+      };
+
+      state.currentProjectId = project.id;
+
+      const ref = db.ref(`users/${state.uid}/studio/projects/${project.id}`);
+      ref.set(project).then(() => {
+        loadProjects();
+        selectProject(project.id);
+      });
+    }
+
+    function updateRenderStatus(status, progress) {
+      const project = currentProject();
+      const p = project || { status: 'ready', progress: 0 };
+
+      if (status === 'rendering') {
+        els.renderStatusText.textContent = 'Rendering...';
+      } else if (status === 'ready') {
+        els.renderStatusText.textContent = 'Ready to generate';
+      } else if (status === 'queued') {
+        els.renderStatusText.textContent = 'Queued';
+      } else if (status === 'done') {
+        els.renderStatusText.textContent = 'Render finished';
+      }
+
+      els.renderProgress.style.width = `${Math.min(100, Math.max(0, Number(progress || 0))) }%`;
+
+      if (project && project.id) {
+        const ref = db.ref(`users/${state.uid}/studio/projects/${project.id}`);
+        ref.update({ status, progress });
+      }
+    }
+
+    function startRender() {
+      const project = currentProject();
+      if (!project) {
+        alert('Create or select a project first.');
+        return;
+      }
+
+      if (project.status === 'rendering') {
+        alert('Render already in progress.');
+        return;
+      }
+
+      const renderState = {
+        status: 'rendering',
+        progress: 0
+      };
+
+      const ref = db.ref(`users/${state.uid}/studio/projects/${project.id}`);
+      ref.update(renderState).then(() => {
+        loadProjects();
+        selectProject(project.id);
+
+        const progress = (step) => {
+          const projectRef = db.ref(`users/${state.uid}/studio/projects/${project.id}`);
+          projectRef.update({
+            status: 'rendering',
+            progress: step
+          }).then(() => {
+            if (step >= 100) {
+              projectRef.update({
+                status: 'done',
+                progress: 100
+              }).then(() => {
+                loadProjects();
+                selectProject(project.id);
+              });
+            }
+          });
+        };
+
+        let step = 0;
+        const timer = setInterval(() => {
+          step += 10;
+          if (step >= 100) {
+            clearInterval(timer);
+            progress(100);
+          } else {
+            progress(step);
+          }
+        }, 600);
+      });
+    }
+
+    function loadProjects() {
+      if (!state.uid) return;
+
+      const projectsRef = db.ref(`users/${state.uid}/studio/projects`);
+      projectsRef.on('value', snap => {
+        const data = snap.val() || {};
+        state.projects = toArray(data).sort((a, b) => (a.updatedAt || 0) - (b.updatedAt || 0));
+        renderProjectList();
+        renderStats();
+
+        if (!state.currentProjectId && state.projects.length) {
+          state.currentProjectId = state.projects[0].id;
+          selectProject(state.currentProjectId);
+        } else if (state.currentProjectId && !state.projects.find(p => p.id === state.currentProjectId)) {
+          state.currentProjectId = null;
+          setProjectForm();
+          renderTimeline([]);
+        }
+      });
+    }
+
+    function setupAuthModes() {
+      document.getElementById('switch-to-signup').addEventListener('click', () => {
+        clearError();
+        document.getElementById('signup-form').classList.remove('hidden');
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('switch-to-login-wrap').classList.remove('hidden');
+        document.getElementById('switch-to-signup-wrap').classList.add('hidden');
+      });
+
+      document.getElementById('switch-to-login').addEventListener('click', () => {
+        clearError();
+        document.getElementById('signup-form').classList.add('hidden');
+        document.getElementById('login-form').classList.remove('hidden');
+        document.getElementById('switch-to-login-wrap').classList.add('hidden');
+        document.getElementById('switch-to-signup-wrap').classList.remove('hidden');
+      });
+
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearError();
+
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!email || !password) {
+          showError('Enter your email and password.');
+          return;
+        }
+
+        try {
+          await auth.signInWithEmailAndPassword(email, password);
+        } catch (err) {
+          showError(err.message || 'Something went wrong.');
+        }
+      });
+
+      document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearError();
+
+        const name = document.getElementById('signup-name').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+
+        if (!name || !email || !password) {
+          showError('Enter your name, email, and password.');
+          return;
+        }
+
+        try {
+          const cred = await auth.createUserWithEmailAndPassword(email, password);
+          await db.ref(`users/${cred.user.uid}/profile`).set({
+            name,
+            email,
+            createdAt: Date.now()
+          });
+        } catch (err) {
+          showError(err.message || 'Something went wrong.');
+        }
+      });
+    }
+
+    function init() {
+      setupAuthModes();
+
+      document.getElementById('new-project-btn').addEventListener('click', () => {
+        state.currentProjectId = null;
+        setProjectForm();
+        renderTimeline([]);
+      });
+
+      document.getElementById('save-project-btn').addEventListener('click', () => {
+        if (!state.uid) return;
+        saveCurrentProject();
+      });
+
+      document.getElementById('generate-plan-btn').addEventListener('click', () => {
+        if (!state.uid) return;
+        generatePlan();
+      });
+
+      document.getElementById('render-btn').addEventListener('click', () => {
+        if (!state.uid) return;
+        startRender();
+      });
+
+      document.getElementById('project-duration').addEventListener('input', (e) => {
+        const value = Number(e.target.value);
+        els.projectDurationValue.textContent = durationLabel(value);
+      });
+
+      document.getElementById('sign-out-btn').addEventListener('click', () => {
+        auth.signOut();
+      });
+
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          state.uid = user.uid;
+          document.getElementById('auth-screen').classList.add('hidden');
+          document.getElementById('app').classList.add('active');
+          loadProjects();
+        } else {
+          state.uid = null;
+          state.currentProjectId = null;
+          state.projects = [];
+          setProjectForm();
+          renderTimeline([]);
+          document.getElementById('auth-screen').classList.remove('hidden');
+          document.getElementById('app').classList.remove('active');
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
