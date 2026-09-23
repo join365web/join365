@@ -1,1 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  G-3BD4RJMCJZ
+  <script async src="https://googletagmanager.com"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-3BD4RJMCJZ'); // Replace with your actual ID
+  </script>
+</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join365</title>
+    <link rel="icon" type="image/png" href="/logo.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#0A0D12;
+    --bg-rail:#0D1119;
+    --bg-panel:#10141C;
+    --bg-elevated:#171C26;
+    --bg-hover:#1E2430;
+    --border-subtle:#232938;
+    --text-primary:#E8EAED;
+    --text-muted:#8B93A5;
+    --text-faint:#5B6272;
+    --accent:#FF6B47;
+    --accent-dim:#7A3D2C;
+    --pulse:#2DD4BF;
+    --violet:#A78BFA;
+    --danger:#F87171;
+    --font-display:'Space Grotesk',sans-serif;
+    --font-body:'Inter',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    background:var(--bg-void);
+    color:var(--text-primary);
+    font-family:var(--font-body);
+    overflow:hidden;
+  }
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none;color:inherit;}
+  input,textarea{font-family:inherit;outline:none;border:none;background:none;color:inherit;}
+  a{color:var(--accent);}
 
+  /* ---------- LOGIN ---------- */
+  #login-overlay{
+    position:fixed;inset:0;z-index:100;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 20%, #1a1420 0%, #0A0D12 60%);
+  }
+  .login-card{
+    width:380px;max-width:90vw;
+    background:var(--bg-panel);
+    border:1px solid var(--border-subtle);
+    border-radius:16px;
+    padding:36px 32px;
+    text-align:center;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);
+  }
+  .wordmark{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:34px;
+    letter-spacing:-0.5px;
+    margin:0 0 4px;
+  }
+  .wordmark span{color:var(--accent);}
+  .wave{
+    height:3px;width:120px;margin:10px auto 22px;
+    background:linear-gradient(90deg,var(--accent),var(--pulse),var(--accent));
+    background-size:200% 100%;
+    border-radius:2px;
+    animation:wave 3s linear infinite;
+  }
+  @keyframes wave{0%{background-position:0% 0;}100%{background-position:200% 0;}}
+  .login-sub{color:var(--text-muted);font-size:13px;margin-bottom:24px;}
+  .login-card input[type=text],.login-card input[type=password],.login-card input[type=email]{
+    width:100%;padding:12px 14px;background:var(--bg-elevated);
+    border:1px solid var(--border-subtle);border-radius:10px;
+    color:var(--text-primary);font-size:14px;margin-bottom:16px;
+  }
+  .login-card input[type=text]:focus,.login-card input[type=password]:focus,.login-card input[type=email]:focus{border-color:var(--accent);}
+  .swatches{display:flex;justify-content:center;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+  .swatch{
+    width:26px;height:26px;border-radius:50%;cursor:pointer;
+    border:2px solid transparent;transition:transform .15s;
+  }
+  .swatch.active{border-color:#fff;transform:scale(1.15);}
+  .btn-primary{
+    width:100%;padding:12px;border-radius:10px;
+    background:var(--accent);color:#1a0e08;font-weight:600;font-size:14px;
+    transition:filter .15s;
+  }
+  .btn-primary:hover{filter:brightness(1.1);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .login-error{color:var(--danger);font-size:12.5px;margin:-10px 0 14px;min-height:14px;text-align:left;}
+
+  .auth-tabs{display:flex;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:3px;margin-bottom:20px;}
+  .auth-tab{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text-muted);}
+  .auth-tab.active{background:var(--bg-hover);color:var(--text-primary);}
+
+  .avatar-upload-row{display:flex;align-items:center;gap:14px;margin-bottom:18px;text-align:left;}
+  .avatar-upload-circle{
+    width:60px;height:60px;border-radius:50%;flex-shrink:0;position:relative;cursor:pointer;
+    background:var(--bg-elevated);border:1px dashed var(--border-subtle);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    font-family:var(--font-display);font-weight:700;font-size:20px;
+  }
+  .avatar-upload-circle img{width:100%;height:100%;object-fit:cover;}
+  .avatar-upload-circle .cam{position:absolute;bottom:-1px;right:-1px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#1a0e08;font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg-panel);}
+  .avatar-upload-hint{font-size:12px;color:var(--text-faint);}
+  .avatar-upload-hint b{color:var(--text-muted);}
+
+  /* ---------- APP LAYOUT ---------- */
+  #app{display:none;height:100vh;grid-template-columns:72px 240px 1fr;}
+  #app.active{display:grid;}
+  #app.member-open{grid-template-columns:72px 240px 1fr 220px;}
+
+  /* server rail */
+  #server-rail{
+    background:var(--bg-rail);
+    display:flex;flex-direction:column;align-items:center;
+    padding:12px 0;gap:8px;overflow-y:auto;
+    border-right:1px solid var(--border-subtle);
+  }
+  .rail-btn{
+    width:46px;height:46px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg-elevated);color:var(--text-primary);
+    font-family:var(--font-display);font-weight:600;font-size:16px;
+    position:relative;transition:border-radius .18s, background .18s;
+    flex-shrink:0;
+  }
+  .rail-btn:hover{border-radius:16px;background:var(--bg-hover);}
+  .rail-btn.active{border-radius:16px;}
+  .rail-btn.active::before{
+    content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+    width:4px;height:22px;border-radius:2px;background:var(--accent);
+  }
+  .rail-ring{position:absolute;inset:-3px;border-radius:inherit;border:2px solid var(--pulse);opacity:0;transition:opacity .2s;}
+  .rail-btn.has-activity .rail-ring{opacity:1;}
+  .rail-sep{width:28px;height:1px;background:var(--border-subtle);margin:4px 0;flex-shrink:0;}
+  .rail-btn.system{background:var(--bg-elevated);color:var(--accent);font-size:20px;}
+  .rail-btn.system:hover{color:var(--pulse);}
+
+  /* channel sidebar */
+  #channel-sidebar{
+    background:var(--bg-panel);
+    display:flex;flex-direction:column;
+    border-right:1px solid var(--border-subtle);
+    min-width:0;
+  }
+  #sidebar-header{
+    padding:16px;border-bottom:1px solid var(--border-subtle);
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:var(--font-display);font-weight:600;font-size:15px;
+    flex-shrink:0;
+  }
+  #sidebar-header .gear{color:var(--text-muted);font-size:16px;}
+  #sidebar-header .gear:hover{color:var(--text-primary);}
+  #channel-list{flex:1;overflow-y:auto;padding:10px 8px;}
+  .channel-group-label{
+    font-family:var(--font-mono);font-size:11px;color:var(--text-faint);
+    text-transform:uppercase;letter-spacing:.06em;padding:8px 8px 4px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .channel-group-label .add-btn{color:var(--text-muted);font-size:15px;}
+  .channel-group-label .add-btn:hover{color:var(--accent);}
+  .channel-item{
+    display:flex;align-items:center;gap:6px;
+    padding:7px 10px;border-radius:8px;margin-bottom:2px;
+    color:var(--text-muted);font-size:14.5px;
+  }
+  .channel-item:hover{background:var(--bg-hover);color:var(--text-primary);}
+  .channel-item.active{background:var(--bg-elevated);color:var(--text-primary);}
+  .channel-item .hash{font-family:var(--font-mono);color:var(--text-faint);}
+  .dm-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:2px;color:var(--text-muted);font-size:14.5px;}
+  .dm-item:hover{background:var(--bg-hover);color:var(--text-primary);}
+  .dm-item.active{background:var(--bg-elevated);color:var(--text-primary);}
+  .mini-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#0A0D12;flex-shrink:0;position:relative;}
+  .status-dot{position:absolute;width:8px;height:8px;border-radius:50%;bottom:-1px;right:-1px;border:2px solid var(--bg-panel);}
+  .status-dot.online{background:var(--pulse);}
+  .status-dot.offline{background:var(--text-faint);}
+
+  #user-footer{
+    padding:10px 12px;border-top:1px solid var(--border-subtle);
+    display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--bg-elevated);
+  }
+  #user-footer .name{font-size:13px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #user-footer .sub{font-size:11px;color:var(--pulse);font-family:var(--font-mono);}
+  #user-footer .edit-color{color:var(--text-muted);font-size:15px;}
+  #user-footer .edit-color:hover{color:var(--accent);}
+
+  /* main panel */
+  #main{display:flex;flex-direction:column;min-width:0;background:var(--bg-void);}
+  #main-header{
+    height:56px;flex-shrink:0;border-bottom:1px solid var(--border-subtle);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px;
+  }
+  #main-header .title{font-family:var(--font-display);font-weight:600;font-size:15.5px;display:flex;align-items:center;gap:8px;}
+  #main-header .topic{color:var(--text-faint);font-size:12.5px;font-weight:400;padding-left:10px;border-left:1px solid var(--border-subtle);margin-left:2px;}
+  .live-badge{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--pulse);}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--pulse);animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(45,212,191,.5);}50%{opacity:.5;box-shadow:0 0 0 5px rgba(45,212,191,0);}}
+  #member-toggle{color:var(--text-muted);font-size:17px;}
+  #member-toggle:hover{color:var(--text-primary);}
+
+  #messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:2px;}
+  .msg-row{display:flex;gap:12px;padding:6px 4px;border-radius:8px;}
+  .msg-row:hover{background:rgba(255,255,255,.02);}
+  .msg-row:hover .msg-del{display:inline;}
+  .avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--font-display);color:#0A0D12;flex-shrink:0;margin-top:2px;}
+  .avatar-img{object-fit:cover;flex-shrink:0;}
+  img.avatar{padding:0;}
+  img.mini-avatar{padding:0;object-fit:cover;}
+  .msg-body{flex:1;min-width:0;}
+  .msg-meta{display:flex;align-items:baseline;gap:8px;}
+  .msg-author{font-weight:600;font-size:14.5px;}
+  .msg-time{font-size:11px;color:var(--text-faint);font-family:var(--font-mono);}
+  .msg-del{display:none;font-size:11px;color:var(--danger);margin-left:4px;}
+  .msg-text{font-size:14.5px;line-height:1.5;color:var(--text-primary);word-wrap:break-word;white-space:pre-wrap;}
+  .reactions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;}
+  .reaction-badge{
+    display:flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;
+    background:var(--bg-elevated);border:1px solid var(--border-subtle);font-size:12.5px;
+  }
+  .reaction-badge.mine{border-color:var(--accent);background:var(--accent-dim);}
+  .reaction-badge:hover{border-color:var(--accent);}
+  .add-reaction{
+    width:22px;height:22px;border-radius:10px;background:var(--bg-elevated);
+    color:var(--text-muted);font-size:14px;display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .add-reaction:hover{color:var(--text-primary);background:var(--bg-hover);}
+  .emoji-picker{
+    position:absolute;bottom:26px;left:0;background:var(--bg-elevated);
+    border:1px solid var(--border-subtle);border-radius:10px;padding:6px;
+    display:none;gap:2px;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .emoji-picker.open{display:flex;}
+  .emoji-picker span{padding:4px 6px;border-radius:6px;font-size:16px;}
+  .emoji-picker span:hover{background:var(--bg-hover);}
+
+  #typing-line{height:18px;padding:0 20px;font-size:12px;color:var(--text-faint);font-style:italic;flex-shrink:0;}
+
+  #composer{padding:12px 20px 18px;flex-shrink:0;}
+  #composer-inner{
+    background:var(--bg-elevated);border:1px solid var(--border-subtle);
+    border-radius:12px;padding:10px 14px;display:flex;align-items:flex-end;gap:10px;
+  }
+  #composer-inner:focus-within{border-color:var(--accent);}
+  #msg-input{flex:1;resize:none;max-height:120px;font-size:14.5px;line-height:1.4;color:var(--text-primary);}
+  #msg-input::placeholder{color:var(--text-faint);}
+  #send-btn{color:var(--accent);font-size:18px;}
+  #send-btn:disabled{color:var(--text-faint);cursor:default;}
+
+  /* empty state */
+  .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);gap:8px;text-align:center;padding:20px;}
+  .empty-state .big{font-family:var(--font-display);font-size:20px;color:var(--text-primary);}
+
+  /* member panel */
+  #member-panel{background:var(--bg-panel);border-left:1px solid var(--border-subtle);overflow-y:auto;padding:16px 12px;display:none;}
+  #app.member-open #member-panel{display:block;}
+  .member-group-label{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;padding:6px 6px;}
+  .member-item{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:8px;}
+  .member-item:hover{background:var(--bg-hover);}
+  .member-item .name{font-size:14px;color:var(--text-primary);}
+  .member-item .name.offline{color:var(--text-faint);}
+  .owner-tag{font-size:10px;color:var(--accent);font-family:var(--font-mono);margin-left:4px;}
+
+  /* modals */
+  .modal-overlay{position:fixed;inset:0;background:rgba(5,6,9,.7);display:none;align-items:center;justify-content:center;z-index:60;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:14px;padding:24px;width:380px;max-width:90vw;max-height:80vh;overflow-y:auto;}
+  .modal h3{font-family:var(--font-display);margin:0 0 14px;font-size:18px;}
+  .modal input[type=text]{width:100%;padding:10px 12px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:8px;color:var(--text-primary);font-size:14px;margin-bottom:12px;}
+  .modal label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;font-family:var(--font-mono);}
+  .modal-actions{display:flex;gap:10px;margin-top:14px;}
+  .btn-secondary{flex:1;padding:10px;border-radius:8px;background:var(--bg-elevated);color:var(--text-primary);font-size:13.5px;border:1px solid var(--border-subtle);}
+  .btn-secondary:hover{background:var(--bg-hover);}
+  .btn-danger{color:var(--danger);}
+  .explore-row{display:flex;align-items:center;gap:12px;padding:10px 6px;border-bottom:1px solid var(--border-subtle);}
+  .explore-row:last-child{border-bottom:none;}
+  .explore-row .info{flex:1;min-width:0;}
+  .explore-row .sname{font-weight:600;font-size:14px;}
+  .explore-row .smeta{font-size:11px;color:var(--text-faint);font-family:var(--font-mono);}
+  .join-btn{padding:6px 14px;border-radius:8px;background:var(--accent);color:#1a0e08;font-size:12.5px;font-weight:600;}
+  .join-btn.joined{background:var(--bg-elevated);color:var(--text-muted);}
+  .icon-btn{width:40px;height:40px;border-radius:12px;background:var(--bg-elevated);color:var(--text-primary);font-family:var(--font-display);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--border-subtle);padding:10px 18px;border-radius:10px;font-size:13px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;}
+  .toast.show{opacity:1;}
+
+  /* friends */
+  .badge-dot{position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;background:var(--danger);border:2px solid var(--bg-rail);}
+  .badge-count{margin-left:auto;background:var(--danger);color:#fff;font-size:10.5px;font-weight:700;border-radius:9px;padding:1px 6px;font-family:var(--font-mono);}
+  .dm-item.friends-pin{font-weight:600;}
+  .friend-section{max-width:520px;margin:0 auto 30px;}
+  .friend-section-title{font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+  .add-friend-row{display:flex;gap:10px;}
+  .add-friend-row input{flex:1;padding:11px 14px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:10px;color:var(--text-primary);font-size:14px;}
+  .add-friend-row input:focus{border-color:var(--accent);}
+  .add-friend-row button{flex-shrink:0;}
+  .friend-row{display:flex;align-items:center;gap:12px;padding:10px 8px;border-bottom:1px solid var(--border-subtle);}
+  .friend-row:last-child{border-bottom:none;}
+  .friend-row .fname{flex:1;font-size:14px;font-weight:500;min-width:0;}
+  .friend-row .frole{font-size:11.5px;color:var(--text-faint);font-family:var(--font-mono);}
+  .pill-btn{padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;flex-shrink:0;}
+  .pill-accept{background:var(--pulse);color:#062622;}
+  .pill-deny{background:var(--bg-elevated);color:var(--danger);border:1px solid var(--border-subtle);}
+  .pill-cancel{background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border-subtle);}
+  .pill-message{background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border-subtle);}
+  .friend-empty{color:var(--text-faint);font-size:13px;padding:6px 8px;}
+
+  @media (max-width:720px){
+    #app{grid-template-columns:60px 200px 1fr;}
+    #app.member-open{grid-template-columns:60px 200px 1fr;}
+    #member-panel{position:fixed;right:0;top:0;bottom:0;width:220px;z-index:40;display:none;}
+    #app.member-open #member-panel{display:block;}
+  }
+</style>
+</head>
+<body>
+
+<div id="login-overlay">
+  <div class="login-card">
+    <div class="wordmark">JOIN<span>365</span></div>
+    <div class="wave"></div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" data-tab="login">Log in</button>
+      <button class="auth-tab" id="tab-signup" data-tab="signup">Sign up</button>
+    </div>
+
+    <!-- LOG IN -->
+    <div id="pane-login">
+      <div class="login-sub">Every account is its own signal — no one else can log in as you.</div>
+      <input type="email" id="login-email" maxlength="100" placeholder="Email" autocomplete="username">
+      <input type="password" id="login-password" maxlength="100" placeholder="Password" autocomplete="current-password">
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-primary" id="login-btn">Log in</button>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="pane-signup" style="display:none;">
+      <div class="login-sub">Create your own character. Your username and password are yours alone.</div>
+      <div class="avatar-upload-row">
+        <div class="avatar-upload-circle" id="signup-avatar-circle">
+          <span id="signup-avatar-fallback">?</span>
+          <div class="cam">✎</div>
+        </div>
+        <div class="avatar-upload-hint">Click to upload a<br><b>profile picture</b> (optional)</div>
+        <input type="file" id="signup-avatar-file" accept="image/*" style="display:none;">
+      </div>
+      <input type="text" id="signup-username" maxlength="20" placeholder="Choose a username" autocomplete="username">
+      <input type="email" id="signup-email" maxlength="100" placeholder="Email" autocomplete="username">
+      <input type="password" id="signup-password" maxlength="100" placeholder="Choose a password" autocomplete="new-password">
+      <input type="password" id="signup-password2" maxlength="100" placeholder="Confirm password" autocomplete="new-password">
+      <div class="swatches" id="login-swatches"></div>
+      <div class="login-error" id="signup-error"></div>
+      <button class="btn-primary" id="signup-btn">Create my character</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div id="server-rail">
+    <button class="rail-btn system" id="home-btn" title="Direct Messages">◆</button>
+    <div class="rail-sep"></div>
+    <div id="server-icons"></div>
+    <button class="rail-btn system" id="add-server-btn" title="Create a server">+</button>
+    <button class="rail-btn system" id="explore-btn" title="Explore servers">⌘</button>
+  </div>
+
+  <div id="channel-sidebar">
+    <div id="sidebar-header"><span id="sidebar-title">Direct Messages</span><span class="gear" id="server-gear" style="display:none;">⚙</span></div>
+    <div id="channel-list"></div>
+    <div id="user-footer">
+      <div class="mini-avatar" id="me-avatar"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="name" id="me-name"></div>
+        <div class="sub">● online</div>
+      </div>
+      <span class="edit-color" id="edit-color-btn" title="Edit profile">✎</span>
+    </div>
+  </div>
+
+  <div id="main"></div>
+
+  <div id="member-panel"></div>
+</div>
+
+<!-- Create server modal -->
+<div class="modal-overlay" id="modal-create-server">
+  <div class="modal">
+    <h3>Start a server</h3>
+    <label>Server name</label>
+    <input type="text" id="new-server-name" maxlength="30" placeholder="e.g. Night Owls">
+    <label>Icon letter / emoji</label>
+    <input type="text" id="new-server-icon" maxlength="2" placeholder="Auto from name">
+    <label>Color</label>
+    <div class="swatches" id="new-server-swatches"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close="modal-create-server">Cancel</button>
+      <button class="btn-primary" id="confirm-create-server">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Explore servers modal -->
+<div class="modal-overlay" id="modal-explore">
+  <div class="modal" style="width:420px;">
+    <h3>Explore servers</h3>
+    <div id="explore-list"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close="modal-explore">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Server info modal -->
+<div class="modal-overlay" id="modal-server-info">
+  <div class="modal">
+    <h3 id="info-server-name">Server</h3>
+    <div style="font-size:13px;color:var(--text-muted);line-height:1.8;" id="info-server-body"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close="modal-server-info">Close</button>
+      <button class="btn-secondary btn-danger" id="leave-server-btn">Leave server</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit profile modal -->
+<div class="modal-overlay" id="modal-color">
+  <div class="modal">
+    <h3>Edit profile</h3>
+    <div class="avatar-upload-row">
+      <div class="avatar-upload-circle" id="profile-avatar-circle">
+        <span id="profile-avatar-fallback">?</span>
+        <div class="cam">✎</div>
+      </div>
+      <div class="avatar-upload-hint">Click to change your<br><b>profile picture</b></div>
+      <input type="file" id="profile-avatar-file" accept="image/*" style="display:none;">
+    </div>
+    <label>Signal color</label>
+    <div class="swatches" id="color-swatches"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" data-close="modal-color">Cancel</button>
+      <button class="btn-primary" id="save-profile-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDKs (compat build so this stays a single plain-<script> file) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- FIREBASE SETUP ----------
+  var firebaseConfig = {
+    apiKey: "AIzaSyAOld48eda9m_rIJ_72wnMVUyJM1unDlzA",
+    authDomain: "join365-9a175.firebaseapp.com",
+    databaseURL: "https://join365-9a175-default-rtdb.firebaseio.com/",
+    projectId: "join365-9a175",
+    storageBucket: "join365-9a175.firebasestorage.app",
+    messagingSenderId: "624922796690",
+    appId: "1:624922796690:web:2ca60637523e4aadcb3c4b",
+    measurementId: "G-3FKMNX91SH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var db = firebase.database();
+
+  var PALETTE = ['#FF6B47','#2DD4BF','#A78BFA','#FBBF24','#F472B6','#60A5FA','#34D399','#F87171'];
+  var EMOJIS = ['👍','❤️','😂','🔥','🎉','👀'];
+
+  // ---------- DB HELPERS (Firebase Realtime Database) ----------
+  // Each "collection" is a top-level RTDB node. Records are keyed by push-id
+  // or by an explicit id (e.g. usernames, composite ids) when we need lookup by key.
+  function colRef(collection){ return db.ref(collection); }
+  function recRef(collection, id){ return db.ref(collection + '/' + id); }
+
+  function dbList(collection){
+    return colRef(collection).once('value').then(function(snap){ return snap.val() || {}; }).catch(function(){ return {}; });
+  }
+  function dbGet(collection, id){
+    return recRef(collection, id).once('value').then(function(snap){
+      var v = snap.val();
+      if(!v) return null;
+      return v;
+    }).catch(function(){ return null; });
+  }
+  function dbCreate(collection, data, id){
+    if(id){
+      return recRef(collection, id).set(data).then(function(){ return {id:id}; }).catch(function(){ return null; });
+    }
+    var ref = colRef(collection).push();
+    return ref.set(data).then(function(){ return {id: ref.key}; }).catch(function(){ return null; });
+  }
+  function dbPut(collection, id, data){
+    return recRef(collection, id).set(data).then(function(){ return data; }).catch(function(){ return null; });
+  }
+  function dbDelete(collection, id){
+    return recRef(collection, id).remove().then(function(){ return true; }).catch(function(){ return false; });
+  }
+  function toArray(raw){
+    return Object.entries(raw || {}).map(function(pair){
+      return Object.assign({id:pair[0]}, pair[1]);
+    });
+  }
+  function esc(str){
+    var d = document.createElement('div');
+    d.textContent = String(str == null ? '' : str);
+    return d.innerHTML;
+  }
+  function initials(name){
+    return (name || '?').trim().charAt(0).toUpperCase() || '?';
+  }
+  function fmtTime(ts){
+    var d = new Date(ts);
+    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+  function safeKey(str){
+    // usernames are used as RTDB keys for the 'users' and 'presence' nodes,
+    // so strip characters RTDB keys can't contain.
+    return String(str || '').toLowerCase().replace(/[.#$\[\]\/]/g, '_');
+  }
+
+  // ---------- STATE ----------
+  var state = {
+    me: null,                // {username, id, color, avatar, uid}
+    view: 'none',            // 'channel' | 'dm'
+    servers: [],
+    myMemberships: [],       // members records for me
+    currentServerId: null,
+    channels: [],
+    currentChannelId: null,
+    presenceList: [],        // all known presence records
+    userDirectory: {},       // lowercased username -> {username, color, avatar}
+    friendRequestsIncoming: [],
+    friendRequestsOutgoing: [],
+    friends: [],
+    dmPartner: null,
+    lastTypingPing: 0
+  };
+
+  // ---------- AVATAR RENDERING ----------
+  function avatarDiv(className, username, fallbackColor, extraInnerHtml){
+    var key = (username || '').toLowerCase();
+    var u = state.userDirectory[key];
+    var color = (u && u.color) || fallbackColor || '#888';
+    var inner = (u && u.avatar) ?
+      '<img src="' + u.avatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">' :
+      esc(initials(username));
+    return '<div class="' + className + '" style="background:' + color + '">' + inner + (extraInnerHtml || '') + '</div>';
+  }
+
+  function refreshUserDirectory(){
+    return dbList('users').then(function(raw){
+      var dir = {};
+      toArray(raw).forEach(function(u){
+        dir[(u.username || '').toLowerCase()] = {username: u.username, color: u.color, avatar: u.avatar || null};
+      });
+      state.userDirectory = dir;
+    });
+  }
+
+  function updateMeFooterUI(){
+    document.getElementById('me-name').textContent = state.me.username;
+    var av = document.getElementById('me-avatar');
+    if(state.me.avatar){
+      av.style.background = 'transparent';
+      av.innerHTML = '<img src="' + state.me.avatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
+    } else {
+      av.style.background = state.me.color;
+      av.textContent = initials(state.me.username);
+    }
+  }
+
+  // ---------- AVATAR FILE UPLOAD (shared by signup + profile edit) ----------
+  function readImageAsCompressedDataUrl(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = function(){ reject(new Error('read failed')); };
+      reader.onload = function(){
+        var img = new Image();
+        img.onerror = function(){ reject(new Error('decode failed')); };
+        img.onload = function(){
+          var size = 128;
+          var canvas = document.createElement('canvas');
+          canvas.width = size; canvas.height = size;
+          var ctx = canvas.getContext('2d');
+          var scale = Math.max(size / img.width, size / img.height);
+          var w = img.width * scale, h = img.height * scale;
+          ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.72));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function wireAvatarUpload(circleId, fileId, fallbackId, onPicked){
+    var circle = document.getElementById(circleId);
+    var file = document.getElementById(fileId);
+    circle.addEventListener('click', function(){ file.click(); });
+    file.addEventListener('change', function(){
+      if(!file.files || !file.files[0]) return;
+      readImageAsCompressedDataUrl(file.files[0]).then(function(dataUrl){
+        circle.innerHTML = '<img src="' + dataUrl + '"><div class="cam">✎</div>';
+        onPicked(dataUrl);
+      }).catch(function(){ showToast('Could not read that image.'); });
+    });
+  }
+
+  // ---------- LOGIN / SIGNUP (Firebase Auth: email/password) ----------
+  var pendingSignupAvatar = null;
+  wireAvatarUpload('signup-avatar-circle', 'signup-avatar-file', 'signup-avatar-fallback', function(dataUrl){
+    pendingSignupAvatar = dataUrl;
+  });
+
+  var signupColor = PALETTE[0];
+  var loginSwatchesEl = document.getElementById('login-swatches');
+  PALETTE.forEach(function(c, i){
+    var s = document.createElement('div');
+    s.className = 'swatch' + (i === 0 ? ' active' : '');
+    s.style.background = c;
+    s.addEventListener('click', function(){
+      signupColor = c;
+      Array.from(loginSwatchesEl.children).forEach(function(el){ el.classList.remove('active'); });
+      s.classList.add('active');
+    });
+    loginSwatchesEl.appendChild(s);
+  });
+
+  document.getElementById('tab-login').addEventListener('click', function(){ switchAuthTab('login'); });
+  document.getElementById('tab-signup').addEventListener('click', function(){ switchAuthTab('signup'); });
+  function switchAuthTab(tab){
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+    document.getElementById('pane-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('pane-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  }
+
+  document.getElementById('login-btn').addEventListener('click', doLogin);
+  document.getElementById('login-password').addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
+  document.getElementById('signup-password2').addEventListener('keydown', function(e){ if(e.key === 'Enter') doSignup(); });
+  document.getElementById('signup-btn').addEventListener('click', doSignup);
+
+  function setAuthBusy(btnId, busy, label){
+    var btn = document.getElementById(btnId);
+    btn.disabled = busy;
+    if(label) btn.textContent = label;
+  }
+
+  function friendlyAuthError(err){
+    var code = (err && err.code) || '';
+    if(code === 'auth/invalid-email') return 'That email address looks invalid.';
+    if(code === 'auth/user-not-found') return 'No account with that email.';
+    if(code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Incorrect email or password.';
+    if(code === 'auth/email-already-in-use') return 'That email is already registered.';
+    if(code === 'auth/weak-password') return 'Password must be at least 6 characters.';
+    if(code === 'auth/too-many-requests') return 'Too many attempts. Try again later.';
+    return (err && err.message) || 'Something went wrong. Try again.';
+  }
+
+  function doLogin(){
+    var errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    var email = document.getElementById('login-email').value.trim();
+    var password = document.getElementById('login-password').value;
+    if(!email || !password){ errEl.textContent = 'Enter your email and password.'; return; }
+    setAuthBusy('login-btn', true, 'Logging in…');
+    auth.signInWithEmailAndPassword(email, password).then(function(cred){
+      setAuthBusy('login-btn', false, 'Log in');
+      return dbGet('users', cred.user.uid).then(function(profile){
+        if(!profile){
+          errEl.textContent = 'Account profile missing. Please sign up again.';
+          return;
+        }
+        completeLogin({username: profile.username, id: cred.user.uid, uid: cred.user.uid, color: profile.color, avatar: profile.avatar || null});
+      });
+    }).catch(function(err){
+      setAuthBusy('login-btn', false, 'Log in');
+      errEl.textContent = friendlyAuthError(err);
+    });
+  }
+
+  function doSignup(){
+    var errEl = document.getElementById('signup-error');
+    errEl.textContent = '';
+    var name = document.getElementById('signup-username').value.trim();
+    var email = document.getElementById('signup-email').value.trim();
+    var password = document.getElementById('signup-password').value;
+    var password2 = document.getElementById('signup-password2').value;
+    if(!/^[A-Za-z0-9_ .-]{2,20}$/.test(name)){ errEl.textContent = 'Usernames are 2-20 characters (letters, numbers, spaces, - or _).'; return; }
+    if(!email){ errEl.textContent = 'Enter an email address.'; return; }
+    if(password.length < 6){ errEl.textContent = 'Password must be at least 6 characters.'; return; }
+    if(password !== password2){ errEl.textContent = 'Passwords do not match.'; return; }
+    setAuthBusy('signup-btn', true, 'Creating…');
+
+    // Ensure the username isn't already taken by scanning the users node.
+    dbList('users').then(function(raw){
+      var taken = toArray(raw).some(function(u){ return (u.username || '').toLowerCase() === name.toLowerCase(); });
+      if(taken){
+        setAuthBusy('signup-btn', false, 'Create my character');
+        errEl.textContent = 'That username is already taken.';
+        return;
+      }
+      return auth.createUserWithEmailAndPassword(email, password).then(function(cred){
+        var profile = {username: name, email: email, color: signupColor, avatar: pendingSignupAvatar, createdAt: Date.now()};
+        return dbPut('users', cred.user.uid, profile).then(function(res){
+          setAuthBusy('signup-btn', false, 'Create my character');
+          if(!res){ errEl.textContent = 'Could not create your account. Try again.'; return; }
+          completeLogin({username: name, id: cred.user.uid, uid: cred.user.uid, color: signupColor, avatar: pendingSignupAvatar});
+        });
+      }).catch(function(err){
+        setAuthBusy('signup-btn', false, 'Create my character');
+        errEl.textContent = friendlyAuthError(err);
+      });
+    });
+  }
+
+  function completeLogin(me){
+    state.me = me;
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').classList.add('active');
+    updateMeFooterUI();
+    initApp();
+  }
+
+  // Keep users signed in across reloads via Firebase's auth persistence.
+  auth.onAuthStateChanged(function(user){
+    if(user && !state.me){
+      dbGet('users', user.uid).then(function(profile){
+        if(profile){
+          completeLogin({username: profile.username, id: user.uid, uid: user.uid, color: profile.color, avatar: profile.avatar || null});
+        }
+      });
+    }
+  });
+
+  // ---------- INIT ----------
+  function initApp(){
+    heartbeat();
+    refreshUserDirectory();
+    refreshFriendData();
+    ensureDefaultServer().then(function(){
+      return refreshServers();
+    }).then(function(){
+      if(state.myMemberships.length){
+        selectServer(state.myMemberships[0].serverId);
+      } else {
+        renderHome();
+      }
+    });
+    setInterval(pollTick, 3000);
+    setInterval(heartbeat, 8000);
+    setInterval(refreshUserDirectory, 6000);
+  }
+
+  function ensureDefaultServer(){
+    return dbList('servers').then(function(raw){
+      var servers = toArray(raw);
+      if(servers.length > 0) return;
+      return dbCreate('servers', {
+        name: 'Join365 HQ', icon: 'J', color: '#FF6B47',
+        owner: state.me.username, createdAt: Date.now()
+      }).then(function(res){
+        if(!res || !res.id) return;
+        var sid = res.id;
+        return Promise.all([
+          dbCreate('channels', {serverId: sid, name: 'general', createdAt: Date.now()}),
+          dbCreate('channels', {serverId: sid, name: 'introductions', createdAt: Date.now() + 1}),
+          dbCreate('channels', {serverId: sid, name: 'off-topic', createdAt: Date.now() + 2})
+        ]);
+      });
+    });
+  }
+
+  function refreshServers(){
+    return Promise.all([dbList('servers'), dbList('members')]).then(function(results){
+      var servers = toArray(results[0]).sort(function(a,b){ return a.createdAt - b.createdAt; });
+      var allMembers = toArray(results[1]);
+      state.servers = servers;
+      state.myMemberships = allMembers.filter(function(m){ return m.username === state.me.username; });
+      var myServerIds = state.myMemberships.map(function(m){ return m.serverId; });
+
+      if(myServerIds.length === 0 && servers.length > 0){
+        // auto-join the very first server so a brand new user lands somewhere
+        return dbCreate('members', {serverId: servers[0].id, username: state.me.username, color: state.me.color, joinedAt: Date.now()})
+          .then(function(){ return refreshServers(); });
+      }
+
+      renderServerRail();
+    });
+  }
+
+  function renderServerRail(){
+    var wrap = document.getElementById('server-icons');
+    wrap.innerHTML = '';
+    var myServerIds = state.myMemberships.map(function(m){ return m.serverId; });
+    state.servers.filter(function(s){ return myServerIds.indexOf(s.id) !== -1; }).forEach(function(s){
+      var btn = document.createElement('button');
+      btn.className = 'rail-btn' + (s.id === state.currentServerId ? ' active' : '');
+      btn.style.background = s.color || '#333';
+      btn.textContent = s.icon || initials(s.name);
+      btn.title = s.name;
+      btn.addEventListener('click', function(){ selectServer(s.id); });
+      wrap.appendChild(btn);
+    });
+    var home = document.getElementById('home-btn');
+    home.className = 'rail-btn system' + ((state.view === 'dm' || state.view === 'friends') ? ' active' : '');
+    updateHomeBadge();
+  }
+
+  // ---------- SERVER / CHANNEL SELECTION ----------
+  function selectServer(serverId){
+    state.view = 'channel';
+    state.currentServerId = serverId;
+    state.currentChannelId = null;
+    document.getElementById('server-gear').style.display = 'inline';
+    renderServerRail();
+    refreshChannels().then(function(){
+      if(state.channels.length){
+        selectChannel(state.channels[0].id);
+      } else {
+        renderEmptyMain('No channels yet', 'Add the first one from the sidebar.');
+      }
+    });
+  }
+
+  function refreshChannels(){
+    return dbList('channels').then(function(raw){
+      state.channels = toArray(raw)
+        .filter(function(c){ return c.serverId === state.currentServerId; })
+        .sort(function(a,b){ return a.createdAt - b.createdAt; });
+      renderChannelSidebar();
+    });
+  }
+
+  function renderChannelSidebar(){
+    document.getElementById('sidebar-title').textContent =
+      (state.servers.find(function(s){ return s.id === state.currentServerId; }) || {}).name || 'Server';
+    var list = document.getElementById('channel-list');
+    var html = '<div class="channel-group-label"><span>Text Channels</span><span class="add-btn" id="add-channel-btn">+</span></div>';
+    state.channels.forEach(function(c){
+      html += '<div class="channel-item' + (c.id === state.currentChannelId ? ' active' : '') + '" data-cid="' + c.id + '">' +
+        '<span class="hash">#</span>' + esc(c.name) + '</div>';
+    });
+    list.innerHTML = html;
+    list.querySelectorAll('.channel-item').forEach(function(el){
+      el.addEventListener('click', function(){ selectChannel(el.getAttribute('data-cid')); });
+    });
+    var addBtn = document.getElementById('add-channel-btn');
+    if(addBtn) addBtn.addEventListener('click', promptNewChannel);
+  }
+
+  function promptNewChannel(){
+    var name = prompt('New channel name:');
+    if(!name) return;
+    name = name.trim().toLowerCase().replace(/\s+/g, '-').slice(0, 24);
+    if(!name) return;
+    dbCreate('channels', {serverId: state.currentServerId, name: name, createdAt: Date.now()}).then(function(){
+      refreshChannels();
+    });
+  }
+
+  function selectChannel(channelId){
+    state.currentChannelId = channelId;
+    renderChannelSidebar();
+    renderChatShell();
+    refreshMessages();
+    refreshMembers();
+  }
+
+  // ---------- MAIN CHAT SHELL ----------
+  function renderChatShell(){
+    var channel = state.channels.find(function(c){ return c.id === state.currentChannelId; });
+    var main = document.getElementById('main');
+    main.innerHTML =
+      '<div id="main-header">' +
+        '<div class="title"><span class="hash" style="color:var(--text-faint);">#</span>' + esc(channel ? channel.name : '') + '</div>' +
+        '<div style="display:flex;align-items:center;gap:16px;">' +
+          '<div class="live-badge"><span class="live-dot"></span>LIVE</div>' +
+          '<span id="member-toggle" title="Members">☰</span>' +
+        '</div>' +
+      '</div>' +
+      '<div id="messages"></div>' +
+      '<div id="typing-line"></div>' +
+      '<div id="composer"><div id="composer-inner">' +
+        '<textarea id="msg-input" rows="1" placeholder="Message #' + esc(channel ? channel.name : '') + '"></textarea>' +
+        '<button id="send-btn" disabled>➤</button>' +
+      '</div></div>';
+    wireComposer('messages');
+    document.getElementById('member-toggle').addEventListener('click', function(){
+      document.getElementById('app').classList.toggle('member-open');
+    });
+  }
+
+  function renderEmptyMain(big, sub){
+    document.getElementById('main').innerHTML =
+      '<div class="empty-state"><div class="big">' + esc(big) + '</div><div>' + esc(sub) + '</div></div>';
+    document.getElementById('member-panel').innerHTML = '';
+  }
+
+  function wireComposer(targetCollectionMode){
+    var input = document.getElementById('msg-input');
+    var btn = document.getElementById('send-btn');
+    function sync(){ btn.disabled = input.value.trim().length === 0; }
+    input.addEventListener('input', function(){
+      sync();
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+      pingTyping();
+    });
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        if(!btn.disabled) sendCurrent();
+      }
+    });
+    btn.addEventListener('click', sendCurrent);
+    sync();
+  }
+
+  function sendCurrent(){
+    var input = document.getElementById('msg-input');
+    var text = input.value.trim();
+    if(!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('send-btn').disabled = true;
+    if(state.view === 'channel'){
+      dbCreate('messages', {
+        channelId: state.currentChannelId, author: state.me.username,
+        color: state.me.color, text: text, ts: Date.now(), reactions: {}
+      }).then(refreshMessages);
+    } else if(state.view === 'dm' && state.dmPartner){
+      var pairKey = [state.me.username, state.dmPartner].sort().join('|');
+      dbCreate('dms', {
+        pairKey: pairKey, from: state.me.username, to: state.dmPartner, text: text, ts: Date.now()
+      }).then(refreshDMs);
+    }
+  }
+
+  function pingTyping(){
+    var now = Date.now();
+    if(now - state.lastTypingPing < 1500) return;
+    state.lastTypingPing = now;
+    if(state.view !== 'channel' || !state.currentChannelId) return;
+    dbPut('presence', safeKey(state.me.username), {
+      username: state.me.username, color: state.me.color, status: 'online',
+      lastSeen: now, serverId: state.currentServerId, channelId: state.currentChannelId,
+      typingUntil: now + 3000
+    });
+  }
+
+  // ---------- MESSAGES ----------
+  function refreshMessages(){
+    if(state.view !== 'channel' || !state.currentChannelId) return Promise.resolve();
+    var cid = state.currentChannelId;
+    return dbList('messages').then(function(raw){
+      if(state.currentChannelId !== cid) return; // channel changed mid-flight
+      var msgs = toArray(raw).filter(function(m){ return m.channelId === cid; })
+        .sort(function(a,b){ return a.ts - b.ts; });
+      renderMessageList(msgs, true);
+    });
+  }
+
+  function renderMessageList(msgs, withReactions){
+    var box = document.getElementById('messages');
+    if(!box) return;
+    var wasAtBottom = (box.scrollTop + box.clientHeight) >= (box.scrollHeight - 40);
+    box.innerHTML = msgs.map(function(m){ return renderOneMessage(m, withReactions); }).join('');
+    wireMessageEvents(box, withReactions);
+    if(wasAtBottom || true){ box.scrollTop = box.scrollHeight; }
+  }
+
+  function renderOneMessage(m, withReactions){
+    var reactionsHtml = '';
+    if(withReactions){
+      var reactions = m.reactions || {};
+      var badgeHtml = Object.keys(reactions).filter(function(e){ return (reactions[e]||[]).length > 0; }).map(function(e){
+        var users = reactions[e];
+        var mine = users.indexOf(state.me.username) !== -1;
+        return '<span class="reaction-badge' + (mine ? ' mine' : '') + '" data-mid="' + m.id + '" data-emoji="' + e + '">' + e + ' ' + users.length + '</span>';
+      }).join('');
+      var pickerHtml = EMOJIS.map(function(e){ return '<span data-mid="' + m.id + '" data-emoji="' + e + '">' + e + '</span>'; }).join('');
+      reactionsHtml = '<div class="reactions">' + badgeHtml +
+        '<span class="add-reaction" data-toggle-mid="' + m.id + '">+' +
+        '<span class="emoji-picker" id="picker-' + m.id + '">' + pickerHtml + '</span>' +
+        '</span></div>';
+    }
+    var delHtml = (m.author === state.me.username) ? '<span class="msg-del" data-del-mid="' + m.id + '" data-coll="' + (withReactions ? 'messages' : 'dms') + '">delete</span>' : '';
+    return '<div class="msg-row">' +
+      avatarDiv('avatar', m.author || m.from, m.color) +
+      '<div class="msg-body">' +
+        '<div class="msg-meta"><span class="msg-author" style="color:' + ((state.userDirectory[(m.author||m.from||'').toLowerCase()]||{}).color || m.color || '#fff') + '">' + esc(m.author || m.from) + '</span>' +
+        '<span class="msg-time">' + fmtTime(m.ts) + '</span>' + delHtml + '</div>' +
+        '<div class="msg-text">' + esc(m.text) + '</div>' +
+        reactionsHtml +
+      '</div></div>';
+  }
+
+  function wireMessageEvents(box, withReactions){
+    box.querySelectorAll('[data-del-mid]').forEach(function(el){
+      el.addEventListener('click', function(){
+        var mid = el.getAttribute('data-del-mid');
+        var coll = el.getAttribute('data-coll');
+        dbDelete(coll, mid).then(function(){
+          if(coll === 'messages') refreshMessages(); else refreshDMs();
+        });
+      });
+    });
+    if(!withReactions) return;
+    box.querySelectorAll('[data-toggle-mid]').forEach(function(el){
+      el.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        var mid = el.getAttribute('data-toggle-mid');
+        var picker = document.getElementById('picker-' + mid);
+        var isOpen = picker.classList.contains('open');
+        box.querySelectorAll('.emoji-picker').forEach(function(p){ p.classList.remove('open'); });
+        if(!isOpen) picker.classList.add('open');
+      });
+    });
+    box.querySelectorAll('.emoji-picker span, .reaction-badge').forEach(function(el){
+      el.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        toggleReaction(el.getAttribute('data-mid'), el.getAttribute('data-emoji'));
+      });
+    });
+  }
+
+  function toggleReaction(messageId, emoji){
+    dbGet('messages', messageId).then(function(data){
+      if(!data) return;
+      var reactions = data.reactions || {};
+      var users = reactions[emoji] || [];
+      var idx = users.indexOf(state.me.username);
+      if(idx === -1) users.push(state.me.username); else users.splice(idx, 1);
+      reactions[emoji] = users;
+      data.reactions = reactions;
+      return dbPut('messages', messageId, data).then(refreshMessages);
+    });
+  }
+
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.emoji-picker.open').forEach(function(p){ p.classList.remove('open'); });
+  });
+
+  // ---------- MEMBERS / PRESENCE ----------
+  function refreshMembers(){
+    if(state.view !== 'channel' || !state.currentServerId) return;
+    var sid = state.currentServerId;
+    return Promise.all([dbList('members'), dbList('presence')]).then(function(results){
+      var members = toArray(results[0]).filter(function(m){ return m.serverId === sid; });
+      state.presenceList = toArray(results[1]);
+      renderMemberPanel(members);
+      renderTypingLine();
+    });
+  }
+
+  function isOnline(username){
+    var p = state.presenceList.find(function(p){ return p.username === username; });
+    return !!(p && (Date.now() - p.lastSeen) < 25000);
+  }
+
+  function renderMemberPanel(members){
+    var server = state.servers.find(function(s){ return s.id === state.currentServerId; });
+    var online = members.filter(function(m){ return isOnline(m.username); });
+    var offline = members.filter(function(m){ return !isOnline(m.username); });
+    function row(m){
+      var isOwner = server && server.owner === m.username;
+      var dot = '<span class="status-dot ' + (isOnline(m.username) ? 'online' : 'offline') + '"></span>';
+      return '<div class="member-item">' + avatarDiv('mini-avatar', m.username, m.color, dot) +
+        '<span class="name' + (isOnline(m.username) ? '' : ' offline') + '">' + esc(m.username) + (isOwner ? '<span class="owner-tag">OWNER</span>' : '') + '</span></div>';
+    }
+    document.getElementById('member-panel').innerHTML =
+      '<div class="member-group-label">Online — ' + online.length + '</div>' + online.map(row).join('') +
+      '<div class="member-group-label">Offline — ' + offline.length + '</div>' + offline.map(row).join('');
+  }
+
+  function renderTypingLine(){
+    var line = document.getElementById('typing-line');
+    if(!line) return;
+    var now = Date.now();
+    var typers = state.presenceList.filter(function(p){
+      return p.username !== state.me.username && p.channelId === state.currentChannelId &&
+        p.typingUntil && p.typingUntil > now;
+    }).map(function(p){ return p.username; });
+    if(typers.length === 0){ line.textContent = ''; return; }
+    line.textContent = (typers.length === 1 ? typers[0] + ' is typing…' : typers.join(', ') + ' are typing…');
+  }
+
+  function heartbeat(){
+    if(!state.me) return;
+    dbPut('presence', safeKey(state.me.username), {
+      username: state.me.username, color: state.me.color, status: 'online',
+      lastSeen: Date.now(), serverId: state.currentServerId, channelId: state.currentChannelId,
+      typingUntil: 0
+    });
+  }
+
+  function pollTick(){
+    if(!state.me) return;
+    refreshFriendData();
+    if(state.view === 'channel'){
+      refreshMessages();
+      refreshMembers();
+    } else if(state.view === 'dm'){
+      refreshDMs();
+      dbList('presence').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); });
+    } else if(state.view === 'friends'){
+      dbList('presence').then(function(raw){ state.presenceList = toArray(raw); renderDMSidebar(); renderFriendsMain(); });
+    }
+  }
+
+  // ---------- FRIENDS ----------
+  function refreshFriendData(){
+    return dbList('friendRequests').then(function(raw){
+      var all = toArray(raw);
+      var meLower = state.me.username.toLowerCase();
+      state.friendRequestsIncoming = all.filter(function(r){ return r.toLower === meLower && r.status === 'pending'; });
+      state.friendRequestsOutgoing = all.filter(function(r){ return r.fromLower === meLower && r.status === 'pending'; });
+      state.friends = all.filter(function(r){ return r.status === 'accepted' && (r.fromLower === meLower || r.toLower === meLower); })
+        .map(function(r){ return {username: r.fromLower === meLower ? r.to : r.from, recordId: r.id}; });
+      updateHomeBadge();
+      if(state.view === 'friends') renderFriendsMain();
+    });
+  }
+
+  function updateHomeBadge(){
+    var homeBtn = document.getElementById('home-btn');
+    var existing = homeBtn.querySelector('.badge-dot');
+    if(existing) existing.remove();
+    if(state.friendRequestsIncoming && state.friendRequestsIncoming.length > 0){
+      var b = document.createElement('span');
+      b.className = 'badge-dot';
+      homeBtn.appendChild(b);
+    }
+  }
+
+  function sendFriendRequest(rawName){
+    var errEl = document.getElementById('add-friend-error');
+    if(errEl) errEl.textContent = '';
+    var name = (rawName || '').trim();
+    if(!name) return;
+    if(name.toLowerCase() === state.me.username.toLowerCase()){
+      if(errEl) errEl.textContent = "You can't send a friend request to yourself.";
+      return;
+    }
+    var toLower = name.toLowerCase();
+    var fromLower = state.me.username.toLowerCase();
+
+    dbList('users').then(function(raw){
+      var targetUser = toArray(raw).find(function(u){ return (u.username || '').toLowerCase() === toLower; });
+      if(!targetUser){
+        if(errEl) errEl.textContent = 'No user with that username exists.';
+        return;
+      }
+      var forwardId = safeKey(fromLower + '__' + toLower);
+      var reverseId = safeKey(toLower + '__' + fromLower);
+      Promise.all([dbGet('friendRequests', forwardId), dbGet('friendRequests', reverseId)]).then(function(pair){
+        var forward = pair[0], reverse = pair[1];
+        if(forward && forward.status === 'accepted'){ if(errEl) errEl.textContent = "You're already friends."; return; }
+        if(forward && forward.status === 'pending'){ if(errEl) errEl.textContent = 'Request already sent.'; return; }
+        if(reverse && reverse.status === 'accepted'){ if(errEl) errEl.textContent = "You're already friends."; return; }
+        if(reverse && reverse.status === 'pending'){
+          reverse.status = 'accepted';
+          return dbPut('friendRequests', reverseId, reverse).then(function(){
+            document.getElementById('add-friend-input').value = '';
+            showToast('You are now friends with ' + targetUser.username + '!');
+            refreshFriendData();
+          });
+        }
+        return dbCreate('friendRequests', {
+          from: state.me.username, fromLower: fromLower,
+          to: targetUser.username, toLower: toLower,
+          status: 'pending', ts: Date.now()
+        }, forwardId).then(function(){
+          document.getElementById('add-friend-input').value = '';
+          showToast('Friend request sent to ' + targetUser.username + '.');
+          refreshFriendData();
+        });
+      });
+    });
+  }
+
+  function acceptFriendRequest(reqId){
+    dbGet('friendRequests', reqId).then(function(data){
+      if(!data) return;
+      data.status = 'accepted';
+      return dbPut('friendRequests', reqId, data).then(function(){
+        showToast('Friend request accepted.');
+        refreshFriendData();
+      });
+    });
+  }
+  function denyFriendRequest(reqId){
+    dbDelete('friendRequests', reqId).then(refreshFriendData);
+  }
+  function cancelFriendRequest(reqId){
+    dbDelete('friendRequests', reqId).then(refreshFriendData);
+  }
+  function removeFriend(reqId){
+    dbDelete('friendRequests', reqId).then(function(){
+      showToast('Friend removed.');
+      refreshFriendData();
+    });
+  }
+
+  function openFriendsView(){
+    state.view = 'friends';
+    renderDMSidebar();
+    renderFriendsMain();
+  }
+
+  function renderFriendsMain(){
+    if(state.view !== 'friends') return;
+    var incoming = state.friendRequestsIncoming || [];
+    var outgoing = state.friendRequestsOutgoing || [];
+    var friends = state.friends || [];
+
+    function friendRow(username, rightHtml){
+      var dot = '<span class="status-dot ' + (isOnline(username) ? 'online' : 'offline') + '"></span>';
+      return '<div class="friend-row">' + avatarDiv('mini-avatar', username, null, dot) +
+        '<span class="fname">' + esc(username) + '</span>' + rightHtml + '</div>';
+    }
+
+    var incomingHtml = incoming.length ? incoming.map(function(r){
+      return friendRow(r.from,
+        '<button class="pill-btn pill-accept" data-accept="' + r.id + '">Accept</button>' +
+        '<button class="pill-btn pill-deny" data-deny="' + r.id + '">Deny</button>');
+    }).join('') : '<div class="friend-empty">No incoming requests.</div>';
+
+    var outgoingHtml = outgoing.length ? outgoing.map(function(r){
+      return friendRow(r.to, '<span class="frole">Pending</span><button class="pill-btn pill-cancel" data-cancel="' + r.id + '">Cancel</button>');
+    }).join('') : '<div class="friend-empty">No outgoing requests.</div>';
+
+    var friendsHtml = friends.length ? friends.map(function(f){
+      return friendRow(f.username,
+        '<button class="pill-btn pill-message" data-message="' + esc(f.username) + '">Message</button>' +
+        '<button class="pill-btn pill-deny" data-remove="' + f.recordId + '">Remove</button>');
+    }).join('') : '<div class="friend-empty">No friends yet — send a request above to get started.</div>';
+
+    document.getElementById('main').innerHTML =
+      '<div id="main-header"><div class="title">Friends</div></div>' +
+      '<div style="flex:1;overflow-y:auto;padding:24px 20px;">' +
+        '<div class="friend-section">' +
+          '<div class="friend-section-title">Add a friend</div>' +
+          '<div class="add-friend-row"><input type="text" id="add-friend-input" placeholder="Enter an exact username" maxlength="20">' +
+          '<button class="btn-primary" id="add-friend-btn" style="width:auto;padding:11px 22px;">Send Request</button></div>' +
+          '<div class="login-error" id="add-friend-error"></div>' +
+        '</div>' +
+        '<div class="friend-section"><div class="friend-section-title">Pending — Incoming (' + incoming.length + ')</div>' + incomingHtml + '</div>' +
+        '<div class="friend-section"><div class="friend-section-title">Pending — Sent (' + outgoing.length + ')</div>' + outgoingHtml + '</div>' +
+        '<div class="friend-section"><div class="friend-section-title">All Friends (' + friends.length + ')</div>' + friendsHtml + '</div>' +
+      '</div>';
+    document.getElementById('member-panel').innerHTML = '';
+
+    var input = document.getElementById('add-friend-input');
+    var btn = document.getElementById('add-friend-btn');
+    btn.addEventListener('click', function(){ sendFriendRequest(input.value); });
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') sendFriendRequest(input.value); });
+
+    document.querySelectorAll('[data-accept]').forEach(function(el){
+      el.addEventListener('click', function(){ acceptFriendRequest(el.getAttribute('data-accept')); });
+    });
+    document.querySelectorAll('[data-deny]').forEach(function(el){
+      el.addEventListener('click', function(){ denyFriendRequest(el.getAttribute('data-deny')); });
+    });
+    document.querySelectorAll('[data-cancel]').forEach(function(el){
+      el.addEventListener('click', function(){ cancelFriendRequest(el.getAttribute('data-cancel')); });
+    });
+    document.querySelectorAll('[data-remove]').forEach(function(el){
+      el.addEventListener('click', function(){ removeFriend(el.getAttribute('data-remove')); });
+    });
+    document.querySelectorAll('[data-message]').forEach(function(el){
+      el.addEventListener('click', function(){ openDM(el.getAttribute('data-message')); });
+    });
+  }
+
+  // ---------- DIRECT MESSAGES ----------
+  document.getElementById('home-btn').addEventListener('click', renderHome);
+
+  function renderHome(){
+    state.currentServerId = null;
+    state.currentChannelId = null;
+    document.getElementById('server-gear').style.display = 'none';
+    document.getElementById('sidebar-title').textContent = 'Direct Messages';
+    renderServerRail();
+    Promise.all([dbList('presence'), refreshFriendData()]).then(function(results){
+      state.presenceList = toArray(results[0]);
+      renderDMSidebar();
+      openFriendsView();
+    });
+  }
+
+  function renderDMSidebar(){
+    var list = document.getElementById('channel-list');
+    var pendingCount = (state.friendRequestsIncoming || []).length;
+    var others = state.presenceList.filter(function(p){ return p.username !== state.me.username; });
+    var html = '<div class="dm-item friends-pin' + (state.view === 'friends' ? ' active' : '') + '" id="friends-pin-row">' +
+      '<div class="mini-avatar" style="background:var(--accent);display:flex;align-items:center;justify-content:center;">🤝</div>' +
+      '<span>Friends</span>' + (pendingCount > 0 ? '<span class="badge-count">' + pendingCount + '</span>' : '') + '</div>' +
+      '<div class="channel-group-label" style="margin-top:8px;"><span>Known Users</span></div>';
+    if(others.length === 0){
+      html += '<div style="padding:8px 10px;color:var(--text-faint);font-size:12.5px;">No one else has joined yet.</div>';
+    }
+    others.forEach(function(p){
+      var dot = '<span class="status-dot ' + (isOnline(p.username) ? 'online' : 'offline') + '"></span>';
+      html += '<div class="dm-item' + (state.view === 'dm' && p.username === state.dmPartner ? ' active' : '') + '" data-user="' + esc(p.username) + '">' +
+        avatarDiv('mini-avatar', p.username, p.color, dot) +
+        '<span>' + esc(p.username) + '</span></div>';
+    });
+    list.innerHTML = html;
+    document.getElementById('friends-pin-row').addEventListener('click', openFriendsView);
+    list.querySelectorAll('.dm-item[data-user]').forEach(function(el){
+      el.addEventListener('click', function(){ openDM(el.getAttribute('data-user')); });
+    });
+  }
+
+  function openDM(username){
+    state.view = 'dm';
+    state.dmPartner = username;
+    renderDMSidebar();
+    var main = document.getElementById('main');
+    main.innerHTML =
+      '<div id="main-header"><div class="title">' + esc(username) + '</div>' +
+        '<div class="live-badge"><span class="live-dot"></span>LIVE</div></div>' +
+      '<div id="messages"></div>' +
+      '<div id="typing-line"></div>' +
+      '<div id="composer"><div id="composer-inner">' +
+        '<textarea id="msg-input" rows="1" placeholder="Message ' + esc(username) + '"></textarea>' +
+        '<button id="send-btn" disabled>➤</button>' +
+      '</div></div>';
+    document.getElementById('member-panel').innerHTML = '';
+    wireComposer('dms');
+    refreshDMs();
+  }
+
+  function refreshDMs(){
+    if(state.view !== 'dm' || !state.dmPartner) return Promise.resolve();
+    var partner = state.dmPartner;
+    var pairKey = [state.me.username, partner].sort().join('|');
+    return dbList('dms').then(function(raw){
+      if(state.dmPartner !== partner) return;
+      var msgs = toArray(raw).filter(function(m){ return m.pairKey === pairKey; })
+        .sort(function(a,b){ return a.ts - b.ts; });
+      renderMessageList(msgs, false);
+    });
+  }
+
+  // ---------- CREATE SERVER MODAL ----------
+  var newServerColor = PALETTE[0];
+  var newServerSwatches = document.getElementById('new-server-swatches');
+  PALETTE.forEach(function(c, i){
+    var s = document.createElement('div');
+    s.className = 'swatch' + (i === 0 ? ' active' : '');
+    s.style.background = c;
+    s.addEventListener('click', function(){
+      newServerColor = c;
+      Array.from(newServerSwatches.children).forEach(function(el){ el.classList.remove('active'); });
+      s.classList.add('active');
+    });
+    newServerSwatches.appendChild(s);
+  });
+  document.getElementById('add-server-btn').addEventListener('click', function(){
+    document.getElementById('new-server-name').value = '';
+    document.getElementById('new-server-icon').value = '';
+    openModal('modal-create-server');
+  });
+  document.getElementById('confirm-create-server').addEventListener('click', function(){
+    var name = document.getElementById('new-server-name').value.trim().slice(0, 30);
+    if(!name){ showToast('Give your server a name first.'); return; }
+    var icon = document.getElementById('new-server-icon').value.trim().slice(0, 2) || initials(name);
+    dbCreate('servers', {name: name, icon: icon, color: newServerColor, owner: state.me.username, createdAt: Date.now()})
+      .then(function(res){
+        if(!res || !res.id) return;
+        var sid = res.id;
+        return Promise.all([
+          dbCreate('channels', {serverId: sid, name: 'general', createdAt: Date.now()}),
+          dbCreate('members', {serverId: sid, username: state.me.username, color: state.me.color, joinedAt: Date.now()})
+        ]).then(function(){
+          closeModal('modal-create-server');
+          return refreshServers().then(function(){ selectServer(sid); });
+        });
+      });
+  });
+
+  // ---------- EXPLORE MODAL ----------
+  document.getElementById('explore-btn').addEventListener('click', function(){
+    dbList('servers').then(function(raw){
+      var servers = toArray(raw).sort(function(a,b){ return a.createdAt - b.createdAt; });
+      var myIds = state.myMemberships.map(function(m){ return m.serverId; });
+      var list = document.getElementById('explore-list');
+      list.innerHTML = servers.map(function(s){
+        var joined = myIds.indexOf(s.id) !== -1;
+        return '<div class="explore-row">' +
+          '<div class="icon-btn" style="background:' + (s.color||'#333') + '">' + esc(s.icon || initials(s.name)) + '</div>' +
+          '<div class="info"><div class="sname">' + esc(s.name) + '</div><div class="smeta">created by ' + esc(s.owner||'unknown') + '</div></div>' +
+          '<button class="join-btn' + (joined ? ' joined' : '') + '" data-sid="' + s.id + '" data-joined="' + joined + '">' + (joined ? 'Open' : 'Join') + '</button>' +
+        '</div>';
+      }).join('') || '<div style="color:var(--text-faint);font-size:13px;">No servers exist yet. Create one!</div>';
+      list.querySelectorAll('.join-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var sid = btn.getAttribute('data-sid');
+          var joined = btn.getAttribute('data-joined') === 'true';
+          if(joined){
+            closeModal('modal-explore');
+            selectServer(sid);
+            return;
+          }
+          dbCreate('members', {serverId: sid, username: state.me.username, color: state.me.color, joinedAt: Date.now()})
+            .then(function(){
+              closeModal('modal-explore');
+              return refreshServers().then(function(){ selectServer(sid); });
+            });
+        });
+      });
+      openModal('modal-explore');
+    });
+  });
+
+  // ---------- SERVER INFO / LEAVE ----------
+  document.getElementById('server-gear').addEventListener('click', function(){
+    var s = state.servers.find(function(s){ return s.id === state.currentServerId; });
+    if(!s) return;
+    document.getElementById('info-server-name').textContent = s.name;
+    document.getElementById('info-server-body').innerHTML =
+      'Owner: ' + esc(s.owner || 'unknown') + '<br>Created: ' + new Date(s.createdAt).toLocaleDateString() +
+      '<br>Channels: ' + state.channels.length;
+    openModal('modal-server-info');
+  });
+  document.getElementById('leave-server-btn').addEventListener('click', function(){
+    var membership = state.myMemberships.find(function(m){ return m.serverId === state.currentServerId; });
+    if(!membership) return;
+    dbDelete('members', membership.id).then(function(){
+      closeModal('modal-server-info');
+      return refreshServers().then(function(){
+        if(state.myMemberships.length) selectServer(state.myMemberships[0].serverId);
+        else renderHome();
+      });
+    });
+  });
+
+  // ---------- PROFILE EDIT (color + picture) ----------
+  var profileColor = PALETTE[0];
+  var profileAvatar = null;
+  var colorSwatches = document.getElementById('color-swatches');
+  PALETTE.forEach(function(c){
+    var s = document.createElement('div');
+    s.className = 'swatch';
+    s.style.background = c;
+    s.addEventListener('click', function(){
+      profileColor = c;
+      Array.from(colorSwatches.children).forEach(function(el){ el.classList.remove('active'); });
+      s.classList.add('active');
+    });
+    colorSwatches.appendChild(s);
+  });
+  wireAvatarUpload('profile-avatar-circle', 'profile-avatar-file', 'profile-avatar-fallback', function(dataUrl){
+    profileAvatar = dataUrl;
+  });
+
+  document.getElementById('edit-color-btn').addEventListener('click', function(){
+    profileColor = state.me.color;
+    profileAvatar = state.me.avatar || null;
+    Array.from(colorSwatches.children).forEach(function(el){
+      el.classList.toggle('active', el.style.background === state.me.color);
+    });
+    var circle = document.getElementById('profile-avatar-circle');
+    circle.innerHTML = state.me.avatar ?
+      ('<img src="' + state.me.avatar + '"><div class="cam">✎</div>') :
+      ('<span>' + esc(initials(state.me.username)) + '</span><div class="cam">✎</div>');
+    openModal('modal-color');
+  });
+
+  document.getElementById('save-profile-btn').addEventListener('click', function(){
+    var btn = document.getElementById('save-profile-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    dbGet('users', state.me.id).then(function(user){
+      if(!user){ btn.disabled = false; btn.textContent = 'Save'; showToast('Could not load your account.'); return; }
+      user.color = profileColor;
+      user.avatar = profileAvatar;
+      return dbPut('users', state.me.id, user).then(function(){
+        state.me.color = profileColor;
+        state.me.avatar = profileAvatar;
+        updateMeFooterUI();
+        heartbeat();
+        refreshUserDirectory();
+        btn.disabled = false; btn.textContent = 'Save';
+        closeModal('modal-color');
+        showToast('Profile updated.');
+      });
+    });
+  });
+
+  // ---------- MODAL HELPERS ----------
+  function openModal(id){ document.getElementById(id).classList.add('open'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('[data-close]').forEach(function(btn){
+    btn.addEventListener('click', function(){ closeModal(btn.getAttribute('data-close')); });
+  });
+  document.querySelectorAll('.modal-overlay').forEach(function(ov){
+    ov.addEventListener('click', function(e){ if(e.target === ov) ov.classList.remove('open'); });
+  });
+
+})();
+</script>
+</body>
+</html>
