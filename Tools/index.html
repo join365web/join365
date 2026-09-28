@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join365 Screensaver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .screensaver-container {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .logo {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #f4c430 0%, #ffd700 100%);
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            font-size: 48px;
+            font-weight: bold;
+            color: #000;
+            user-select: none;
+        }
+
+        .bars {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .bar {
+            width: 8px;
+            background-color: #000;
+            border-radius: 4px;
+            animation: wave 0.6s ease-in-out infinite;
+        }
+
+        .bar:nth-child(1) {
+            height: 30px;
+            animation-delay: 0s;
+        }
+
+        .bar:nth-child(2) {
+            height: 50px;
+            animation-delay: 0.1s;
+        }
+
+        .bar:nth-child(3) {
+            height: 40px;
+            animation-delay: 0.2s;
+        }
+
+        .bar:nth-child(4) {
+            height: 55px;
+            animation-delay: 0.1s;
+        }
+
+        .bar:nth-child(5) {
+            height: 35px;
+            animation-delay: 0s;
+        }
+
+        @keyframes wave {
+            0%, 100% {
+                transform: scaleY(0.8);
+            }
+            50% {
+                transform: scaleY(1.2);
+            }
+        }
+
+        .text {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .corner-text {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #666;
+            font-size: 12px;
+            pointer-events: none;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="screensaver-container">
+        <div class="logo" id="logo">
+            <div class="bars">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <div class="text">Join365</div>
+        </div>
+    </div>
+    <div class="corner-text" id="cornerText"></div>
+
+    <script>
+        const logo = document.getElementById('logo');
+        const cornerText = document.getElementById('cornerText');
+        let x = Math.random() * (window.innerWidth - 200);
+        let y = Math.random() * (window.innerHeight - 200);
+        let vx = (Math.random() - 0.5) * 8; // velocity x
+        let vy = (Math.random() - 0.5) * 8; // velocity y
+
+        const logoSize = 200;
+
+        function animate() {
+            // Update position
+            x += vx;
+            y += vy;
+
+            // Bounce off walls
+            if (x <= 0 || x >= window.innerWidth - logoSize) {
+                vx = -vx;
+                x = Math.max(0, Math.min(x, window.innerWidth - logoSize));
+            }
+
+            if (y <= 0 || y >= window.innerHeight - logoSize) {
+                vy = -vy;
+                y = Math.max(0, Math.min(y, window.innerHeight - logoSize));
+            }
+
+            // Apply position
+            logo.style.left = x + 'px';
+            logo.style.top = y + 'px';
+
+            // Update corner text with position
+            cornerText.textContent = `X: ${Math.round(x)} | Y: ${Math.round(y)}`;
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            // Clamp position to new window size
+            x = Math.min(x, window.innerWidth - logoSize);
+            y = Math.min(y, window.innerHeight - logoSize);
+        });
+    </script>
+</body>
+</html>
