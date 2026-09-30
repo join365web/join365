@@ -1,42 +1,1018 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Join365 — one home for all your tools.">
-  <title>Join365 — your tools, together</title>
-  <link rel="icon" type="image/png" href="/logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#090c12;--panel:#10151f;--panel-hover:#161d2a;--line:#253044;--text:#f1f5f9;--muted:#94a3b8;--faint:#64748b;--orange:#ff6b47;--teal:#2dd4bf;--gold:#e8a93b;--violet:#a78bfa}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(circle at 85% -10%,#20213b 0,transparent 36%),radial-gradient(circle at 10% 0,#1e171b 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}a{color:inherit;text-decoration:none}.shell{width:min(1180px,calc(100% - 40px));margin:auto}
-    header{display:flex;align-items:center;justify-content:space-between;padding:24px 0}.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.03em}.brand span{color:var(--orange)}
-    .wave-mark{display:inline-flex;align-items:flex-end;gap:2px;height:22px}.wave-mark i{display:block;width:3px;background:var(--orange);border-radius:2px}.wave-mark i:nth-child(1){height:40%}.wave-mark i:nth-child(2){height:100%}.wave-mark i:nth-child(3){height:65%}.wave-mark i:nth-child(4){height:100%}.wave-mark i:nth-child(5){height:30%}
-    .header-link{font-size:13px;color:var(--muted);border:1px solid var(--line);padding:9px 14px;border-radius:9px;transition:.2s}.header-link:hover{color:var(--text);border-color:#52617a;background:var(--panel)}
-    .hero{padding:76px 0 70px;max-width:760px}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--teal);font:11px 'Space Grotesk',sans-serif;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}.eyebrow:before{content:'';width:23px;height:1px;background:var(--teal)}h1{font:600 clamp(42px,7vw,78px)/.98 'Space Grotesk',sans-serif;letter-spacing:-.065em;margin:0 0 24px}h1 em{font-style:normal;color:var(--orange)}.hero p{max-width:590px;color:var(--muted);font-size:17px;line-height:1.7;margin:0}
-    .tools-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:22px}h2{font:600 25px 'Space Grotesk',sans-serif;letter-spacing:-.03em;margin:0}.tools-heading p{color:var(--faint);font-size:13px;margin:0}.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding-bottom:80px}
-    .tool{position:relative;display:flex;flex-direction:column;min-height:265px;padding:22px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),var(--panel);transition:transform .2s,border-color .2s,background .2s;overflow:hidden}.tool:after{content:'';position:absolute;width:120px;height:120px;border-radius:50%;right:-55px;top:-55px;background:var(--tool-color);opacity:.08;filter:blur(2px)}.tool:hover{transform:translateY(-4px);border-color:var(--tool-color);background:var(--panel-hover)}
-    .tool-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:15px;background:color-mix(in srgb,var(--tool-color) 15%,transparent);border:1px solid color-mix(in srgb,var(--tool-color) 35%,transparent);color:var(--tool-color);font:700 21px 'Space Grotesk',sans-serif;margin-bottom:20px}.tool h3{font:600 20px 'Space Grotesk',sans-serif;margin:0 0 8px}.tool p{color:var(--muted);font-size:13px;line-height:1.6;margin:0}.open{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:22px;color:var(--tool-color);font-size:13px;font-weight:700}.arrow{font-size:18px;transition:transform .2s}.tool:hover .arrow{transform:translateX(4px)}
-    footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--faint);font-size:12px;display:flex;justify-content:space-between}@media(max-width:900px){.tools{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.shell{width:min(100% - 28px,1180px)}header{padding:18px 0}.hero{padding:55px 0}.tools-heading{display:block}.tools-heading p{margin-top:8px}.tools{grid-template-columns:1fr;padding-bottom:55px}.tool{min-height:220px}footer{display:block}footer span{display:block;margin-top:6px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="The Join365 toolbox — search and launch every Join365 app: Chat, Call365, Mail, Folio, Game365 and Gust.">
+<meta name="theme-color" content="#070a10">
+<title>Tools · Join365 — every tool, one place</title>
+<link rel="icon" type="image/png" href="https://join365.eu.cc/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   JOIN365 · TOOLS  —  one dashboard for every Join365 app
+   Plain HTML + CSS + JS. No frameworks, no build step.
+   ============================================================ */
+
+/* ---------- tokens ---------- */
+:root{
+  --bg:#070a10;
+  --panel:#0e141f;
+  --panel-2:#141c2b;
+  --line:#1e293b;
+  --line-2:#2c3b53;
+  --text:#f2f6fb;
+  --muted:#9aa8bd;
+  --faint:#5f7089;
+  --orange:#ff6b47;
+  --teal:#2dd4bf;
+  --gold:#e8a93b;
+  --violet:#a78bfa;
+  --pink:#f472b6;
+  --sky:#38bdf8;
+  --green:#34d399;
+  --radius:18px;
+  --header-h:60px;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+::selection{background:rgba(255,107,71,.35)}
+
+/* ---------- animated background ---------- */
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;
+  background:
+    radial-gradient(1100px 700px at 88% -12%, rgba(255,107,71,.08), transparent 62%),
+    radial-gradient(900px 650px at -5% 12%, rgba(56,189,248,.07), transparent 58%),
+    radial-gradient(800px 600px at 55% 115%, rgba(167,139,250,.06), transparent 60%),
+    var(--bg);
+}
+.bg::before{content:'';position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.4px);
+  background-size:27px 27px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 65% at 50% 0%, #000 25%, transparent 78%);
+  mask-image:radial-gradient(ellipse 90% 65% at 50% 0%, #000 25%, transparent 78%);
+}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.45;pointer-events:none}
+.orb.o1{width:420px;height:420px;left:-140px;top:12%;background:#ff6b47;animation:drift 26s ease-in-out infinite alternate}
+.orb.o2{width:380px;height:380px;right:-120px;top:44%;background:#38bdf8;animation:drift 32s ease-in-out -8s infinite alternate-reverse}
+@keyframes drift{
+  0%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(60px,-40px) scale(1.08)}
+  100%{transform:translate(-40px,50px) scale(.96)}
+}
+
+/* ---------- shell ---------- */
+.shell{width:min(1200px,calc(100% - 40px));margin:0 auto}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:60;height:var(--header-h);
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:0 4px;
+  background:color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.03em}
+.brand .wave-mark{display:inline-flex;align-items:flex-end;gap:2.5px;height:20px}
+.wave-mark i{display:block;width:3.2px;background:var(--orange);border-radius:2px}
+.wave-mark i:nth-child(1){height:42%}
+.wave-mark i:nth-child(2){height:100%}
+.wave-mark i:nth-child(3){height:66%}
+.wave-mark i:nth-child(4){height:100%}
+.wave-mark i:nth-child(5){height:32%}
+.brand em{font-style:normal;color:var(--orange)}
+.brand .crumb{color:var(--faint);font-weight:500;margin:0 1px}
+.brand .here{color:var(--text)}
+.top-actions{display:flex;align-items:center;gap:10px}
+.top-link{font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);
+  padding:8px 13px;border-radius:10px;transition:.2s;background:var(--panel)}
+.top-link:hover{color:var(--text);border-color:var(--line-2);background:var(--panel-2)}
+
+/* view toggle (grid / list) */
+.vt{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.vt button{width:38px;height:35px;display:grid;place-items:center;color:var(--faint);background:none;border:0;cursor:pointer;transition:.18s}
+.vt button + button{border-left:1px solid var(--line)}
+.vt button:hover{color:var(--muted)}
+.vt button[aria-pressed="true"]{color:var(--text);background:var(--panel-2);box-shadow:inset 0 0 0 1px var(--line-2)}
+.vt svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- hero ---------- */
+.hero{padding:64px 0 30px;max-width:800px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--teal);
+  font:600 11px 'Space Grotesk',sans-serif;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
+.eyebrow::before{content:'';width:24px;height:1px;background:var(--teal)}
+.hero h1{font:600 clamp(40px,6.4vw,72px)/1 'Space Grotesk',sans-serif;letter-spacing:-.05em;margin:0 0 20px}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero>.lede{color:var(--muted);font-size:16.5px;line-height:1.7;margin:0 0 30px;max-width:600px}
+
+/* hero stats */
+.stats{display:flex;flex-wrap:wrap;gap:12px 34px;margin-top:30px}
+.stat{display:flex;align-items:baseline;gap:9px}
+.stat strong{font:700 26px 'Space Grotesk',sans-serif;letter-spacing:-.03em}
+.stat:nth-child(1) strong{color:var(--orange)}
+.stat:nth-child(2) strong{color:var(--teal)}
+.stat:nth-child(3) strong{color:var(--gold)}
+.stat:nth-child(4) strong{color:var(--violet)}
+.stat span{color:var(--faint);font-size:12.5px}
+
+/* ---------- search ---------- */
+.search{display:flex;align-items:center;gap:12px;height:58px;padding:0 15px;
+  border-radius:17px;border:1px solid var(--line-2);
+  background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.014)),var(--panel);
+  transition:border-color .2s, box-shadow .2s}
+.search:focus-within{border-color:var(--orange);box-shadow:0 0 0 4px rgba(255,107,71,.13)}
+.search .s-ic{width:20px;height:20px;flex:none;fill:none;stroke:var(--faint);stroke-width:2;stroke-linecap:round;transition:stroke .2s}
+.search:focus-within .s-ic{stroke:var(--orange)}
+.search input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;color:var(--text);font:500 16px Inter,system-ui,sans-serif}
+.search input::placeholder{color:var(--faint)}
+.search input::-webkit-search-cancel-button{display:none}
+.search .clear{flex:none;width:28px;height:28px;border-radius:8px;border:0;cursor:pointer;
+  display:none;place-items:center;color:var(--muted);background:var(--panel-2);font-size:13px;line-height:1}
+.search .clear:hover{color:var(--text)}
+.search .clear.show{display:grid}
+.search kbd{flex:none;font:600 11px 'Space Grotesk',sans-serif;color:var(--faint);
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:3px 8px;background:var(--panel);
+  transition:opacity .2s}
+.search:focus-within kbd{opacity:0}
+
+/* popular searches */
+.sugg{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px}
+.sugg>span{color:var(--faint);font-size:12px;margin-right:2px}
+.sugg button{font-size:12px;font-weight:600;color:var(--muted);background:var(--panel);
+  border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer;transition:.18s}
+.sugg button:hover{color:var(--text);border-color:var(--orange);background:color-mix(in srgb,var(--orange) 12%,var(--panel))}
+
+/* ---------- toolbar (sticky) ---------- */
+.toolbar{
+  position:sticky;top:calc(var(--header-h) + 10px);z-index:50;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
+  margin-top:34px;padding:11px 13px;
+  border:1px solid var(--line);border-radius:16px;
+  background:color-mix(in srgb, #0a0f18 84%, transparent);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;
+  font:600 12.5px Inter,sans-serif;color:var(--muted);
+  background:var(--panel);border:1px solid var(--line);border-radius:99px;
+  padding:8px 14px;cursor:pointer;transition:.18s;white-space:nowrap}
+.chip .n{font-size:11px;font-weight:700;opacity:.55;font-family:'Space Grotesk',sans-serif}
+.chip:hover{color:var(--text);border-color:var(--line-2);transform:translateY(-1px)}
+.chip.active{color:var(--text);border-color:color-mix(in srgb,var(--c) 60%,transparent);
+  background:color-mix(in srgb,var(--c) 15%,var(--panel));
+  box-shadow:0 4px 18px -8px color-mix(in srgb,var(--c) 60%,transparent)}
+.controls{display:flex;align-items:center;gap:9px;flex:none}
+.sort{appearance:none;-webkit-appearance:none;cursor:pointer;
+  font:600 12.5px Inter,sans-serif;color:var(--muted);
+  background:var(--panel) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%239aa8bd' stroke-width='1.6' stroke-linecap='round'/></svg>") no-repeat right 11px center/9px;
+  border:1px solid var(--line);border-radius:10px;padding:8px 32px 8px 13px;transition:.18s}
+.sort:hover{color:var(--text);border-color:var(--line-2)}
+.sort option{background:var(--panel);color:var(--text)}
+
+/* results meta + reset */
+.meta-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:18px 3px 4px}
+#resultsMeta{color:var(--faint);font-size:12.5px}
+#resultsMeta b{color:var(--muted);font-weight:600}
+#resultsMeta mark{background:none;color:var(--orange);font-weight:600;padding:0}
+.reset{display:none;align-items:center;gap:6px;font:600 12px Inter,sans-serif;color:var(--muted);
+  background:none;border:1px solid var(--line);border-radius:9px;padding:7px 12px;cursor:pointer;transition:.18s}
+.reset.show{display:inline-flex}
+.reset:hover{color:var(--text);border-color:var(--orange)}
+
+/* ---------- sections ---------- */
+.cat{margin:40px 0}
+.cat-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.cat-ic{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:var(--c);
+  background:color-mix(in srgb,var(--c) 11%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 32%,transparent)}
+.cat-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.cat-ic svg [data-fill]{fill:currentColor;stroke:none}
+.cat-head h2{font:600 21px 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0}
+.cat-head .blurb{margin:3px 0 0;color:var(--faint);font-size:13px}
+.cat-count{margin-left:auto;flex:none;font:600 12px 'Space Grotesk',sans-serif;color:var(--muted);
+  border:1px solid var(--line);background:var(--panel);padding:5px 11px;border-radius:99px}
+.cat-count b{color:var(--c)}
+
+/* ---------- tool grid + cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:15px}
+.grid.list{display:flex;flex-direction:column;gap:12px}
+
+.card{
+  position:relative;overflow:hidden;
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.012) 45%),var(--panel);
+  transition:transform .22s ease,border-color .22s,box-shadow .22s;
+  animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
+  animation-delay:calc(min(var(--i),12) * 45ms);
+}
+.no-anim .card{animation:none}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 25%,transparent) 55%,transparent)}
+.card::after{content:'';position:absolute;width:160px;height:160px;border-radius:50%;
+  right:-65px;top:-65px;background:var(--c);opacity:.07;filter:blur(8px);pointer-events:none;transition:opacity .25s}
+.card:hover,.card:focus-within{transform:translateY(-4px);
+  border-color:color-mix(in srgb,var(--c) 55%,var(--line));
+  box-shadow:0 20px 46px -20px color-mix(in srgb,var(--c) 45%,transparent)}
+.card:hover::after{opacity:.14}
+.card:focus-within{outline:2px solid color-mix(in srgb,var(--c) 70%,transparent);outline-offset:2px}
+
+.card-link{position:static;display:flex;flex-direction:column;height:100%;padding:22px}
+.card-link::after{content:'';position:absolute;inset:0;z-index:1;border-radius:inherit}
+
+.logo{flex:none;width:58px;height:58px;border-radius:15px;overflow:hidden;margin-bottom:18px;
+  box-shadow:0 16px 32px -14px color-mix(in srgb,var(--c) 65%,transparent),0 3px 8px rgba(0,0,0,.45)}
+.logo svg{width:100%;height:100%;display:block}
+
+.card h3{font:600 20px 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0}
+.tagline{display:block;color:var(--c);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
+.desc{color:var(--muted);font-size:13px;line-height:1.65;margin:11px 0 0}
+
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:14px;font-size:11.5px;color:var(--faint)}
+.status{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:700;letter-spacing:.03em}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(52,211,153,.5);animation:pulse 2.2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 6px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.meta .sep{opacity:.45}
+.opens{color:var(--gold);font-weight:600}
+
+.go{margin-top:auto;padding-top:20px;display:flex;align-items:center;justify-content:space-between;
+  color:var(--c);font-size:13.5px;font-weight:700}
+.go .arrow{font-size:17px;transition:transform .2s}
+.card:hover .go .arrow{transform:translateX(5px)}
+
+mark{background:color-mix(in srgb,var(--c,#ff6b47) 32%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+
+/* favorite star */
+.star{position:absolute;top:14px;right:14px;z-index:3;width:34px;height:34px;
+  display:grid;place-items:center;border-radius:10px;cursor:pointer;
+  background:color-mix(in srgb,var(--panel-2) 80%,transparent);border:1px solid var(--line);
+  color:var(--faint);transition:.18s}
+.star svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.star:hover{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 55%,transparent);transform:scale(1.06)}
+.star.is-fav{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 60%,transparent);
+  background:color-mix(in srgb,var(--gold) 16%,var(--panel-2));animation:pop .35s ease}
+.star.is-fav svg{fill:currentColor;stroke:none}
+@keyframes pop{40%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ---------- list view ---------- */
+.grid.list .card-link{flex-direction:row;align-items:center;gap:19px;padding:16px 20px 16px 68px}
+.grid.list .logo{width:54px;height:54px;margin:0;border-radius:14px}
+.grid.list .card-body{flex:1;min-width:0}
+.grid.list h3{display:inline}
+.grid.list .tagline{display:inline;margin:0 0 0 10px;letter-spacing:.04em}
+.grid.list .desc{margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid.list .meta{margin-top:8px}
+.grid.list .go{margin:0;padding:0;flex:none}
+.grid.list .go .label{display:none}
+.grid.list .go .arrow{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:15px;
+  border:1px solid color-mix(in srgb,var(--c) 42%,transparent);
+  background:color-mix(in srgb,var(--c) 11%,transparent)}
+.grid.list .star{top:50%;left:15px;right:auto;transform:translateY(-50%)}
+.grid.list .star:hover{transform:translateY(-50%) scale(1.1)}
+.grid.list .star.is-fav{animation:none}
+@media (max-width:640px){.grid.list .star{display:none}.grid.list .card-link{padding-left:20px}}
+
+/* ---------- empty state ---------- */
+.empty{display:none;text-align:center;padding:70px 20px 80px;border:1px dashed var(--line-2);border-radius:var(--radius);margin:40px 0 60px}
+.empty.show{display:block}
+.empty .e-ic{width:74px;height:74px;margin:0 auto 20px;border-radius:22px;display:grid;place-items:center;
+  color:var(--faint);background:var(--panel);border:1px solid var(--line)}
+.empty .e-ic svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+.empty h3{font:600 22px 'Space Grotesk',sans-serif;margin:0 0 8px}
+.empty p{color:var(--muted);font-size:14px;margin:0 auto 22px;max-width:430px}
+.empty p em{color:var(--orange);font-style:normal;font-weight:600}
+.empty .btn{display:inline-flex;align-items:center;gap:8px;font:700 13px Inter,sans-serif;color:#0b0d12;
+  background:var(--orange);border:0;border-radius:11px;padding:11px 20px;cursor:pointer;transition:.2s}
+.empty .btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px -10px rgba(255,107,71,.55)}
+
+/* ---------- noscript ---------- */
+.noscript{margin:40px 0;padding:22px;border:1px solid var(--line-2);border-radius:var(--radius);background:var(--panel)}
+.noscript ul{margin:12px 0 0;padding-left:20px;color:var(--muted)}
+.noscript a{color:var(--orange)}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
+.foot-grid{display:flex;flex-wrap:wrap;gap:26px 40px;align-items:flex-start;justify-content:space-between}
+.foot-brand{display:flex;align-items:center;gap:10px;font:700 16px 'Space Grotesk',sans-serif;letter-spacing:-.02em}
+.foot-brand em{font-style:normal;color:var(--orange)}
+.foot-tag{color:var(--faint);font-size:12.5px;margin:8px 0 0}
+.foot-links{display:flex;flex-wrap:wrap;gap:7px 8px;max-width:560px;justify-content:flex-end}
+.foot-links a{font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line);
+  background:var(--panel);border-radius:99px;padding:6px 12px;transition:.18s}
+.foot-links a:hover{color:var(--text);border-color:var(--line-2);transform:translateY(-1px)}
+.foot-fine{color:var(--faint);font-size:11.5px;margin-top:24px;display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:26px;z-index:100;transform:translate(-50%,16px);
+  opacity:0;pointer-events:none;transition:.28s cubic-bezier(.2,.7,.3,1);
+  font:600 13px Inter,sans-serif;color:var(--text);
+  background:var(--panel-2);border:1px solid var(--line-2);border-radius:12px;
+  padding:11px 18px;box-shadow:0 16px 40px -12px rgba(0,0,0,.6);max-width:calc(100vw - 40px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast b{color:var(--gold)}
+
+/* ---------- responsive ---------- */
+@media (max-width:760px){
+  .shell{width:calc(100% - 28px)}
+  .hero{padding:44px 0 22px}
+  .top-link span{display:none}
+  .toolbar{position:static}
+  .controls{width:100%;justify-content:space-between}
+  .sort{flex:1}
+  .foot-links{justify-content:flex-start}
+}
+@media (max-width:560px){
+  .stats{gap:10px 24px}
+  .stat strong{font-size:22px}
+  .search kbd{display:none}
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
 </head>
 <body>
-  <div class="shell">
-    <header><a class="brand" href="/" aria-label="Join365 home"><span class="wave-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>JOIN<span>365</span></a><a class="header-link" href="#tools">Browse tools ↓</a></header>
-    <main>
-      <section class="hero"><div class="eyebrow">Your digital workspace</div><h1>Everything you need.<br><em>One place.</em></h1><p>Welcome to Join365 — a connected collection of simple tools for communicating, creating, organizing, and getting things done.</p></section>
-      <section id="tools" aria-labelledby="tools-title"><div class="tools-heading"><h2>Explore your tools</h2><p>Choose an app to get started</p></div>
-        <div class="tools">
-          <a class="tool" style="--tool-color:#ff6b47" href="https://join365.eu.cc/Chat/"><div class="tool-icon"><span class="wave-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div><h3>Chat</h3><p>Talk, share, and stay connected with your people in real time.</p><div class="open">Open Chat <span class="arrow">→</span></div></a>
-          <a class="tool" style="--tool-color:#2dd4bf" href="https://join365.eu.cc/Gust/"><div class="tool-icon">G</div><h3>Gust</h3><p>A focused space for your gusts of ideas, plans, and everyday work.</p><div class="open">Open Gust <span class="arrow">→</span></div></a>
-          <a class="tool" style="--tool-color:#e8a93b" href="https://join365.eu.cc/Folio/"><div class="tool-icon">Fo</div><h3>Folio</h3><p>Write books, organize chapters, and shape your ideas into something lasting.</p><div class="open">Open Folio <span class="arrow">→</span></div></a>
-          <a class="tool" style="--tool-color:#a78bfa" href="https://join365.eu.cc/Mail/"><div class="tool-icon">@</div><h3>Mail</h3><p>Manage your Join365 addresses and keep important messages together.</p><div class="open">Open Mail <span class="arrow">→</span></div></a>
+
+<!-- animated backdrop -->
+<div class="bg" aria-hidden="true">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+</div>
+
+<div class="shell">
+
+  <!-- ============ top bar ============ -->
+  <header class="topbar">
+    <a class="brand" href="https://join365.eu.cc/" aria-label="Join365 home">
+      <span class="wave-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      JOIN<em>365</em><span class="crumb">/</span><span class="here">Tools</span>
+    </a>
+    <div class="top-actions">
+      <div class="vt" role="group" aria-label="Card layout">
+        <button id="viewGrid" aria-pressed="true" title="Grid view" aria-label="Grid view">
+          <svg viewBox="0 0 20 20"><rect x="3.2" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="3.2" y="10.8" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="10.8" width="6.2" height="6.2" rx="1.6"/></svg>
+        </button>
+        <button id="viewList" aria-pressed="false" title="List view" aria-label="List view">
+          <svg viewBox="0 0 20 20"><path d="M8 5.4h9M8 10h9M8 14.6h9"/><circle cx="4.3" cy="5.4" r="1.2"/><circle cx="4.3" cy="10" r="1.2"/><circle cx="4.3" cy="14.6" r="1.2"/></svg>
+        </button>
+      </div>
+      <a class="top-link" href="https://join365.eu.cc/" title="Join365 home"><span>Join365 home</span> ↗</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ hero + search ============ -->
+    <section class="hero">
+      <div class="eyebrow">The Join365 toolbox</div>
+      <h1>Every tool.<br><em>One place.</em></h1>
+      <p class="lede">All six Join365 apps on one dashboard — talk, meet, mail, write, play and browse.
+        Search by name, filter by category, and pin your favorites with the ★.</p>
+
+      <div class="search">
+        <svg class="s-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7.2"/><path d="m16.4 16.4 4.3 4.3"/></svg>
+        <input id="q" type="search" placeholder="Search tools — try “games”, “video”, “book” or “browser”…"
+               autocomplete="off" spellcheck="false" aria-label="Search tools by name, description or tag"
+               aria-describedby="kbdHint">
+        <button class="clear" id="clearSearch" aria-label="Clear search" title="Clear search">✕</button>
+        <kbd id="kbdHint" title="Press / to search">/</kbd>
+      </div>
+      <div class="sugg" id="sugg" aria-label="Popular searches">
+        <span>Popular:</span>
+        <button data-q="chat">chat</button>
+        <button data-q="video">video</button>
+        <button data-q="email">email</button>
+        <button data-q="book">book</button>
+        <button data-q="games">games</button>
+        <button data-q="browser">browser</button>
+      </div>
+
+      <div class="stats" aria-label="Toolbox stats">
+        <div class="stat"><strong id="statTools">0</strong><span>tools</span></div>
+        <div class="stat"><strong id="statCats">0</strong><span>categories</span></div>
+        <div class="stat"><strong id="statFavs">0</strong><span>favorites</span></div>
+        <div class="stat"><strong id="statOpens">0</strong><span>all-time opens</span></div>
+      </div>
+    </section>
+
+    <!-- ============ filter toolbar ============ -->
+    <div class="toolbar">
+      <div class="chips" id="chips" role="group" aria-label="Filter tools by category"></div>
+      <div class="controls">
+        <select class="sort" id="sort" aria-label="Sort tools">
+          <option value="curated">Sort · Curated</option>
+          <option value="az">Sort · Name A–Z</option>
+          <option value="za">Sort · Name Z–A</option>
+          <option value="opens">Sort · Most opened</option>
+          <option value="favs">Sort · Favorites first</option>
+        </select>
+        <div class="vt" role="group" aria-label="Card layout (mobile)">
+          <button id="viewGrid2" aria-pressed="true" title="Grid view" aria-label="Grid view">
+            <svg viewBox="0 0 20 20"><rect x="3.2" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="3.2" y="10.8" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="10.8" width="6.2" height="6.2" rx="1.6"/></svg>
+          </button>
+          <button id="viewList2" aria-pressed="false" title="List view" aria-label="List view">
+            <svg viewBox="0 0 20 20"><path d="M8 5.4h9M8 10h9M8 14.6h9"/><circle cx="4.3" cy="5.4" r="1.2"/><circle cx="4.3" cy="10" r="1.2"/><circle cx="4.3" cy="14.6" r="1.2"/></svg>
+          </button>
         </div>
-      </section>
-    </main>
-    <footer><span>© 2026 Join365</span><span>One workspace. Many possibilities.</span></footer>
-  </div>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <div id="resultsMeta" aria-live="polite"></div>
+      <button class="reset" id="resetBtn">✕ Clear search &amp; filters</button>
+    </div>
+
+    <!-- everything below renders from JS -->
+    <div id="output"></div>
+
+    <!-- ============ empty state ============ -->
+    <div class="empty" id="empty">
+      <div class="e-ic" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7"/><path d="m15.9 15.9 4.6 4.6"/><path d="m8 8 5 5m0-5-5 5" opacity=".55"/></svg>
+      </div>
+      <h3 id="emptyTitle">No tools found</h3>
+      <p id="emptyBody">Nothing matches your search. Try a different word, or reset the filters.</p>
+      <button class="btn" id="emptyReset">Clear search &amp; filters</button>
+    </div>
+
+    <noscript>
+      <div class="noscript">
+        <strong>JavaScript is off — here are the tools anyway:</strong>
+        <ul>
+          <li><a href="https://join365.eu.cc/Chat/">Chat — real-time messaging</a></li>
+          <li><a href="https://join365.eu.cc/Call365/">Call365 — video meetings</a></li>
+          <li><a href="https://join365.eu.cc/Mail/">Mail — your Join365 email</a></li>
+          <li><a href="https://join365.eu.cc/Folio/">Folio — write your book</a></li>
+          <li><a href="https://join365.eu.cc/Game365/">Game365 — play &amp; publish games</a></li>
+          <li><a href="https://join365.eu.cc/Gust/">Gust — browser-in-a-browser</a></li>
+        </ul>
+      </div>
+    </noscript>
+  </main>
+
+  <!-- ============ footer ============ -->
+  <footer>
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <span class="wave-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          JOIN<em>365</em>
+        </div>
+        <p class="foot-tag">One workspace. Many possibilities.</p>
+      </div>
+      <nav class="foot-links" aria-label="All Join365 tools" id="footLinks"></nav>
+    </div>
+    <div class="foot-fine">
+      <span>© 2026 Join365 — Tools dashboard</span>
+      <span>Plain HTML, CSS &amp; JS · favorites &amp; history stay in your browser</span>
+    </div>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   1 · DATA — categories, tools, and hand-drawn SVG logos
+   ============================================================ */
+
+var CATEGORIES = [
+  { id:'connect', name:'Communication', color:'#ff8f6b',
+    blurb:'Talk, meet and message — everything you need to stay in touch.',
+    icon:'<svg viewBox="0 0 20 20"><rect x="2.4" y="3.4" width="11" height="8" rx="2.2"/><path d="M6 11.4v3.4l3.4-3.4"/><path d="M15.3 6.4h1.1a2 2 0 0 1 2 2v3.1a2 2 0 0 1-2 2h-4.5l-2.5 2.3v-2.3"/></svg>' },
+  { id:'create', name:'Create', color:'#c084fc',
+    blurb:'Slow down and make something — books, chapters, ideas that last.',
+    icon:'<svg viewBox="0 0 20 20"><path d="M14.7 2.6a2.4 2.4 0 0 1 3.4 3.4L7.1 17 3 18.1 4.1 14Z"/><path d="m12.9 4.4 3.2 3.2"/></svg>' },
+  { id:'play', name:'Play', color:'#4ade80',
+    blurb:'Kick back — your personal browser arcade is waiting.',
+    icon:'<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4"/><path d="M8.2 6.8 13.5 10l-5.3 3.2Z" data-fill/></svg>' },
+  { id:'browse', name:'Explore', color:'#60a5fa',
+    blurb:'Wander the web without ever leaving Join365.',
+    icon:'<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4"/><path d="m13.2 6.8-1.8 4.6-4.6 1.8 1.8-4.6Z" data-fill/></svg>' }
+];
+
+/* ---- app-icon factory ------------------------------------------------
+   Every tool gets a glossy "app icon": a rounded squircle with a rich
+   3-stop gradient, a glass sheen across the top, a soft shadow along the
+   bottom, and a crisp inner rim. Gradient ids carry a __ID__ placeholder
+   that gets swapped for a unique value on every render, so the same icon
+   can safely appear twice on the page (e.g. pinned favorites). */
+function appIcon(stops, glyph){
+  return '<svg viewBox="0 0 64 64" aria-hidden="true">'
+    + '<defs><linearGradient id="bg__ID__" x1="0" y1="0" x2="52" y2="64" gradientUnits="userSpaceOnUse">' + stops + '</linearGradient></defs>'
+    + '<rect width="64" height="64" rx="16" fill="url(#bg__ID__)"/>'
+    + glyph
+    + '<path d="M1 17C1 8.7 8.7 1 17 1h30c8.3 0 15 7.7 15 16v13C47 21 17 21 1 32Z" fill="#fff" opacity=".13"/>'
+    + '<path d="M2 46c13 10 47 10 60 0-1 10-8 17-16 17H18C10 63 3 56 2 46Z" fill="#000" opacity=".12"/>'
+    + '<rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>'
+    + '</svg>';
+}
+
+var TOOLS = [
+  { id:'chat', name:'Chat', cat:'connect', color:'#ff6b47', url:'https://join365.eu.cc/Chat/',
+    tagline:'Real-time messaging',
+    desc:'Message friends, join servers, and explore communities. Create your character, hop into DMs, and stay connected in real time.',
+    tags:['chat','messaging','messages','dm','direct messages','servers','community','friends','talk','real-time','characters'],
+    logo: appIcon('<stop stop-color="#ffb37c"/><stop offset=".55" stop-color="#ff7a45"/><stop offset="1" stop-color="#f2410f"/>',
+      /* two overlapping speech bubbles + the Join365 wave */
+      '<rect x="30" y="10" width="22" height="17" rx="6.5" fill="#fff" opacity=".55"/>'
+      + '<path d="M20 15h12a8 8 0 0 1 8 8v8a8 8 0 0 1-8 8h-2.4l-7.6 5.8V39H20a8 8 0 0 1-8-8v-8a8 8 0 0 1 8-8Z" fill="#fff"/>'
+      + '<g fill="url(#bg__ID__)">'
+      +   '<rect x="16.5" y="24.5" width="2.8" height="4.5" rx="1.4"/>'
+      +   '<rect x="21.1" y="18" width="2.8" height="11" rx="1.4"/>'
+      +   '<rect x="25.7" y="21.5" width="2.8" height="7.5" rx="1.4"/>'
+      +   '<rect x="30.3" y="18" width="2.8" height="11" rx="1.4"/>'
+      +   '<rect x="34.9" y="25.5" width="2.8" height="3.5" rx="1.4"/>'
+      + '</g>') },
+
+  { id:'call365', name:'Call365', cat:'connect', color:'#2dd4bf', url:'https://join365.eu.cc/Call365/',
+    tagline:'Video meetings',
+    desc:'Start an instant call, join with a room code, or schedule your next meeting — clear, simple video calls for your people.',
+    tags:['call','calling','video call','video','meet','meetings','room code','room','schedule','voice','camera','conference'],
+    logo: appIcon('<stop stop-color="#8ff5e2"/><stop offset=".55" stop-color="#22c9b2"/><stop offset="1" stop-color="#0a8f80"/>',
+      /* camcorder with lens + sparkle rays */
+      '<g stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".9" fill="none">'
+      +   '<path d="M13.5 14.2 11.3 12M18.5 11.5l-1-3M9 20.5l-3.6-.9"/>'
+      + '</g>'
+      + '<rect x="12" y="19" width="27" height="24" rx="7.5" fill="#fff"/>'
+      + '<path d="M41.5 25.8 49 21.6c1.5-.9 3.3.2 3.3 1.9v12.9c0 1.7-1.8 2.8-3.3 1.9l-7.5-4.2Z" fill="#fff"/>'
+      + '<circle cx="25.5" cy="31" r="7" fill="url(#bg__ID__)"/>'
+      + '<circle cx="25.5" cy="31" r="2.8" fill="#fff" opacity=".9"/>') },
+
+  { id:'mail', name:'Mail', cat:'connect', color:'#a78bfa', url:'https://join365.eu.cc/Mail/',
+    tagline:'Your Join365 email',
+    desc:'Get your own @join365.eu.cc address, send and receive mail, search your inbox, and keep every conversation together.',
+    tags:['mail','email','inbox','compose','send','address','@join365.eu.cc','messages'],
+    logo: appIcon('<stop stop-color="#d9c8ff"/><stop offset=".55" stop-color="#a78bfa"/><stop offset="1" stop-color="#7048d0"/>',
+      /* envelope with a wax-seal @ badge */
+      '<rect x="10" y="17" width="44" height="30" rx="8" fill="#fff"/>'
+      + '<path d="M13.5 21.5 32 35l18.5-13.5" fill="none" stroke="url(#bg__ID__)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>'
+      + '<circle cx="32" cy="34" r="9.5" fill="url(#bg__ID__)"/>'
+      + '<g transform="translate(32 34)" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round">'
+      +   '<circle r="5" stroke-dasharray="26.7 4.7" transform="rotate(75)"/>'
+      +   '<circle r="1.3" fill="#fff" stroke="none"/>'
+      +   '<path d="M4.6 5.3c1 2.3-.8 4.5-3.4 4.1"/>'
+      + '</g>') },
+
+  { id:'folio', name:'Folio', cat:'create', color:'#e8a93b', url:'https://join365.eu.cc/Folio/',
+    tagline:'Write your book',
+    desc:'A quiet place to write. Build your library, organize chapters, and shape rough ideas into a finished book.',
+    tags:['folio','book','books','write','writing','chapters','library','author','story','reading','publish'],
+    logo: appIcon('<stop stop-color="#ffe29a"/><stop offset=".55" stop-color="#f0b13e"/><stop offset="1" stop-color="#c97a12"/>',
+      /* open book, page lines, red bookmark ribbon */
+      '<path d="M32 22c-3.8-3.4-8.9-4.8-14.5-4.4v24.4c5.6-.4 10.7 1 14.5 4 3.8-3 8.9-4.4 14.5-4V17.6c-5.6-.4-10.7 1-14.5 4.4Z" fill="#fff"/>'
+      + '<path d="M32 22v24" stroke="url(#bg__ID__)" stroke-width="2.4" stroke-linecap="round" fill="none"/>'
+      + '<g stroke="url(#bg__ID__)" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".9">'
+      +   '<path d="M21 26.5h6.5M21 31h6.5M21 35.5h4.5M36.5 26.5h6.5M36.5 31h6.5M36.5 35.5h4.5"/>'
+      + '</g>'
+      + '<path d="M38 19.2h4.8v8L40.4 24.6 38 27.2Z" fill="#e0442e"/>') },
+
+  { id:'game365', name:'Game365', cat:'play', color:'#f472b6', url:'https://join365.eu.cc/Game365/',
+    tagline:'Play & publish games',
+    desc:'Your browser arcade. Publish self-contained HTML games, build a collection, favorite the good ones, and play instantly in a sandbox.',
+    tags:['game','games','gaming','arcade','play','publish','build','sandbox','fun','browser games'],
+    logo: appIcon('<stop stop-color="#ffb3da"/><stop offset=".55" stop-color="#f4699f"/><stop offset="1" stop-color="#c53d80"/>',
+      /* controller: D-pad + four-button diamond */
+      '<path d="M25.5 21h13c6.7 0 12 5.3 12 11.8 0 4.2-1.9 7.7-5 7.7-2.3 0-3.5-1.4-5-3-1.4-1.5-3.3-2.1-5.9-2.1h-5.2c-2.6 0-4.5.6-5.9 2.1-1.5 1.6-2.7 3-5 3-3.1 0-5-3.5-5-7.7C13.5 26.3 18.8 21 25.5 21Z" fill="#fff"/>'
+      + '<path d="M26.5 26.5v8M22.5 30.5h8" stroke="url(#bg__ID__)" stroke-width="3.4" stroke-linecap="round" fill="none"/>'
+      + '<g fill="url(#bg__ID__)">'
+      +   '<circle cx="41.5" cy="26.5" r="2.2"/>'
+      +   '<circle cx="45.4" cy="30.5" r="2.2" opacity=".65"/>'
+      +   '<circle cx="41.5" cy="34.5" r="2.2" opacity=".85"/>'
+      +   '<circle cx="37.6" cy="30.5" r="2.2" opacity=".65"/>'
+      + '</g>') },
+
+  { id:'gust', name:'Gust', cat:'browse', color:'#38bdf8', url:'https://join365.eu.cc/Gust/',
+    tagline:'Browser-in-a-browser',
+    desc:'Open tabs and surf the web from inside Join365 — a service-worker-less web browser that runs right in your page.',
+    tags:['gust','browser','web','internet','surf','tabs','explore','sites','search the web'],
+    logo: appIcon('<stop stop-color="#a5e3ff"/><stop offset=".55" stop-color="#3fb4f0"/><stop offset="1" stop-color="#0c7ec4"/>',
+      /* browser window: traffic lights, address pill, wind on the screen */
+      '<rect x="10" y="13" width="44" height="38" rx="8" fill="#fff"/>'
+      + '<path d="M11 21a7 7 0 0 1 7-7h28a7 7 0 0 1 7 7v2.5H11Z" fill="#0f3a52" opacity=".16"/>'
+      + '<circle cx="17" cy="18.4" r="1.9" fill="#ff5f57"/><circle cx="22.6" cy="18.4" r="1.9" fill="#febc2e"/><circle cx="28.2" cy="18.4" r="1.9" fill="#28c840"/>'
+      + '<rect x="33" y="16.2" width="16.5" height="4.6" rx="2.3" fill="#0f3a52" opacity=".18"/>'
+      + '<rect x="14.5" y="25" width="35" height="22" rx="4.5" fill="url(#bg__ID__)"/>'
+      + '<g stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none">'
+      +   '<path d="M19.5 33.5h14a4.2 4.2 0 1 1-4.2 4.2"/>'
+      +   '<path d="M19.5 40.5h9.5a3.4 3.4 0 1 1-3.4 3.4" opacity=".85"/>'
+      + '</g>') }
+];
+
+var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.5 6 .9-4.35 4.2 1 6L12 16.9l-5.35 2.9 1-6L3.3 9.6l6-.9Z"/></svg>';
+var FAV_ICON = '<svg viewBox="0 0 20 20"><path d="M10 1.8l2.5 5.2 5.7.8-4.1 4 1 5.7L10 14.8l-5.1 2.7 1-5.7-4.1-4 5.7-.8Z" data-fill/></svg>';
+
+/* pre-compute a lowercase search haystack per tool */
+var CAT_BY_ID = {};
+CATEGORIES.forEach(function(c){ CAT_BY_ID[c.id] = c; });
+TOOLS.forEach(function(t){
+  t.catName = CAT_BY_ID[t.cat].name;
+  t.hay = (t.name + ' ' + t.tagline + ' ' + t.desc + ' ' + t.catName + ' ' + t.tags.join(' ')).toLowerCase();
+});
+
+/* ============================================================
+   2 · STATE + PERSISTENCE (favorites, open counts, view)
+   ============================================================ */
+
+var LS_KEY = 'join365.tools.v1';
+
+function loadStore(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw){ var o = JSON.parse(raw);
+      return { favs: Array.isArray(o.favs) ? o.favs : [],
+               opens: o.opens && typeof o.opens === 'object' ? o.opens : {},
+               view: o.view === 'list' ? 'list' : 'grid' };
+    }
+  }catch(e){}
+  return { favs:[], opens:{}, view:'grid' };
+}
+function saveStore(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({ favs: favs.slice(), opens: opens, view: view }));
+  }catch(e){}
+}
+
+var store = loadStore();
+var favs  = store.favs;                 /* array of tool ids */
+var opens = store.opens;                /* { toolId: count } */
+var view  = store.view;                 /* 'grid' | 'list' */
+
+var state = { q:'', cat:'all', sort:'curated' };
+var curWords = [];                      /* current search words (for highlighting) */
+
+/* ============================================================
+   3 · HELPERS
+   ============================================================ */
+
+function $(s){ return document.querySelector(s); }
+function words(q){ return q.trim().toLowerCase().split(/\s+/).filter(Boolean); }
+function isFav(id){ return favs.indexOf(id) !== -1; }
+function openCount(id){ return opens[id] || 0; }
+function totalOpens(){ var n = 0; for(var k in opens){ n += opens[k]; } return n; }
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+/* escape + wrap search matches in <mark> */
+function hl(text){
+  if(!curWords.length) return esc(text);
+  var re = new RegExp('(' + curWords.map(escRe).join('|') + ')', 'gi');
+  return text.split(re).map(function(part, i){
+    return i % 2 ? '<mark>' + esc(part) + '</mark>' : esc(part);
+  }).join('');
+}
+
+function matchTool(t, ws){
+  if(!ws.length) return true;
+  return ws.every(function(w){ return t.hay.indexOf(w) !== -1; });
+}
+function wordScore(t, w){                    /* lower = more relevant */
+  var n = t.name.toLowerCase();
+  if(n.indexOf(w) === 0) return 0;
+  if(n.indexOf(w) !== -1) return 1;
+  if(t.tagline.toLowerCase().indexOf(w) !== -1) return 2;
+  if(t.tags.some(function(x){ return x.indexOf(w) !== -1; })) return 3;
+  return 4;
+}
+function relScore(t, ws){
+  return ws.reduce(function(sum, w){ return sum + wordScore(t, w); }, 0);
+}
+
+var toastTimer = null;
+function toast(html){
+  var el = $('#toast');
+  el.innerHTML = html;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1900);
+}
+
+function countUp(el, target, dur){
+  var now = (window.performance && performance.now) ? function(){ return performance.now(); } : function(){ return Date.now(); };
+  var raf = window.requestAnimationFrame
+    ? function(f){ window.requestAnimationFrame(f); }
+    : function(f){ setTimeout(f, 16); };
+  var t0 = now();
+  (function step(){
+    var p = Math.min(1, (now() - t0) / (dur || 700));
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+    if(p < 1) raf(step);
+  })();
+}
+
+/* ============================================================
+   4 · RENDERING
+   ============================================================ */
+
+function cardHTML(t, i){
+  var fav = isFav(t.id), n = openCount(t.id);
+  var tags = t.tags.slice(0, 3).map(function(x){ return hl(x); }).join('<span class="sep">·</span>');
+  /* unique gradient ids per rendered card, so an icon can safely appear twice */
+  var logo = t.logo.replace(/__ID__/g, t.id + '-' + i);
+  return '<article class="card" style="--c:' + t.color + ';--i:' + i + '" data-id="' + t.id + '">' +
+    '<button class="star' + (fav ? ' is-fav' : '') + '" data-star="' + t.id + '" aria-pressed="' + fav + '" ' +
+      'title="' + (fav ? 'Remove' : 'Add') + ' ' + esc(t.name) + ' ' + (fav ? 'from' : 'to') + ' favorites" ' +
+      'aria-label="' + (fav ? 'Remove' : 'Add') + ' ' + esc(t.name) + ' ' + (fav ? 'from' : 'to') + ' favorites">' + STAR + '</button>' +
+    '<a class="card-link" href="' + t.url + '" data-open="' + t.id + '">' +
+      '<div class="logo" aria-hidden="true">' + logo + '</div>' +
+      '<div class="card-body">' +
+        '<h3>' + hl(t.name) + '</h3>' +
+        '<span class="tagline">' + hl(t.tagline) + '</span>' +
+        '<p class="desc">' + hl(t.desc) + '</p>' +
+        '<div class="meta">' +
+          '<span class="status"><i></i>Online</span><span class="sep">·</span>' +
+          '<span>' + tags + '</span>' +
+          (n ? '<span class="sep">·</span><span class="opens">↗ ' + n + ' open' + (n === 1 ? '' : 's') + '</span>' : '') +
+        '</div>' +
+        '<div class="go"><span class="label">Open ' + esc(t.name) + '</span><span class="arrow" aria-hidden="true">→</span></div>' +
+      '</div>' +
+    '</a>' +
+  '</article>';
+}
+
+function sectionHTML(catId, list, startIndex, opts){
+  var c = CAT_BY_ID[catId];
+  var cards = list.map(function(t, i){ return cardHTML(t, startIndex + i); }).join('');
+  return '<section class="cat" style="--c:' + (opts.color || c.color) + '">' +
+    '<div class="cat-head">' +
+      '<div class="cat-ic" aria-hidden="true">' + (opts.icon || c.icon) + '</div>' +
+      '<div><h2>' + esc(opts.title || c.name) + '</h2><p class="blurb">' + esc(opts.blurb || c.blurb) + '</p></div>' +
+      '<span class="cat-count"><b>' + list.length + '</b> ' + (list.length === 1 ? 'tool' : 'tools') + '</span>' +
+    '</div>' +
+    '<div class="grid' + (view === 'list' ? ' list' : '') + '">' + cards + '</div>' +
+  '</section>';
+}
+
+function renderChips(ws){
+  var html = '';
+  function count(list){ return list.filter(function(t){ return matchTool(t, ws); }).length; }
+  html += '<button class="chip' + (state.cat === 'all' ? ' active' : '') + '" data-cat="all" style="--c:#ff6b47">' +
+          'All tools <span class="n">' + count(TOOLS) + '</span></button>';
+  html += '<button class="chip' + (state.cat === 'favs' ? ' active' : '') + '" data-cat="favs" style="--c:#e8a93b">' +
+          '★ Favorites <span class="n">' + count(TOOLS.filter(function(t){ return isFav(t.id); })) + '</span></button>';
+  CATEGORIES.forEach(function(c){
+    html += '<button class="chip' + (state.cat === c.id ? ' active' : '') + '" data-cat="' + c.id + '" style="--c:' + c.color + '">' +
+            esc(c.name) + ' <span class="n">' + count(TOOLS.filter(function(t){ return t.cat === c.id; })) + '</span></button>';
+  });
+  $('#chips').innerHTML = html;
+}
+
+function renderMeta(visibleCount, ws){
+  var el = $('#resultsMeta'), bits = [];
+  if(ws.length){
+    bits.push('<b>' + visibleCount + '</b> ' + (visibleCount === 1 ? 'result' : 'results') +
+              ' for <mark>“' + esc(state.q.trim()) + '”</mark> · best matches first');
+  }else if(state.cat === 'favs'){
+    bits.push('<b>' + visibleCount + '</b> favorite' + (visibleCount === 1 ? '' : 's'));
+  }else if(state.cat !== 'all'){
+    bits.push('<b>' + visibleCount + '</b> ' + CAT_BY_ID[state.cat].name.toLowerCase() +
+              (visibleCount === 1 ? ' tool' : ' tools'));
+  }else{
+    bits.push('Showing all <b>' + visibleCount + '</b> tools across <b>' + CATEGORIES.length + '</b> categories');
+  }
+  el.innerHTML = bits.join('');
+  $('#resetBtn').classList.toggle('show', !!(ws.length || state.cat !== 'all' || state.sort !== 'curated'));
+}
+
+function renderEmpty(ws, list){
+  var box = $('#empty'), show = list.length === 0;
+  box.classList.toggle('show', show);
+  if(!show) return;
+  if(state.cat === 'favs' && !ws.length){
+    $('#emptyTitle').textContent = 'No favorites yet';
+    $('#emptyBody').innerHTML = 'Tap the <b style="color:var(--gold)">★</b> on any tool card to pin it here.';
+  }else{
+    $('#emptyTitle').textContent = 'No tools found';
+    $('#emptyBody').innerHTML = 'Nothing matches <em>“' + esc(state.q.trim()) + '”</em>' +
+      (state.cat !== 'all' ? ' in <b>' + esc(state.cat === 'favs' ? 'your favorites' : CAT_BY_ID[state.cat].name) + '</b>' : '') +
+      '. Try another word, or reset the filters.';
+  }
+}
+
+function renderStats(){
+  $('#statFavs').textContent = favs.length;
+  $('#statOpens').textContent = totalOpens();
+}
+
+/* main render — everything flows through here */
+function render(animate){
+  var ws = words(state.q);
+  curWords = ws;
+
+  /* 1 · filter by query */
+  var list = TOOLS.filter(function(t){ return matchTool(t, ws); });
+
+  /* 2 · filter by category chip */
+  var scoped;
+  if(state.cat === 'favs')       scoped = list.filter(function(t){ return isFav(t.id); });
+  else if(state.cat !== 'all')   scoped = list.filter(function(t){ return t.cat === state.cat; });
+  else                           scoped = list.slice();
+
+  /* 3 · sort (search overrides with relevance) */
+  if(ws.length){
+    scoped.sort(function(a, b){ return relScore(a, ws) - relScore(b, ws); });
+  }else if(state.sort === 'az'){
+    scoped.sort(function(a, b){ return a.name.localeCompare(b.name); });
+  }else if(state.sort === 'za'){
+    scoped.sort(function(a, b){ return b.name.localeCompare(a.name); });
+  }else if(state.sort === 'opens'){
+    scoped.sort(function(a, b){ return openCount(b.id) - openCount(a.id); });
+  }else if(state.sort === 'favs'){
+    scoped.sort(function(a, b){ return (isFav(b.id) ? 1 : 0) - (isFav(a.id) ? 1 : 0); });
+  }/* 'curated' keeps original order */
+
+  /* 4 · chips, meta, stats, empty state */
+  renderChips(ws);
+  renderMeta(scoped.length, ws);
+  renderStats();
+  renderEmpty(ws, scoped);
+
+  /* 5 · build sections */
+  var out = [], idx = 0;
+
+  /* pinned favorites strip (only in clean browse mode) */
+  if(!ws.length && state.cat === 'all' && favs.length){
+    var favTools = TOOLS.filter(function(t){ return isFav(t.id); });
+    out.push(sectionHTML('connect', favTools, idx, {
+      color:'#e8a93b', title:'★ Your favorites', icon: FAV_ICON,
+      blurb:'Pinned for quick access — stored in this browser.'
+    }));
+    idx += favTools.length;
+  }
+
+  /* one section per category (in category order) */
+  CATEGORIES.forEach(function(c){
+    var inCat = scoped.filter(function(t){ return t.cat === c.id; });
+    if(!inCat.length) return;
+    out.push(sectionHTML(c.id, inCat, idx, {}));
+    idx += inCat.length;
+  });
+
+  var host = $('#output');
+  host.innerHTML = out.join('');
+  host.classList.toggle('no-anim', animate === false);
+}
+
+/* ============================================================
+   5 · EVENTS
+   ============================================================ */
+
+var input = $('#q');
+
+input.addEventListener('input', function(){
+  state.q = input.value;
+  $('#clearSearch').classList.toggle('show', !!input.value);
+  render(false);
+});
+input.addEventListener('search', function(){        /* native clear, if any */
+  state.q = input.value;
+  $('#clearSearch').classList.toggle('show', !!input.value);
+  render(true);
+});
+input.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    if(input.value){ input.value = ''; state.q = ''; $('#clearSearch').classList.remove('show'); render(true); }
+    else input.blur();
+  }
+});
+
+$('#clearSearch').addEventListener('click', function(){
+  input.value = ''; state.q = '';
+  this.classList.remove('show');
+  render(true); input.focus();
+});
+
+/* popular-search chips */
+document.addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('[data-q]') : null;
+  if(b){
+    input.value = b.getAttribute('data-q');
+    state.q = input.value;
+    $('#clearSearch').classList.toggle('show', !!input.value);
+    render(true); input.focus();
+  }
+});
+
+/* category chips (delegated) */
+$('#chips').addEventListener('click', function(e){
+  var chip = e.target.closest ? e.target.closest('.chip') : null;
+  if(!chip) return;
+  state.cat = chip.getAttribute('data-cat');
+  render(true);
+});
+
+/* sort */
+$('#sort').addEventListener('change', function(){
+  state.sort = this.value;
+  render(true);
+});
+
+/* reset buttons */
+function resetAll(){
+  state.q = ''; state.cat = 'all'; state.sort = 'curated';
+  input.value = '';
+  $('#clearSearch').classList.remove('show');
+  $('#sort').value = 'curated';
+  render(true);
+}
+$('#resetBtn').addEventListener('click', resetAll);
+$('#emptyReset').addEventListener('click', resetAll);
+
+/* view toggle (header + toolbar copies stay in sync) */
+function setView(v){
+  view = v; saveStore();
+  [['#viewGrid', true], ['#viewList', false], ['#viewGrid2', true], ['#viewList2', false]].forEach(function(p){
+    var el = $(p[0]);
+    el.setAttribute('aria-pressed', (v === 'grid') === p[1]);
+  });
+  render(true);
+}
+$('#viewGrid').addEventListener('click', function(){ setView('grid'); });
+$('#viewList').addEventListener('click', function(){ setView('list'); });
+$('#viewGrid2').addEventListener('click', function(){ setView('grid'); });
+$('#viewList2').addEventListener('click', function(){ setView('list'); });
+
+/* favorite stars (delegated) */
+$('#output').addEventListener('click', function(e){
+  var star = e.target.closest ? e.target.closest('[data-star]') : null;
+  if(!star) return;
+  e.preventDefault();
+  var id = star.getAttribute('data-star');
+  var t = TOOLS.filter(function(x){ return x.id === id; })[0];
+  if(!t) return;
+  if(isFav(id)){
+    favs.splice(favs.indexOf(id), 1);
+    toast('<b>' + esc(t.name) + '</b> removed from favorites');
+  }else{
+    favs.push(id);
+    toast('★ <b>' + esc(t.name) + '</b> added to favorites');
+  }
+  saveStore();
+  render(true);
+});
+
+/* open counter (lets navigation continue normally) */
+$('#output').addEventListener('click', function(e){
+  var link = e.target.closest ? e.target.closest('[data-open]') : null;
+  if(!link) return;
+  var id = link.getAttribute('data-open');
+  opens[id] = (opens[id] || 0) + 1;
+  saveStore();
+}, true);
+
+/* keyboard shortcuts: "/" or Ctrl/Cmd+K focuses search */
+document.addEventListener('keydown', function(e){
+  var tag = (e.target.tagName || '').toLowerCase();
+  var typing = tag === 'input' || tag === 'textarea' || tag === 'select';
+  if(e.key === '/' && !typing){ e.preventDefault(); input.focus(); input.select(); }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); input.focus(); input.select(); }
+});
+
+/* ============================================================
+   6 · INIT
+   ============================================================ */
+
+function buildFooterLinks(){
+  var html = TOOLS.map(function(t){
+    return '<a href="' + t.url + '" style="color:' + t.color + '">' + esc(t.name) + ' ↗</a>';
+  }).join('');
+  html += '<a href="https://join365.eu.cc/" style="color:#9aa8bd">Join365 home ↗</a>';
+  $('#footLinks').innerHTML = html;
+}
+
+buildFooterLinks();
+setView(view);                 /* sync toggle buttons + grid class */
+countUp($('#statTools'), TOOLS.length, 650);
+countUp($('#statCats'), CATEGORIES.length, 800);
+render(true);
+
+})();
+</script>
 </body>
 </html>
