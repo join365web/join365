@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="The Join365 toolbox — search and launch every Join365 app: Chat, Call365, Mail, Folio, Game365 and Gust.">
+<meta name="description" content="The Join365 toolbox — search and launch every Join365 app: Chat, Call365, Mail, Folio, Create365, Game365 and Gust.">
 <meta name="theme-color" content="#070a10">
 <title>Tools · Join365 — every tool, one place</title>
 <link rel="icon" type="image/png" href="https://join365.eu.cc/logo.png">
@@ -461,6 +461,7 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
           <li><a href="https://join365.eu.cc/Call365/">Call365 — video meetings</a></li>
           <li><a href="https://join365.eu.cc/Mail/">Mail — your Join365 email</a></li>
           <li><a href="https://join365.eu.cc/Folio/">Folio — write your book</a></li>
+          <li><a href="https://join365.eu.cc/Create365/">Create365 — infinite whiteboard</a></li>
           <li><a href="https://join365.eu.cc/Game365/">Game365 — play &amp; publish games</a></li>
           <li><a href="https://join365.eu.cc/Gust/">Gust — browser-in-a-browser</a></li>
         </ul>
@@ -502,7 +503,7 @@ var CATEGORIES = [
     blurb:'Talk, meet and message — everything you need to stay in touch.',
     icon:'<svg viewBox="0 0 20 20"><rect x="2.4" y="3.4" width="11" height="8" rx="2.2"/><path d="M6 11.4v3.4l3.4-3.4"/><path d="M15.3 6.4h1.1a2 2 0 0 1 2 2v3.1a2 2 0 0 1-2 2h-4.5l-2.5 2.3v-2.3"/></svg>' },
   { id:'create', name:'Create', color:'#c084fc',
-    blurb:'Slow down and make something — books, chapters, ideas that last.',
+    blurb:'Slow down and make something — boards, books, ideas that last.',
     icon:'<svg viewBox="0 0 20 20"><path d="M14.7 2.6a2.4 2.4 0 0 1 3.4 3.4L7.1 17 3 18.1 4.1 14Z"/><path d="m12.9 4.4 3.2 3.2"/></svg>' },
   { id:'play', name:'Play', color:'#4ade80',
     blurb:'Kick back — your personal browser arcade is waiting.',
@@ -587,6 +588,17 @@ var TOOLS = [
       +   '<path d="M21 26.5h6.5M21 31h6.5M21 35.5h4.5M36.5 26.5h6.5M36.5 31h6.5M36.5 35.5h4.5"/>'
       + '</g>'
       + '<path d="M38 19.2h4.8v8L40.4 24.6 38 27.2Z" fill="#e0442e"/>') },
+
+  { id:'create365', name:'Create365', cat:'create', color:'#c084fc', url:'https://join365.eu.cc/Create365/',
+    tagline:'Infinite whiteboard',
+    desc:'Draw, sketch, plan and design on an endless canvas. Pen, shapes, sticky notes, frames, images and templates — then export PNG, SVG or a board file.',
+    tags:['create365','create','whiteboard','draw','drawing','design','canvas','sketch','diagram','flowchart','sticky notes','brainstorm','art','paint','board','canva','figma','moodboard','wireframe'],
+    logo: appIcon('<stop stop-color="#f2b8ff"/><stop offset=".55" stop-color="#b265f0"/><stop offset="1" stop-color="#7a1fc4"/>',
+      /* pencil drawing a stroke, with a colour dot palette */
+      '<path d="M16 46c0-5 2.6-9.2 6.4-13L37 18.4a6.4 6.4 0 0 1 9 9L31.4 42c-3.8 3.8-8 6.4-13 6.4A2.4 2.4 0 0 1 16 46Z" fill="#fff"/>'
+      + '<path d="m34.5 21 8.5 8.5" stroke="url(#bg__ID__)" stroke-width="3" stroke-linecap="round" fill="none"/>'
+      + '<path d="M16 48c3.5 1.6 7 1.6 10.5 0" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".8"/>'
+      + '<g><circle cx="19" cy="17" r="4" fill="#ffd866"/><circle cx="29.5" cy="13" r="3.2" fill="#8de8c3" opacity=".95"/><circle cx="48" cy="44" r="3.6" fill="#8fd4ff" opacity=".95"/></g>') },
 
   { id:'game365', name:'Game365', cat:'play', color:'#f472b6', url:'https://join365.eu.cc/Game365/',
     tagline:'Play & publish games',
