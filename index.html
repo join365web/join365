@@ -8,14 +8,12 @@
     <style>
         :root {
             --yellow: #f3c644;
-            --yellow-bright: #ffdb69;
-            --white: #fffaf0;
-            --muted: #a5a2ac;
-            --black: #111216;
-            --cube-size: 220px;
-            --cube-depth: 110px;
-            --tile-size: 88px;
-            --tile-gap: 8px;
+            --yellow-light: #ffdb69;
+            --cream: #fffaf0;
+            --muted: #a6a3ad;
+            --bg: #111216;
+            --tile: 88px;
+            --gap: 8px;
         }
 
         * {
@@ -32,10 +30,10 @@
         body {
             min-height: 100vh;
             overflow-x: hidden;
-            color: var(--white);
+            color: var(--cream);
             background:
-                radial-gradient(circle at 50% 40%, rgba(91, 69, 161, 0.22), transparent 34%),
-                radial-gradient(circle at 8% 95%, rgba(243, 198, 68, 0.12), transparent 27%),
+                radial-gradient(circle at 50% 42%, rgba(96, 71, 166, 0.25), transparent 34%),
+                radial-gradient(circle at 8% 95%, rgba(243, 198, 68, 0.12), transparent 28%),
                 #111216;
             font-family: Arial, Helvetica, sans-serif;
         }
@@ -46,7 +44,7 @@
             z-index: 0;
             pointer-events: none;
             content: "";
-            opacity: 0.35;
+            opacity: 0.34;
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
@@ -61,191 +59,126 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 42px 18px 32px;
+            padding: 42px 16px 34px;
             text-align: center;
         }
 
+        .intro,
+        .logo-stage,
+        .tagline,
+        .enter-button,
+        .hint {
+            position: relative;
+            z-index: 1;
+        }
+
         .intro {
-            animation: appear 650ms ease-out both;
+            animation: enter 650ms ease-out both;
         }
 
         .eyebrow {
             margin: 0 0 18px;
-            color: var(--yellow-bright);
+            color: var(--yellow-light);
             font-size: 11px;
             font-weight: bold;
-            letter-spacing: 0.24em;
+            letter-spacing: 0.25em;
             text-transform: uppercase;
         }
 
         h1 {
-            max-width: 760px;
+            max-width: 800px;
             margin: 0;
-            color: var(--white);
-            font-size: clamp(36px, 6vw, 72px);
+            color: var(--cream);
+            font-size: clamp(35px, 6vw, 72px);
             font-weight: 700;
             letter-spacing: -0.06em;
             line-height: 0.98;
         }
 
-        h1 em {
+        h1 span {
             color: var(--yellow);
-            font-style: normal;
         }
 
         .logo-stage {
             position: relative;
             width: min(100%, 500px);
             height: 350px;
-            margin-top: 16px;
-            perspective: 1000px;
-            animation: appear 700ms 100ms ease-out both;
+            margin-top: 17px;
+            animation: enter 700ms 100ms ease-out both;
         }
 
         .logo-stage::before {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 330px;
-            height: 170px;
-            border: 1px solid rgba(255, 255, 255, 0.11);
+            width: min(74vw, 335px);
+            height: min(38vw, 175px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 50%;
             content: "";
             pointer-events: none;
             transform: translate(-50%, -50%) rotate(-12deg);
         }
 
-        .logo-trigger {
+        /* The canvas is the reliable visible fallback and the animated cube renderer. */
+        .cube-button {
             position: absolute;
             inset: 0;
-            z-index: 5;
+            z-index: 2;
             display: block;
             width: 100%;
             height: 100%;
             padding: 0;
             border: 0;
-            outline: none;
+            outline: 0;
             background: transparent;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
 
-        .logo-trigger:focus-visible::after {
+        .cube-button:focus-visible::after {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 330px;
-            height: 180px;
+            width: min(76vw, 355px);
+            height: min(42vw, 195px);
             border: 2px solid var(--yellow);
             border-radius: 50%;
             content: "";
             transform: translate(-50%, -50%) rotate(-12deg);
         }
 
-        .animation-space {
-            position: absolute;
-            inset: 0;
-            transform-style: preserve-3d;
-        }
-
-        /* A separate wrapper handles the up-and-down movement. */
-        .cube-bob {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: var(--cube-size);
-            height: var(--cube-size);
-            transform: translate(-50%, -50%);
-            transform-style: preserve-3d;
-            animation: bob 3.4s ease-in-out infinite;
-        }
-
-        /* The cube itself spins on both its X and Y axes. */
-        .cube {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transform-style: preserve-3d;
-            animation: rotate-cube 12s linear infinite;
-            filter: drop-shadow(0 24px 20px rgba(0, 0, 0, 0.42));
-        }
-
-        .logo-trigger:hover .cube {
-            animation-duration: 7s;
-        }
-
-        .cube-face {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            border: 2px solid rgba(255, 255, 255, 0.48);
-            border-radius: 22px;
-            background: var(--yellow);
-            backface-visibility: hidden;
-            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
-        }
-
-        .cube-face img {
+        #cubeCanvas {
             display: block;
             width: 100%;
             height: 100%;
-            object-fit: cover;
         }
 
-        .cube-face::after,
-        .tile-face::after {
-            position: absolute;
-            inset: 0;
-            content: "";
-            pointer-events: none;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.32), transparent 38%, rgba(0, 0, 0, 0.13));
-            mix-blend-mode: soft-light;
-        }
-
-        .front { transform: translateZ(var(--cube-depth)); }
-        .back { transform: rotateY(180deg) translateZ(var(--cube-depth)); }
-        .right { transform: rotateY(90deg) translateZ(var(--cube-depth)); }
-        .left { transform: rotateY(-90deg) translateZ(var(--cube-depth)); }
-        .top { transform: rotateX(90deg) translateZ(var(--cube-depth)); }
-        .bottom { transform: rotateX(-90deg) translateZ(var(--cube-depth)); }
-
-        .cube-shadow {
-            position: absolute;
-            bottom: 27px;
-            left: 50%;
-            width: 145px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.5);
-            filter: blur(14px);
-            transform: translateX(-50%);
-            animation: shadow 3.4s ease-in-out infinite;
-        }
-
-        /* This layer is hidden until the cube is clicked. */
+        /* Six logo squares are revealed by the click. */
         .tiles {
             position: absolute;
             top: 50%;
             left: 50%;
+            z-index: 3;
             display: grid;
-            width: calc(var(--tile-size) * 3 + var(--tile-gap) * 2);
-            height: calc(var(--tile-size) * 2 + var(--tile-gap));
-            grid-template-columns: repeat(3, var(--tile-size));
-            grid-template-rows: repeat(2, var(--tile-size));
-            gap: var(--tile-gap);
+            width: calc(var(--tile) * 3 + var(--gap) * 2);
+            height: calc(var(--tile) * 2 + var(--gap));
+            grid-template-columns: repeat(3, var(--tile));
+            grid-template-rows: repeat(2, var(--tile));
+            gap: var(--gap);
             opacity: 0;
             pointer-events: none;
-            transform: translate(-50%, -50%) scale(0.25);
-            transition: opacity 250ms ease 350ms, transform 700ms cubic-bezier(0.2, 0.85, 0.2, 1) 350ms;
+            transform: translate(-50%, -50%) scale(0.18);
+            transition: opacity 260ms ease 300ms, transform 700ms cubic-bezier(0.2, 0.85, 0.2, 1) 300ms;
         }
 
         .tile {
-            width: var(--tile-size);
-            height: var(--tile-size);
+            width: var(--tile);
+            height: var(--tile);
             perspective: 700px;
             opacity: 0;
-            transform: scale(0.15) rotate(22deg) translateY(20px);
-            transition: opacity 320ms ease var(--delay), transform 700ms cubic-bezier(0.2, 0.85, 0.2, 1) var(--delay);
+            transform: translateY(20px) rotate(24deg) scale(0.12);
+            transition: opacity 300ms ease var(--delay), transform 650ms cubic-bezier(0.2, 0.85, 0.2, 1) var(--delay);
         }
 
         .tile-inner {
@@ -261,47 +194,38 @@
             display: grid;
             place-items: center;
             overflow: hidden;
-            border: 2px solid rgba(255, 255, 255, 0.48);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 13px;
-            background: var(--yellow);
             backface-visibility: hidden;
-            box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
+            box-shadow: 0 14px 25px rgba(0, 0, 0, 0.28);
         }
 
         .tile-front {
-            background-image: url("./logo.png");
-            background-position: center;
-            background-size: cover;
+            background: var(--yellow) url("./logo.png") center / cover no-repeat;
         }
 
         .tile-back {
             color: var(--yellow);
-            background: linear-gradient(135deg, #3b3152, #16161d);
+            background: linear-gradient(135deg, #3d3155, #15151c);
             font-size: 25px;
             font-weight: bold;
             transform: rotateY(180deg);
         }
 
-        .tile-1 { --delay: 40ms; --flip-delay: -1.0s; grid-column: 1; grid-row: 1; }
-        .tile-2 { --delay: 110ms; --flip-delay: -1.8s; grid-column: 2; grid-row: 1; }
-        .tile-3 { --delay: 180ms; --flip-delay: -2.6s; grid-column: 3; grid-row: 1; }
-        .tile-4 { --delay: 250ms; --flip-delay: -3.4s; grid-column: 1; grid-row: 2; }
-        .tile-5 { --delay: 320ms; --flip-delay: -4.2s; grid-column: 2; grid-row: 2; }
-        .tile-6 { --delay: 390ms; --flip-delay: -5.0s; grid-column: 3; grid-row: 2; }
-
-        .logo-stage.is-open .cube-bob {
-            animation: cube-open 850ms cubic-bezier(0.45, 0, 0.15, 1) forwards;
+        .tile-face::after {
+            position: absolute;
+            inset: 0;
+            content: "";
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 36%, rgba(0, 0, 0, 0.12));
         }
 
-        .logo-stage.is-open .cube {
-            animation-play-state: paused;
-        }
-
-        .logo-stage.is-open .cube-shadow {
-            opacity: 0;
-            transform: translateX(-50%) scale(0.2);
-            transition: opacity 350ms ease, transform 450ms ease;
-        }
+        .tile-1 { --delay: 40ms; --flip: -0.9s; grid-column: 1; grid-row: 1; }
+        .tile-2 { --delay: 110ms; --flip: -1.7s; grid-column: 2; grid-row: 1; }
+        .tile-3 { --delay: 180ms; --flip: -2.5s; grid-column: 3; grid-row: 1; }
+        .tile-4 { --delay: 250ms; --flip: -3.3s; grid-column: 1; grid-row: 2; }
+        .tile-5 { --delay: 320ms; --flip: -4.1s; grid-column: 2; grid-row: 2; }
+        .tile-6 { --delay: 390ms; --flip: -4.9s; grid-column: 3; grid-row: 2; }
 
         .logo-stage.is-open .tiles {
             opacity: 1;
@@ -311,15 +235,15 @@
 
         .logo-stage.is-open .tile {
             opacity: 1;
-            transform: scale(1) rotate(0) translateY(0);
+            transform: translateY(0) rotate(0) scale(1);
         }
 
         .logo-stage.is-open .tile-inner {
-            animation: tile-slideshow 6.2s var(--flip-delay) ease-in-out infinite;
+            animation: slideshow-flip 6.2s var(--flip) ease-in-out infinite;
         }
 
         .logo-stage.is-open .tile:hover {
-            transform: scale(1.06) translateY(-5px) rotate(-2deg);
+            transform: translateY(-5px) rotate(-2deg) scale(1.06);
             transition-duration: 180ms;
         }
 
@@ -328,11 +252,11 @@
             color: var(--muted);
             font-size: clamp(17px, 2.5vw, 23px);
             letter-spacing: -0.02em;
-            animation: appear 700ms 170ms ease-out both;
+            animation: enter 700ms 160ms ease-out both;
         }
 
         .tagline span {
-            color: var(--yellow-bright);
+            color: var(--yellow-light);
         }
 
         .enter-button {
@@ -342,14 +266,14 @@
             margin-top: 24px;
             padding: 14px 18px 14px 23px;
             border-radius: 999px;
-            color: #17161a;
+            color: #18171b;
             background: var(--yellow);
             box-shadow: 0 14px 30px rgba(243, 198, 68, 0.18);
             font-size: 14px;
             font-weight: bold;
             text-decoration: none;
             transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
-            animation: appear 700ms 230ms ease-out both;
+            animation: enter 700ms 220ms ease-out both;
         }
 
         .enter-button::after {
@@ -359,7 +283,7 @@
             place-items: center;
             border-radius: 50%;
             color: var(--yellow);
-            background: #17161a;
+            background: #18171b;
             content: "↗";
             font-size: 17px;
             transition: transform 180ms ease;
@@ -367,7 +291,7 @@
 
         .enter-button:hover,
         .enter-button:focus-visible {
-            background: var(--yellow-bright);
+            background: var(--yellow-light);
             box-shadow: 0 18px 36px rgba(243, 198, 68, 0.3);
             transform: translateY(-3px);
         }
@@ -378,7 +302,7 @@
         }
 
         .enter-button:focus-visible {
-            outline: 2px solid var(--white);
+            outline: 2px solid var(--cream);
             outline-offset: 4px;
         }
 
@@ -388,7 +312,7 @@
             font-size: 11px;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            animation: appear 700ms 290ms ease-out both;
+            animation: enter 700ms 280ms ease-out both;
         }
 
         .hint::before {
@@ -397,70 +321,37 @@
             content: "✦";
         }
 
-        @keyframes rotate-cube {
-            from { transform: rotateX(-18deg) rotateY(0deg) rotateZ(1deg); }
-            to { transform: rotateX(-18deg) rotateY(360deg) rotateZ(1deg); }
+        @keyframes enter {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes bob {
-            0%, 100% { transform: translate(-50%, calc(-50% + 9px)); }
-            50% { transform: translate(-50%, calc(-50% - 11px)); }
-        }
-
-        @keyframes cube-open {
-            0% { opacity: 1; transform: translate(-50%, calc(-50% - 9px)) scale(1) rotate(0); }
-            45% { opacity: 1; transform: translate(-50%, -50%) scale(1.12) rotate(14deg); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.06) rotate(180deg); }
-        }
-
-        @keyframes shadow {
-            0%, 100% { opacity: 0.52; transform: translateX(-50%) scale(0.82); }
-            50% { opacity: 0.3; transform: translateX(-50%) scale(1.08); }
-        }
-
-        @keyframes tile-slideshow {
+        @keyframes slideshow-flip {
             0%, 24% { transform: rotateY(0deg) rotateX(0deg); }
             38%, 67% { transform: rotateY(180deg) rotateX(3deg); }
             81%, 100% { transform: rotateY(360deg) rotateX(0deg); }
         }
 
-        @keyframes appear {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         @media (max-width: 480px) {
             :root {
-                --cube-size: 180px;
-                --cube-depth: 90px;
-                --tile-size: 68px;
-                --tile-gap: 6px;
+                --tile: 68px;
+                --gap: 6px;
             }
 
             .page {
-                padding-right: 13px;
-                padding-left: 13px;
+                padding-right: 12px;
+                padding-left: 12px;
             }
 
             .logo-stage {
                 height: 295px;
-            }
-
-            .logo-stage::before {
-                width: 285px;
-                height: 145px;
-            }
-
-            .logo-trigger:focus-visible::after {
-                width: 290px;
-                height: 155px;
             }
         }
 
         @media (max-height: 700px) {
             .page {
                 justify-content: flex-start;
-                padding-top: 25px;
+                padding-top: 24px;
             }
 
             .logo-stage {
@@ -481,10 +372,6 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.001ms !important;
             }
-
-            .cube {
-                transform: rotateX(-18deg) rotateY(-28deg) rotateZ(1deg) !important;
-            }
         }
     </style>
 </head>
@@ -492,64 +379,52 @@
     <main class="page">
         <header class="intro">
             <p class="eyebrow">Join365 / Digital workspace</p>
-            <h1>Welcome to Join365. <em>Your digital workspace</em></h1>
+            <h1>Welcome to Join365. <span>Your digital workspace</span></h1>
         </header>
 
         <section class="logo-stage" id="logoStage" aria-label="Interactive Join365 logo">
-            <button class="logo-trigger" id="logoTrigger" type="button" aria-pressed="false" aria-label="Open the rotating Join365 cube">
-                <span class="animation-space" aria-hidden="true">
-                    <span class="cube-bob">
-                        <span class="cube">
-                            <span class="cube-face front"><img src="./logo.png" alt=""></span>
-                            <span class="cube-face back"><img src="./logo.png" alt=""></span>
-                            <span class="cube-face right"><img src="./logo.png" alt=""></span>
-                            <span class="cube-face left"><img src="./logo.png" alt=""></span>
-                            <span class="cube-face top"><img src="./logo.png" alt=""></span>
-                            <span class="cube-face bottom"><img src="./logo.png" alt=""></span>
-                        </span>
-                    </span>
-                    <span class="cube-shadow"></span>
-
-                    <span class="tiles">
-                        <span class="tile tile-1">
-                            <span class="tile-inner">
-                                <span class="tile-face tile-front"></span>
-                                <span class="tile-face tile-back">J</span>
-                            </span>
-                        </span>
-                        <span class="tile tile-2">
-                            <span class="tile-inner">
-                                <span class="tile-face tile-front"></span>
-                                <span class="tile-face tile-back">O</span>
-                            </span>
-                        </span>
-                        <span class="tile tile-3">
-                            <span class="tile-inner">
-                                <span class="tile-face tile-front"></span>
-                                <span class="tile-face tile-back">I</span>
-                            </span>
-                        </span>
-                        <span class="tile tile-4">
-                            <span class="tile-inner">
-                                <span class="tile-face tile-front"></span>
-                                <span class="tile-face tile-back">N</span>
-                            </span>
-                        </span>
-                        <span class="tile tile-5">
-                            <span class="tile-inner">
-                                <span class="tile-face tile-front"></span>
-                                <span class="tile-face tile-back">3</span>
-                            </span>
-                        </span>
-                        <span class="tile tile-6">
-                            <span class="tile-inner">
-                                <span class="tile-face tile-front"></span>
-                                <span class="tile-face tile-back">65</span>
-                            </span>
-                        </span>
-                    </span>
-                </span>
+            <button class="cube-button" id="cubeButton" type="button" aria-pressed="false" aria-label="Open the rotating Join365 cube">
+                <canvas id="cubeCanvas" aria-hidden="true"></canvas>
             </button>
+
+            <div class="tiles" id="tiles" aria-hidden="true">
+                <div class="tile tile-1">
+                    <div class="tile-inner">
+                        <div class="tile-face tile-front"></div>
+                        <div class="tile-face tile-back">J</div>
+                    </div>
+                </div>
+                <div class="tile tile-2">
+                    <div class="tile-inner">
+                        <div class="tile-face tile-front"></div>
+                        <div class="tile-face tile-back">O</div>
+                    </div>
+                </div>
+                <div class="tile tile-3">
+                    <div class="tile-inner">
+                        <div class="tile-face tile-front"></div>
+                        <div class="tile-face tile-back">I</div>
+                    </div>
+                </div>
+                <div class="tile tile-4">
+                    <div class="tile-inner">
+                        <div class="tile-face tile-front"></div>
+                        <div class="tile-face tile-back">N</div>
+                    </div>
+                </div>
+                <div class="tile tile-5">
+                    <div class="tile-inner">
+                        <div class="tile-face tile-front"></div>
+                        <div class="tile-face tile-back">3</div>
+                    </div>
+                </div>
+                <div class="tile tile-6">
+                    <div class="tile-inner">
+                        <div class="tile-face tile-front"></div>
+                        <div class="tile-face tile-back">65</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <p class="tagline">Everything you need. <span>One place</span></p>
@@ -560,22 +435,200 @@
     <script>
         (function () {
             var stage = document.getElementById("logoStage");
-            var trigger = document.getElementById("logoTrigger");
+            var button = document.getElementById("cubeButton");
+            var canvas = document.getElementById("cubeCanvas");
             var hint = document.getElementById("hint");
+            var context = canvas.getContext("2d");
+            var logo = new Image();
+            var logoLoaded = false;
+            var opened = false;
+            var openAmount = 0;
+            var lastTime = 0;
+            var canvasWidth = 1;
+            var canvasHeight = 1;
+            var pixelRatio = 1;
 
-            trigger.addEventListener("click", function () {
-                var open = stage.classList.toggle("is-open");
-                trigger.setAttribute("aria-pressed", String(open));
-                trigger.setAttribute(
+            logo.onload = function () {
+                logoLoaded = true;
+            };
+            logo.onerror = function () {
+                logoLoaded = false;
+            };
+            logo.src = "./logo.png";
+
+            function resizeCanvas() {
+                var bounds = canvas.getBoundingClientRect();
+                pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+                canvasWidth = Math.max(bounds.width, 1);
+                canvasHeight = Math.max(bounds.height, 1);
+                canvas.width = Math.round(canvasWidth * pixelRatio);
+                canvas.height = Math.round(canvasHeight * pixelRatio);
+                context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            }
+
+            function rotatePoint(point, xAngle, yAngle, zAngle) {
+                var x = point[0];
+                var y = point[1];
+                var z = point[2];
+                var cosY = Math.cos(yAngle);
+                var sinY = Math.sin(yAngle);
+                var nextX = x * cosY - z * sinY;
+                var nextZ = x * sinY + z * cosY;
+                x = nextX;
+                z = nextZ;
+
+                var cosX = Math.cos(xAngle);
+                var sinX = Math.sin(xAngle);
+                var nextY = y * cosX - z * sinX;
+                nextZ = y * sinX + z * cosX;
+                y = nextY;
+                z = nextZ;
+
+                var cosZ = Math.cos(zAngle);
+                var sinZ = Math.sin(zAngle);
+                nextX = x * cosZ - y * sinZ;
+                nextY = x * sinZ + y * cosZ;
+
+                return [nextX, nextY, z];
+            }
+
+            function project(point, centerX, centerY, size) {
+                var camera = 5.5;
+                var depth = camera / (camera - point[2]);
+                return {
+                    x: centerX + point[0] * size * depth,
+                    y: centerY + point[1] * size * depth,
+                    z: point[2]
+                };
+            }
+
+            function polygon(points) {
+                context.beginPath();
+                context.moveTo(points[0].x, points[0].y);
+                for (var i = 1; i < points.length; i += 1) {
+                    context.lineTo(points[i].x, points[i].y);
+                }
+                context.closePath();
+            }
+
+            function drawTexture(points) {
+                if (!logoLoaded || !logo.naturalWidth) {
+                    return;
+                }
+
+                var first = points[0];
+                var across = points[1];
+                var down = points[3];
+                var width = logo.naturalWidth;
+                var height = logo.naturalHeight;
+
+                context.save();
+                polygon(points);
+                context.clip();
+                context.setTransform(
+                    pixelRatio * (across.x - first.x) / width,
+                    pixelRatio * (across.y - first.y) / width,
+                    pixelRatio * (down.x - first.x) / height,
+                    pixelRatio * (down.y - first.y) / height,
+                    pixelRatio * first.x,
+                    pixelRatio * first.y
+                );
+                context.drawImage(logo, 0, 0);
+                context.restore();
+                context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            }
+
+            function drawCube(time) {
+                context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                var fade = 1 - openAmount;
+                var centerX = canvasWidth / 2;
+                var centerY = canvasHeight / 2 + Math.sin(time / 600) * 10;
+                var cubeSize = Math.min(canvasWidth, canvasHeight) * 0.27 * (0.08 + fade * 0.92);
+                var xAngle = -0.34 + Math.sin(time / 1900) * 0.06;
+                var yAngle = time / 1150;
+                var zAngle = 0.035;
+                var rawVertices = [
+                    [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
+                    [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1]
+                ];
+                var vertices = rawVertices.map(function (point) {
+                    return project(rotatePoint(point, xAngle, yAngle, zAngle), centerX, centerY, cubeSize);
+                });
+                var faces = [
+                    { points: [0, 1, 2, 3], color: "#f3c644" },
+                    { points: [1, 5, 6, 2], color: "#d9ad30" },
+                    { points: [0, 4, 5, 1], color: "#ffda67" },
+                    { points: [4, 7, 6, 5], color: "#b68e21" },
+                    { points: [4, 0, 3, 7], color: "#c29a25" },
+                    { points: [3, 2, 6, 7], color: "#a6801f" }
+                ];
+
+                context.save();
+                context.globalAlpha = Math.max(fade, 0);
+                context.fillStyle = "rgba(0, 0, 0, 0.48)";
+                context.filter = "blur(13px)";
+                context.beginPath();
+                context.ellipse(centerX, canvasHeight * 0.79, cubeSize * 0.9, cubeSize * 0.13, 0, 0, Math.PI * 2);
+                context.fill();
+                context.restore();
+
+                faces.sort(function (a, b) {
+                    var az = a.points.reduce(function (sum, index) { return sum + vertices[index].z; }, 0);
+                    var bz = b.points.reduce(function (sum, index) { return sum + vertices[index].z; }, 0);
+                    return az - bz;
+                });
+
+                context.globalAlpha = Math.max(fade, 0);
+                faces.forEach(function (face) {
+                    var points = face.points.map(function (index) { return vertices[index]; });
+                    polygon(points);
+                    context.fillStyle = face.color;
+                    context.fill();
+                    drawTexture(points);
+                    polygon(points);
+                    context.strokeStyle = "rgba(20, 18, 10, 0.42)";
+                    context.lineWidth = 2;
+                    context.stroke();
+                });
+                context.globalAlpha = 1;
+            }
+
+            function frame(time) {
+                if (!lastTime) {
+                    lastTime = time;
+                }
+                var elapsed = Math.min(time - lastTime, 50);
+                lastTime = time;
+                var target = opened ? 1 : 0;
+                var step = elapsed / 420;
+                openAmount += (target - openAmount) * Math.min(step, 1);
+                if (Math.abs(target - openAmount) < 0.001) {
+                    openAmount = target;
+                }
+                drawCube(time);
+                window.requestAnimationFrame(frame);
+            }
+
+            function toggle() {
+                opened = !opened;
+                stage.classList.toggle("is-open", opened);
+                button.setAttribute("aria-pressed", String(opened));
+                button.setAttribute(
                     "aria-label",
-                    open
-                        ? "Return the six Join365 tiles to the rotating cube"
+                    opened
+                        ? "Return the six Join365 squares to the cube"
                         : "Open the rotating Join365 cube"
                 );
-                hint.textContent = open
-                    ? "Click the tiles to rebuild the cube"
+                hint.textContent = opened
+                    ? "Click the squares to rebuild the cube"
                     : "Click the cube to unfold it";
-            });
+            }
+
+            button.addEventListener("click", toggle);
+            window.addEventListener("resize", resizeCanvas);
+            resizeCanvas();
+            window.requestAnimationFrame(frame);
         }());
     </script>
 </body>
