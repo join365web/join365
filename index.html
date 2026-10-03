@@ -533,7 +533,28 @@
                     pixelRatio * first.x,
                     pixelRatio * first.y
                 );
-                context.drawImage(logo, 0, 0);
+
+                /* Paint the complete logo on every face, not just a color or a crop. */
+                if (logoLoaded) {
+                    context.drawImage(logo, 0, 0, width, height);
+                } else {
+                    /* The same waveform remains visible while the image is loading. */
+                    context.fillStyle = "#151419";
+                    var bars = [
+                        [0.26, 0.37, 0.055, 0.16],
+                        [0.37, 0.27, 0.055, 0.34],
+                        [0.48, 0.18, 0.055, 0.52],
+                        [0.59, 0.27, 0.055, 0.34],
+                        [0.70, 0.37, 0.055, 0.16]
+                    ];
+                    bars.forEach(function (bar) {
+                        context.fillRect(width * bar[0], height * bar[1], width * bar[2], height * bar[3]);
+                    });
+                    context.font = "bold " + Math.round(width * 0.14) + "px Arial";
+                    context.textAlign = "center";
+                    context.textBaseline = "middle";
+                    context.fillText("Join365", width * 0.5, height * 0.76);
+                }
                 context.restore();
                 context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
             }
