@@ -163,6 +163,36 @@
             perspective: 900px;
         }
 
+        /* A visible isometric fallback keeps the cube present even in a preview browser that flattens CSS 3D. */
+        .cube-fallback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 1;
+            width: 282px;
+            height: 282px;
+            overflow: visible;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: fallback-bob 3.4s ease-in-out infinite;
+        }
+
+        .cube-fallback .fallback-outline {
+            fill: none;
+            stroke: rgba(20, 18, 10, 0.48);
+            stroke-width: 3;
+        }
+
+        .cube-fallback .fallback-face {
+            stroke: rgba(255, 255, 255, 0.5);
+            stroke-width: 2;
+        }
+
+        .logo-stage.is-open .cube-fallback {
+            opacity: 0;
+            transition: opacity 350ms ease;
+        }
+
         .cube-bob {
             position: relative;
             width: var(--cube-size);
@@ -435,6 +465,11 @@
             100% { opacity: 0; transform: translateY(0) scale(0.06) rotate(180deg); }
         }
 
+        @keyframes fallback-bob {
+            0%, 100% { transform: translate(-50%, calc(-50% + 9px)) rotate(-2deg); }
+            50% { transform: translate(-50%, calc(-50% - 11px)) rotate(2deg); }
+        }
+
         @keyframes shadow {
             0%, 100% { opacity: 0.52; transform: translateX(-50%) scale(0.82); }
             50% { opacity: 0.3; transform: translateX(-50%) scale(1.08); }
@@ -506,6 +541,21 @@
         <section class="logo-stage" id="logoStage" aria-label="Interactive Join365 logo">
             <button class="cube-button" id="cubeButton" type="button" aria-pressed="false" aria-label="Open the rotating Join365 cube">
                 <span class="cube-scene" aria-hidden="true">
+                    <svg class="cube-fallback" viewBox="0 0 360 340" role="img" aria-label="Join365 logo cube fallback">
+                        <defs>
+                            <clipPath id="fallback-front-clip"><polygon points="72,91 232,91 232,251 72,251"></polygon></clipPath>
+                            <clipPath id="fallback-top-clip"><polygon points="72,91 152,44 312,44 232,91"></polygon></clipPath>
+                            <clipPath id="fallback-right-clip"><polygon points="232,91 312,44 312,204 232,251"></polygon></clipPath>
+                        </defs>
+                        <polygon class="fallback-face" points="72,91 152,44 312,44 232,91" fill="#ffdb69"></polygon>
+                        <image href="./logo.png?v=2" x="72" y="-12" width="160" height="160" preserveAspectRatio="none" clip-path="url(#fallback-top-clip)"></image>
+                        <polygon class="fallback-face" points="232,91 312,44 312,204 232,251" fill="#c79c29"></polygon>
+                        <image href="./logo.png?v=2" x="232" y="44" width="160" height="160" preserveAspectRatio="none" clip-path="url(#fallback-right-clip)"></image>
+                        <polygon class="fallback-face" points="72,91 232,91 232,251 72,251" fill="#f3c644"></polygon>
+                        <image href="./logo.png?v=2" x="72" y="91" width="160" height="160" preserveAspectRatio="none" clip-path="url(#fallback-front-clip)"></image>
+                        <polyline class="fallback-outline" points="72,91 152,44 312,44 312,204 232,251 72,251 72,91 232,91 312,44"></polyline>
+                        <line class="fallback-outline" x1="232" y1="91" x2="232" y2="251"></line>
+                    </svg>
                     <span class="cube-bob">
                         <span class="cube">
                             <span class="cube-face face-front"><img src="./logo.png?v=2" alt=""></span>
