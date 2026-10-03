@@ -1,254 +1,624 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join365 Screensaver</title>
+    <meta name="theme-color" content="#101014">
+    <meta name="description" content="Join365 — your digital workspace, all in one place.">
+    <title>Join365 | Your digital workspace</title>
     <style>
+        :root {
+            --ink: #f8f6ef;
+            --muted: #a8a5ad;
+            --yellow: #f3c744;
+            --yellow-light: #ffdb69;
+            --orange: #f28c38;
+            --purple: #8d72ff;
+            --bg: #101014;
+            --panel: rgba(255, 255, 255, 0.055);
+            --line: rgba(255, 255, 255, 0.12);
+            --tile-size: clamp(58px, 16vw, 92px);
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            width: 100vw;
-            height: 100vh;
-            background-color: #0f1419;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+        html {
+            min-width: 320px;
+            background: var(--bg);
         }
 
-        .header {
-            position: absolute;
-            top: 40px;
-            z-index: 100;
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 50% 45%, rgba(68, 57, 107, 0.28), transparent 31rem),
+                radial-gradient(circle at 9% 94%, rgba(243, 199, 68, 0.10), transparent 22rem),
+                var(--bg);
+            font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body::before {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            content: "";
+            opacity: 0.32;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            background-position: center;
+            background-size: 72px 72px;
+            mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(42px, 7vh, 82px) 22px 32px;
             text-align: center;
         }
 
-        .header-subtitle {
-            font-size: 14px;
-            letter-spacing: 2px;
-            color: #00d9ff;
+        .intro {
+            position: relative;
+            z-index: 2;
+            max-width: 760px;
+            animation: rise-in 900ms 80ms both cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 19px;
+            color: var(--yellow-light);
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 0.22em;
+            line-height: 1;
             text-transform: uppercase;
-            margin-bottom: 15px;
-            font-weight: 600;
         }
 
-        .header h1 {
-            font-size: 72px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: -2px;
-            margin-bottom: 10px;
+        .eyebrow::before,
+        .eyebrow::after {
+            width: 26px;
+            height: 1px;
+            content: "";
+            background: currentColor;
+            opacity: 0.7;
         }
 
-        .header h1 span {
-            color: #ff6b35;
+        h1 {
+            max-width: 760px;
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(35px, 6vw, 72px);
+            font-weight: 760;
+            letter-spacing: -0.065em;
+            line-height: 0.98;
         }
 
-        .screensaver-container {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            top: 0;
-            left: 0;
-            overflow: hidden;
+        h1 strong {
+            color: var(--yellow);
+            font-weight: inherit;
         }
 
-        .logo {
+        .logo-stage {
+            position: relative;
+            width: min(100%, 470px);
+            height: clamp(300px, 38vh, 370px);
+            margin: clamp(15px, 3vh, 27px) 0 0;
+            perspective: 1100px;
+            animation: rise-in 900ms 190ms both cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .logo-stage::before,
+        .logo-stage::after {
             position: absolute;
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, #f4c430 0%, #ffd700 100%);
-            border-radius: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 20px 60px rgba(244, 196, 48, 0.3);
-            font-size: 48px;
-            font-weight: bold;
-            color: #000;
-            user-select: none;
-            transition: box-shadow 0.3s ease;
-        }
-
-        .bars {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            height: 60px;
-            margin-bottom: 10px;
-        }
-
-        .bar {
-            width: 8px;
-            background-color: #000;
-            border-radius: 4px;
-            animation: wave 0.6s ease-in-out infinite;
-        }
-
-        .bar:nth-child(1) {
-            height: 30px;
-            animation-delay: 0s;
-        }
-
-        .bar:nth-child(2) {
-            height: 50px;
-            animation-delay: 0.1s;
-        }
-
-        .bar:nth-child(3) {
-            height: 40px;
-            animation-delay: 0.2s;
-        }
-
-        .bar:nth-child(4) {
-            height: 55px;
-            animation-delay: 0.1s;
-        }
-
-        .bar:nth-child(5) {
-            height: 35px;
-            animation-delay: 0s;
-        }
-
-        @keyframes wave {
-            0%, 100% {
-                transform: scaleY(0.8);
-            }
-            50% {
-                transform: scaleY(1.2);
-            }
-        }
-
-        .text {
-            font-size: 42px;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        .button-container {
-            position: absolute;
-            bottom: 60px;
-            z-index: 100;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .check-it-out-btn {
-            padding: 14px 36px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #0f1419;
-            background-color: #ff6b35;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .check-it-out-btn:hover {
-            background-color: #ff8455;
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(255, 107, 53, 0.4);
-        }
-
-        .check-it-out-btn:active {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.3);
-        }
-
-        .corner-text {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            color: #4a5568;
-            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 50%;
+            content: "";
             pointer-events: none;
-            font-family: 'Monaco', 'Courier New', monospace;
-            z-index: 50;
+            transform: translate(-50%, -50%) rotate(-17deg);
+        }
+
+        .logo-stage::before {
+            width: min(72vw, 336px);
+            height: min(40vw, 190px);
+        }
+
+        .logo-stage::after {
+            width: min(62vw, 294px);
+            height: min(34vw, 158px);
+            border-color: rgba(243, 199, 68, 0.12);
+            transform: translate(-50%, -50%) rotate(22deg);
+        }
+
+        .logo-control {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: grid;
+            place-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            border: 0;
+            outline: none;
+            color: inherit;
+            background: transparent;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .logo-control:focus-visible::before {
+            position: absolute;
+            width: min(73vw, 340px);
+            height: min(43vw, 205px);
+            border: 2px solid var(--yellow);
+            border-radius: 50%;
+            content: "";
+            transform: rotate(-8deg);
+        }
+
+        .scene {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .cube {
+            position: relative;
+            z-index: 2;
+            width: clamp(170px, 43vw, 238px);
+            aspect-ratio: 1;
+            transform-style: preserve-3d;
+            animation: cube-spin 15s linear infinite;
+            filter: drop-shadow(0 25px 24px rgba(0, 0, 0, 0.37));
+            transition: filter 400ms ease;
+        }
+
+        .logo-control:hover .cube,
+        .logo-control:focus-visible .cube {
+            animation-duration: 8s;
+            filter: drop-shadow(0 29px 28px rgba(0, 0, 0, 0.5));
+        }
+
+        .cube-face {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.48);
+            border-radius: 19px;
+            background-color: var(--yellow);
+            background-image: url("logo.png");
+            background-position: center;
+            background-size: cover;
+            backface-visibility: hidden;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+        }
+
+        .cube-face::after {
+            position: absolute;
+            inset: 0;
+            content: "";
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 30%, transparent 68%, rgba(0, 0, 0, 0.12));
+            mix-blend-mode: soft-light;
+        }
+
+        .front { transform: translateZ(calc(clamp(170px, 43vw, 238px) / 2)); }
+        .back { transform: rotateY(180deg) translateZ(calc(clamp(170px, 43vw, 238px) / 2)); }
+        .right { transform: rotateY(90deg) translateZ(calc(clamp(170px, 43vw, 238px) / 2)); }
+        .left { transform: rotateY(-90deg) translateZ(calc(clamp(170px, 43vw, 238px) / 2)); }
+        .top { transform: rotateX(90deg) translateZ(calc(clamp(170px, 43vw, 238px) / 2)); }
+        .bottom { transform: rotateX(-90deg) translateZ(calc(clamp(170px, 43vw, 238px) / 2)); }
+
+        .cube-shadow {
+            position: absolute;
+            bottom: 31px;
+            left: 50%;
+            width: clamp(115px, 26vw, 160px);
+            height: 25px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.45);
+            filter: blur(15px);
+            transform: translateX(-50%);
+            animation: shadow-pulse 2.7s ease-in-out infinite;
+        }
+
+        .tile-field {
+            position: absolute;
+            z-index: 3;
+            top: 50%;
+            left: 50%;
+            display: grid;
+            width: calc(var(--tile-size) * 3);
+            height: calc(var(--tile-size) * 2);
+            grid-template-columns: repeat(3, var(--tile-size));
+            grid-template-rows: repeat(2, var(--tile-size));
+            transform: translate(-50%, -50%);
+            transform-style: preserve-3d;
+            pointer-events: none;
+        }
+
+        .slide-tile {
+            position: relative;
+            width: var(--tile-size);
+            height: var(--tile-size);
+            opacity: 0;
+            perspective: 700px;
+            transform: translateY(20px) scale(0.16) rotate(17deg);
+            transition:
+                opacity 520ms var(--delay) ease,
+                transform 850ms var(--delay) cubic-bezier(0.18, 0.9, 0.25, 1);
+        }
+
+        .tile-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: slide-show 6.8s var(--slide-delay) ease-in-out infinite;
+        }
+
+        .tile-face {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: 13px;
+            color: #111116;
+            background-color: var(--yellow);
+            background-image: url("logo.png");
+            background-repeat: no-repeat;
+            background-size: 300% 200%;
+            backface-visibility: hidden;
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .tile-face::after {
+            position: absolute;
+            inset: 0;
+            content: "";
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.32), transparent 42%, rgba(0, 0, 0, 0.1));
+            pointer-events: none;
+        }
+
+        .tile-back {
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #2c263b, #14131a);
+            transform: rotateY(180deg);
+        }
+
+        .tile-back::before {
+            color: var(--yellow);
+            content: attr(data-mark);
+            font-size: clamp(15px, 4vw, 23px);
+            font-weight: 800;
+            letter-spacing: -0.08em;
+        }
+
+        /* Each tile carries the matching section of logo.png. */
+        .tile-1 .tile-front { background-position: 0% 0%; }
+        .tile-2 .tile-front { background-position: 50% 0%; }
+        .tile-3 .tile-front { background-position: 100% 0%; }
+        .tile-4 .tile-front { background-position: 0% 100%; }
+        .tile-5 .tile-front { background-position: 50% 100%; }
+        .tile-6 .tile-front { background-position: 100% 100%; }
+
+        .tile-1 { --delay: 40ms; --slide-delay: -1.2s; grid-column: 1; grid-row: 1; }
+        .tile-2 { --delay: 120ms; --slide-delay: -2.05s; grid-column: 2; grid-row: 1; }
+        .tile-3 { --delay: 200ms; --slide-delay: -2.9s; grid-column: 3; grid-row: 1; }
+        .tile-4 { --delay: 280ms; --slide-delay: -3.75s; grid-column: 1; grid-row: 2; }
+        .tile-5 { --delay: 360ms; --slide-delay: -4.6s; grid-column: 2; grid-row: 2; }
+        .tile-6 { --delay: 440ms; --slide-delay: -5.45s; grid-column: 3; grid-row: 2; }
+
+        .logo-stage.is-expanded .cube {
+            animation: cube-open 850ms cubic-bezier(0.4, 0, 0.15, 1) forwards;
+        }
+
+        .logo-stage.is-expanded .cube-shadow {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.45);
+            transition: opacity 500ms ease, transform 700ms ease;
+        }
+
+        .logo-stage.is-expanded .slide-tile {
+            opacity: 1;
+            transform: translateY(0) scale(1) rotate(0);
+        }
+
+        .logo-stage.is-expanded .tile-field {
+            pointer-events: auto;
+        }
+
+        .logo-stage.is-expanded .slide-tile:hover {
+            transform: translateY(-6px) scale(1.04) rotate(-2deg);
+            transition-duration: 220ms;
+        }
+
+        .caption {
+            position: relative;
+            z-index: 2;
+            margin: clamp(-1px, 0.5vh, 8px) 0 0;
+            color: var(--muted);
+            font-size: clamp(17px, 2.2vw, 22px);
+            font-weight: 450;
+            letter-spacing: -0.025em;
+            animation: rise-in 900ms 260ms both cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .caption span {
+            color: var(--yellow-light);
+        }
+
+        .enter-button {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 25px;
+            padding: 14px 18px 14px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            color: #151419;
+            background: var(--yellow);
+            box-shadow: 0 14px 30px rgba(243, 199, 68, 0.16);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.01em;
+            text-decoration: none;
+            transition: transform 220ms ease, background 220ms ease, box-shadow 220ms ease;
+            animation: rise-in 900ms 320ms both cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .enter-button span {
+            display: grid;
+            width: 27px;
+            height: 27px;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--yellow);
+            background: #17151b;
+            font-size: 17px;
+            line-height: 1;
+            transition: transform 220ms ease;
+        }
+
+        .enter-button:hover,
+        .enter-button:focus-visible {
+            background: var(--yellow-light);
+            box-shadow: 0 18px 38px rgba(243, 199, 68, 0.27);
+            transform: translateY(-3px);
+        }
+
+        .enter-button:hover span,
+        .enter-button:focus-visible span {
+            transform: translate(2px, -2px);
+        }
+
+        .enter-button:focus-visible {
+            outline: 2px solid var(--ink);
+            outline-offset: 4px;
+        }
+
+        .interaction-note {
+            margin: 17px 0 0;
+            color: #77747e;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            animation: rise-in 900ms 390ms both cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .interaction-note::before {
+            margin-right: 7px;
+            color: var(--yellow);
+            content: "✦";
+        }
+
+        @keyframes cube-spin {
+            0% { transform: rotateX(-17deg) rotateY(0deg) rotateZ(1deg) translateY(-8px); }
+            25% { transform: rotateX(10deg) rotateY(90deg) rotateZ(-1deg) translateY(7px); }
+            50% { transform: rotateX(-12deg) rotateY(180deg) rotateZ(1deg) translateY(-8px); }
+            75% { transform: rotateX(14deg) rotateY(270deg) rotateZ(-1deg) translateY(7px); }
+            100% { transform: rotateX(-17deg) rotateY(360deg) rotateZ(1deg) translateY(-8px); }
+        }
+
+        @keyframes cube-open {
+            0% { opacity: 1; transform: rotateX(-17deg) rotateY(0deg) scale(1); }
+            45% { opacity: 1; transform: rotateX(46deg) rotateY(180deg) scale(1.08); }
+            100% { opacity: 0; transform: rotateX(70deg) rotateY(510deg) scale(0.1); }
+        }
+
+        @keyframes shadow-pulse {
+            0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(0.86); }
+            50% { opacity: 0.35; transform: translateX(-50%) scale(1.08); }
+        }
+
+        @keyframes slide-show {
+            0%, 24% { transform: rotateY(0deg) rotateX(0deg); }
+            39%, 66% { transform: rotateY(180deg) rotateX(2deg); }
+            81%, 100% { transform: rotateY(360deg) rotateX(0deg); }
+        }
+
+        @keyframes rise-in {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-height: 700px) {
+            .page {
+                justify-content: flex-start;
+                padding-top: 28px;
+            }
+
+            .logo-stage {
+                height: 270px;
+                margin-top: 8px;
+            }
+
+            .caption {
+                margin-top: -2px;
+            }
+
+            .enter-button {
+                margin-top: 15px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .page {
+                padding-right: 15px;
+                padding-left: 15px;
+            }
+
+            .eyebrow {
+                font-size: 9px;
+                letter-spacing: 0.16em;
+            }
+
+            .eyebrow::before,
+            .eyebrow::after {
+                width: 16px;
+            }
+
+            .logo-stage {
+                height: 290px;
+            }
+
+            .cube-face {
+                border-radius: 15px;
+            }
+
+            .tile-face {
+                border-radius: 9px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+
+            .cube {
+                transform: rotateX(-17deg) rotateY(-27deg) rotateZ(1deg) !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-subtitle">YOUR DIGITAL WORKSPACE</div>
-        <h1>Everything you need.<br><span>One place.</span></h1>
-    </div>
+    <main class="page">
+        <header class="intro">
+            <p class="eyebrow">Join365 / Digital workspace</p>
+            <h1>Welcome to <strong>Join365.</strong><br>Your digital workspace</h1>
+        </header>
 
-    <div class="screensaver-container">
-        <div class="logo" id="logo">
-            <div class="bars">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-            </div>
-            <div class="text">Join365</div>
-        </div>
-    </div>
+        <section class="logo-stage" id="logoStage" aria-label="Interactive Join365 logo">
+            <button class="logo-control" id="logoControl" type="button" aria-pressed="false" aria-label="Expand the rotating Join365 cube">
+                <span class="scene">
+                    <span class="cube" aria-hidden="true">
+                        <span class="cube-face front"></span>
+                        <span class="cube-face back"></span>
+                        <span class="cube-face right"></span>
+                        <span class="cube-face left"></span>
+                        <span class="cube-face top"></span>
+                        <span class="cube-face bottom"></span>
+                    </span>
+                    <span class="cube-shadow" aria-hidden="true"></span>
+                    <span class="tile-field" aria-hidden="true">
+                        <span class="slide-tile tile-1">
+                            <span class="tile-inner">
+                                <span class="tile-face tile-front"></span>
+                                <span class="tile-face tile-back" data-mark="J"></span>
+                            </span>
+                        </span>
+                        <span class="slide-tile tile-2">
+                            <span class="tile-inner">
+                                <span class="tile-face tile-front"></span>
+                                <span class="tile-face tile-back" data-mark="O"></span>
+                            </span>
+                        </span>
+                        <span class="slide-tile tile-3">
+                            <span class="tile-inner">
+                                <span class="tile-face tile-front"></span>
+                                <span class="tile-face tile-back" data-mark="I"></span>
+                            </span>
+                        </span>
+                        <span class="slide-tile tile-4">
+                            <span class="tile-inner">
+                                <span class="tile-face tile-front"></span>
+                                <span class="tile-face tile-back" data-mark="N"></span>
+                            </span>
+                        </span>
+                        <span class="slide-tile tile-5">
+                            <span class="tile-inner">
+                                <span class="tile-face tile-front"></span>
+                                <span class="tile-face tile-back" data-mark="3"></span>
+                            </span>
+                        </span>
+                        <span class="slide-tile tile-6">
+                            <span class="tile-inner">
+                                <span class="tile-face tile-front"></span>
+                                <span class="tile-face tile-back" data-mark="65"></span>
+                            </span>
+                        </span>
+                    </span>
+                </span>
+            </button>
+        </section>
 
-    <div class="button-container">
-        <a href="https://join365.eu.cc/Tools" class="check-it-out-btn">Check It Out</a>
-    </div>
+        <p class="caption">Everything you need. <span>One place</span></p>
 
-    <div class="corner-text" id="cornerText"></div>
+        <a class="enter-button" href="https://join365.eu.cc/Tools">Enter the site <span aria-hidden="true">↗</span></a>
+        <p class="interaction-note" id="interactionNote">Click the cube to unfold your workspace</p>
+    </main>
 
     <script>
-        const logo = document.getElementById('logo');
-        const cornerText = document.getElementById('cornerText');
-        let x = Math.random() * (window.innerWidth - 200);
-        let y = Math.random() * (window.innerHeight - 200);
-        let vx = (Math.random() - 0.5) * 8; // velocity x
-        let vy = (Math.random() - 0.5) * 8; // velocity y
+        const logoStage = document.getElementById("logoStage");
+        const logoControl = document.getElementById("logoControl");
+        const interactionNote = document.getElementById("interactionNote");
 
-        const logoSize = 200;
-
-        function animate() {
-            // Update position
-            x += vx;
-            y += vy;
-
-            // Bounce off walls
-            if (x <= 0 || x >= window.innerWidth - logoSize) {
-                vx = -vx;
-                x = Math.max(0, Math.min(x, window.innerWidth - logoSize));
-            }
-
-            if (y <= 0 || y >= window.innerHeight - logoSize) {
-                vy = -vy;
-                y = Math.max(0, Math.min(y, window.innerHeight - logoSize));
-            }
-
-            // Apply position
-            logo.style.left = x + 'px';
-            logo.style.top = y + 'px';
-
-            // Update corner text with position
-            cornerText.textContent = `X: ${Math.round(x)} | Y: ${Math.round(y)}`;
-
-            requestAnimationFrame(animate);
+        function setExpanded(expanded) {
+            logoStage.classList.toggle("is-expanded", expanded);
+            logoControl.setAttribute("aria-pressed", String(expanded));
+            logoControl.setAttribute(
+                "aria-label",
+                expanded
+                    ? "Return the Join365 squares to the rotating cube"
+                    : "Expand the rotating Join365 cube"
+            );
+            interactionNote.textContent = expanded
+                ? "Click the squares to rebuild the cube"
+                : "Click the cube to unfold your workspace";
         }
 
-        animate();
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            // Clamp position to new window size
-            x = Math.min(x, window.innerWidth - logoSize);
-            y = Math.min(y, window.innerHeight - logoSize);
+        logoControl.addEventListener("click", () => {
+            setExpanded(!logoStage.classList.contains("is-expanded"));
         });
     </script>
 </body>
