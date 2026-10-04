@@ -3,77 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="The Join365 toolbox — search and launch every Join365 app: Chat, Call365, Mail, Folio, Game365 and Gust.">
-<meta name="theme-color" content="#070a10">
-<title>Tools · Join365 — every tool, one place</title>
+<meta name="description" content="The Join365 library — every Join365 app lives on one bookshelf. Pull out a book to read what it does, then jump straight in.">
+<meta name="theme-color" content="#150e09">
+<title>The Library · Join365 — pick a book, open a tool</title>
 <link rel="icon" type="image/png" href="https://join365.eu.cc/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   JOIN365 · TOOLS  —  one dashboard for every Join365 app
+   JOIN365 · THE LIBRARY
+   Every app is a book on a wooden shelf. Click a book to pull
+   it out and read about it — then jump straight into the tool.
    Plain HTML + CSS + JS. No frameworks, no build step.
    ============================================================ */
 
 /* ---------- tokens ---------- */
 :root{
-  --bg:#070a10;
-  --panel:#0e141f;
-  --panel-2:#141c2b;
-  --line:#1e293b;
-  --line-2:#2c3b53;
-  --text:#f2f6fb;
-  --muted:#9aa8bd;
-  --faint:#5f7089;
+  --wall:#150e09;                 /* library wall at night */
+  --panel:#1d130c;
+  --panel-2:#261810;
+  --line:#39291d;
+  --line-2:#4f3a27;
+  --text:#f5ede0;
+  --muted:#b39e88;
+  --faint:#8a715c;
   --orange:#ff6b47;
-  --teal:#2dd4bf;
   --gold:#e8a93b;
-  --violet:#a78bfa;
-  --pink:#f472b6;
-  --sky:#38bdf8;
   --green:#34d399;
-  --radius:18px;
+  --paper:#f6efdf;                /* book pages */
+  --paper-2:#efe3c9;
+  --ink:#3c2a1a;                  /* text printed on pages */
+  --ink-soft:#6b5540;
+  --wood-1:#8a5a30;
+  --wood-2:#5b3619;
+  --wood-3:#3a2110;
+  --brass:#d9b25f;
+  --brass-dark:#8a6a24;
+  --radius:16px;
   --header-h:60px;
 }
-
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
-  margin:0;
-  min-height:100vh;
-  color:var(--text);
-  font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;
-  font-size:15px;
-  line-height:1.55;
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.55;
   -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1000px 540px at 50% -6%, rgba(255,177,92,.15), transparent 62%),
+    radial-gradient(820px 620px at 108% 38%, rgba(150,75,28,.10), transparent 60%),
+    radial-gradient(700px 560px at -8% 70%, rgba(120,60,30,.08), transparent 60%),
+    var(--wall);
 }
+/* faint wood paneling on the wall */
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.016) 0 2px, transparent 2px 148px)}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit}
-::selection{background:rgba(255,107,71,.35)}
+::selection{background:rgba(232,169,59,.35)}
 
-/* ---------- animated background ---------- */
-.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;
-  background:
-    radial-gradient(1100px 700px at 88% -12%, rgba(255,107,71,.08), transparent 62%),
-    radial-gradient(900px 650px at -5% 12%, rgba(56,189,248,.07), transparent 58%),
-    radial-gradient(800px 600px at 55% 115%, rgba(167,139,250,.06), transparent 60%),
-    var(--bg);
-}
-.bg::before{content:'';position:absolute;inset:0;
-  background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.4px);
-  background-size:27px 27px;
-  -webkit-mask-image:radial-gradient(ellipse 90% 65% at 50% 0%, #000 25%, transparent 78%);
-  mask-image:radial-gradient(ellipse 90% 65% at 50% 0%, #000 25%, transparent 78%);
-}
-.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.45;pointer-events:none}
-.orb.o1{width:420px;height:420px;left:-140px;top:12%;background:#ff6b47;animation:drift 26s ease-in-out infinite alternate}
-.orb.o2{width:380px;height:380px;right:-120px;top:44%;background:#38bdf8;animation:drift 32s ease-in-out -8s infinite alternate-reverse}
-@keyframes drift{
-  0%{transform:translate(0,0) scale(1)}
-  50%{transform:translate(60px,-40px) scale(1.08)}
-  100%{transform:translate(-40px,50px) scale(.96)}
-}
+/* floating dust in the lamplight */
+.motes{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.motes i{position:absolute;bottom:-12px;width:3px;height:3px;border-radius:50%;background:#ffd9a0;opacity:0;animation:mote linear infinite}
+.motes i:nth-child(1){left:7%;animation-duration:21s;animation-delay:-3s}
+.motes i:nth-child(2){left:16%;width:2px;animation-duration:26s;animation-delay:-11s}
+.motes i:nth-child(3){left:27%;animation-duration:18s;animation-delay:-6s}
+.motes i:nth-child(4){left:38%;width:2px;animation-duration:24s;animation-delay:-16s}
+.motes i:nth-child(5){left:52%;animation-duration:20s;animation-delay:-1s}
+.motes i:nth-child(6){left:63%;width:2px;animation-duration:28s;animation-delay:-9s}
+.motes i:nth-child(7){left:71%;animation-duration:22s;animation-delay:-14s}
+.motes i:nth-child(8){left:82%;width:2px;animation-duration:19s;animation-delay:-5s}
+.motes i:nth-child(9){left:90%;animation-duration:25s;animation-delay:-19s}
+.motes i:nth-child(10){left:45%;width:2px;animation-duration:23s;animation-delay:-12s}
+@keyframes mote{0%{transform:translateY(0);opacity:0}14%{opacity:.16}86%{opacity:.1}100%{transform:translateY(-88vh);opacity:0}}
 
 /* ---------- shell ---------- */
 .shell{width:min(1200px,calc(100% - 40px));margin:0 auto}
@@ -81,11 +83,10 @@ button{font-family:inherit}
 /* ---------- top bar ---------- */
 .topbar{
   position:sticky;top:0;z-index:60;height:var(--header-h);
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  padding:0 4px;
-  background:color-mix(in srgb, var(--bg) 72%, transparent);
+  display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 4px;
+  background:color-mix(in srgb, var(--wall) 74%, transparent);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  border-bottom:1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  border-bottom:1px solid color-mix(in srgb, var(--line) 80%, transparent);
 }
 .brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.03em}
 .brand .wave-mark{display:inline-flex;align-items:flex-end;gap:2.5px;height:20px}
@@ -98,36 +99,27 @@ button{font-family:inherit}
 .brand em{font-style:normal;color:var(--orange)}
 .brand .crumb{color:var(--faint);font-weight:500;margin:0 1px}
 .brand .here{color:var(--text)}
-.top-actions{display:flex;align-items:center;gap:10px}
 .top-link{font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);
   padding:8px 13px;border-radius:10px;transition:.2s;background:var(--panel)}
 .top-link:hover{color:var(--text);border-color:var(--line-2);background:var(--panel-2)}
 
-/* view toggle (grid / list) */
-.vt{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
-.vt button{width:38px;height:35px;display:grid;place-items:center;color:var(--faint);background:none;border:0;cursor:pointer;transition:.18s}
-.vt button + button{border-left:1px solid var(--line)}
-.vt button:hover{color:var(--muted)}
-.vt button[aria-pressed="true"]{color:var(--text);background:var(--panel-2);box-shadow:inset 0 0 0 1px var(--line-2)}
-.vt svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-
 /* ---------- hero ---------- */
-.hero{padding:64px 0 30px;max-width:800px}
-.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--teal);
-  font:600 11px 'Space Grotesk',sans-serif;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
-.eyebrow::before{content:'';width:24px;height:1px;background:var(--teal)}
+.hero{padding:64px 0 26px;max-width:800px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--gold);
+  font:600 11px 'Space Grotesk',sans-serif;letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px}
+.eyebrow::before{content:'';width:24px;height:1px;background:var(--gold)}
 .hero h1{font:600 clamp(40px,6.4vw,72px)/1 'Space Grotesk',sans-serif;letter-spacing:-.05em;margin:0 0 20px}
 .hero h1 em{font-style:normal;color:var(--orange)}
-.hero>.lede{color:var(--muted);font-size:16.5px;line-height:1.7;margin:0 0 30px;max-width:600px}
+.hero>.lede{color:var(--muted);font-size:16.5px;line-height:1.7;margin:0 0 30px;max-width:620px}
 
 /* hero stats */
 .stats{display:flex;flex-wrap:wrap;gap:12px 34px;margin-top:30px}
 .stat{display:flex;align-items:baseline;gap:9px}
 .stat strong{font:700 26px 'Space Grotesk',sans-serif;letter-spacing:-.03em}
 .stat:nth-child(1) strong{color:var(--orange)}
-.stat:nth-child(2) strong{color:var(--teal)}
+.stat:nth-child(2) strong{color:var(--brass)}
 .stat:nth-child(3) strong{color:var(--gold)}
-.stat:nth-child(4) strong{color:var(--violet)}
+.stat:nth-child(4) strong{color:#c9a06a}
 .stat span{color:var(--faint);font-size:12.5px}
 
 /* ---------- search ---------- */
@@ -135,9 +127,9 @@ button{font-family:inherit}
   border-radius:17px;border:1px solid var(--line-2);
   background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.014)),var(--panel);
   transition:border-color .2s, box-shadow .2s}
-.search:focus-within{border-color:var(--orange);box-shadow:0 0 0 4px rgba(255,107,71,.13)}
+.search:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(232,169,59,.14)}
 .search .s-ic{width:20px;height:20px;flex:none;fill:none;stroke:var(--faint);stroke-width:2;stroke-linecap:round;transition:stroke .2s}
-.search:focus-within .s-ic{stroke:var(--orange)}
+.search:focus-within .s-ic{stroke:var(--gold)}
 .search input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;color:var(--text);font:500 16px Inter,system-ui,sans-serif}
 .search input::placeholder{color:var(--faint)}
 .search input::-webkit-search-cancel-button{display:none}
@@ -146,180 +138,265 @@ button{font-family:inherit}
 .search .clear:hover{color:var(--text)}
 .search .clear.show{display:grid}
 .search kbd{flex:none;font:600 11px 'Space Grotesk',sans-serif;color:var(--faint);
-  border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:3px 8px;background:var(--panel);
-  transition:opacity .2s}
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:3px 8px;background:var(--panel);transition:opacity .2s}
 .search:focus-within kbd{opacity:0}
-
-/* popular searches */
 .sugg{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px}
 .sugg>span{color:var(--faint);font-size:12px;margin-right:2px}
 .sugg button{font-size:12px;font-weight:600;color:var(--muted);background:var(--panel);
   border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer;transition:.18s}
-.sugg button:hover{color:var(--text);border-color:var(--orange);background:color-mix(in srgb,var(--orange) 12%,var(--panel))}
+.sugg button:hover{color:var(--text);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--panel))}
 
-/* ---------- toolbar (sticky) ---------- */
-.toolbar{
-  position:sticky;top:calc(var(--header-h) + 10px);z-index:50;
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
-  margin-top:34px;padding:11px 13px;
-  border:1px solid var(--line);border-radius:16px;
-  background:color-mix(in srgb, #0a0f18 84%, transparent);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{display:inline-flex;align-items:center;gap:7px;
-  font:600 12.5px Inter,sans-serif;color:var(--muted);
-  background:var(--panel);border:1px solid var(--line);border-radius:99px;
-  padding:8px 14px;cursor:pointer;transition:.18s;white-space:nowrap}
-.chip .n{font-size:11px;font-weight:700;opacity:.55;font-family:'Space Grotesk',sans-serif}
-.chip:hover{color:var(--text);border-color:var(--line-2);transform:translateY(-1px)}
-.chip.active{color:var(--text);border-color:color-mix(in srgb,var(--c) 60%,transparent);
-  background:color-mix(in srgb,var(--c) 15%,var(--panel));
-  box-shadow:0 4px 18px -8px color-mix(in srgb,var(--c) 60%,transparent)}
-.controls{display:flex;align-items:center;gap:9px;flex:none}
-.sort{appearance:none;-webkit-appearance:none;cursor:pointer;
-  font:600 12.5px Inter,sans-serif;color:var(--muted);
-  background:var(--panel) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%239aa8bd' stroke-width='1.6' stroke-linecap='round'/></svg>") no-repeat right 11px center/9px;
+/* ---------- toolbar ---------- */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;
+  margin-top:34px;padding:11px 14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.tools-left{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+/* bookmarked-only switch */
+.switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .track{width:40px;height:22px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line-2);
+  position:relative;transition:.2s;flex:none}
+.switch .track::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+  background:var(--faint);transition:.2s}
+.switch input:checked + .track{background:color-mix(in srgb,var(--gold) 38%,var(--panel-2));border-color:var(--gold)}
+.switch input:checked + .track::after{left:20px;background:var(--gold)}
+.switch input:focus-visible + .track{outline:2px solid var(--gold);outline-offset:2px}
+.switch .lbl{font-size:13px;font-weight:600;color:var(--muted)}
+.switch:hover .lbl{color:var(--text)}
+/* sort */
+.sort{appearance:none;-webkit-appearance:none;cursor:pointer;font:600 12.5px Inter,sans-serif;color:var(--muted);
+  background:var(--panel-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23b39e88' stroke-width='1.6' stroke-linecap='round'/></svg>") no-repeat right 11px center/9px;
   border:1px solid var(--line);border-radius:10px;padding:8px 32px 8px 13px;transition:.18s}
 .sort:hover{color:var(--text);border-color:var(--line-2)}
 .sort option{background:var(--panel);color:var(--text)}
-
-/* results meta + reset */
+/* meta + reset */
 .meta-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:18px 3px 4px}
 #resultsMeta{color:var(--faint);font-size:12.5px}
 #resultsMeta b{color:var(--muted);font-weight:600}
-#resultsMeta mark{background:none;color:var(--orange);font-weight:600;padding:0}
+#resultsMeta mark{background:none;color:var(--gold);font-weight:600;padding:0}
 .reset{display:none;align-items:center;gap:6px;font:600 12px Inter,sans-serif;color:var(--muted);
   background:none;border:1px solid var(--line);border-radius:9px;padding:7px 12px;cursor:pointer;transition:.18s}
 .reset.show{display:inline-flex}
-.reset:hover{color:var(--text);border-color:var(--orange)}
+.reset:hover{color:var(--text);border-color:var(--gold)}
 
-/* ---------- sections ---------- */
-.cat{margin:40px 0}
-.cat-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.cat-ic{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:var(--c);
-  background:color-mix(in srgb,var(--c) 11%,transparent);
-  border:1px solid color-mix(in srgb,var(--c) 32%,transparent)}
-.cat-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.cat-ic svg [data-fill]{fill:currentColor;stroke:none}
-.cat-head h2{font:600 21px 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0}
-.cat-head .blurb{margin:3px 0 0;color:var(--faint);font-size:13px}
-.cat-count{margin-left:auto;flex:none;font:600 12px 'Space Grotesk',sans-serif;color:var(--muted);
-  border:1px solid var(--line);background:var(--panel);padding:5px 11px;border-radius:99px}
-.cat-count b{color:var(--c)}
-
-/* ---------- tool grid + cards ---------- */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:15px}
-.grid.list{display:flex;flex-direction:column;gap:12px}
-
-.card{
-  position:relative;overflow:hidden;
-  border:1px solid var(--line);border-radius:var(--radius);
-  background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.012) 45%),var(--panel);
-  transition:transform .22s ease,border-color .22s,box-shadow .22s;
-  animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
-  animation-delay:calc(min(var(--i),12) * 45ms);
+/* ============================================================
+   THE BOOKCASE — one regular bookshelf, two shelves
+   ============================================================ */
+.case{position:relative;margin:34px 0 60px;border-radius:12px 12px 8px 8px;
+  background:linear-gradient(180deg,#241711 0%,#1b110b 10%,#180e09 55%,#140b07 100%);
+  box-shadow:
+    inset 0 0 46px rgba(0,0,0,.55),
+    inset 0 2px 0 rgba(255,255,255,.03),
+    0 36px 64px -24px rgba(0,0,0,.78);
 }
-.no-anim .card{animation:none}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 25%,transparent) 55%,transparent)}
-.card::after{content:'';position:absolute;width:160px;height:160px;border-radius:50%;
-  right:-65px;top:-65px;background:var(--c);opacity:.07;filter:blur(8px);pointer-events:none;transition:opacity .25s}
-.card:hover,.card:focus-within{transform:translateY(-4px);
-  border-color:color-mix(in srgb,var(--c) 55%,var(--line));
-  box-shadow:0 20px 46px -20px color-mix(in srgb,var(--c) 45%,transparent)}
-.card:hover::after{opacity:.14}
-.card:focus-within{outline:2px solid color-mix(in srgb,var(--c) 70%,transparent);outline-offset:2px}
+.case-top{position:relative;height:20px;border-radius:11px 11px 0 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 2px, transparent 2px 13px),
+    linear-gradient(180deg,#8a5a30,#5f3a1c 60%,#4a2c15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 2px 5px rgba(0,0,0,.4)}
+.nameplate{position:absolute;left:50%;top:3px;transform:translateX(-50%);
+  padding:2px 12px;border-radius:4px;white-space:nowrap;
+  background:linear-gradient(180deg,#ecc978,#b8913f);
+  border:1px solid var(--brass-dark);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 1px 3px rgba(0,0,0,.45);
+  color:#42300f;font:700 8.5px 'Space Grotesk',sans-serif;letter-spacing:.22em;text-transform:uppercase;
+  text-shadow:0 1px 0 rgba(255,255,255,.35)}
+.case-side{position:absolute;top:0;bottom:0;width:18px;z-index:5;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 2px, transparent 2px 15px),
+    linear-gradient(90deg,#7a4c28,#573417 45%,#43280f);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.22)}
+.case-side.l{left:0;border-radius:12px 0 0 0}
+.case-side.r{right:0;border-radius:0 12px 0 0}
+.row{padding:0 12px}
+.case-base{height:16px;margin:0 -7px;border-radius:4px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 2px, transparent 2px 13px),
+    linear-gradient(180deg,#6b4423,#3a2110);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 14px 26px -6px rgba(0,0,0,.6)}
 
-.card-link{position:static;display:flex;flex-direction:column;height:100%;padding:22px}
-.card-link::after{content:'';position:absolute;inset:0;z-index:1;border-radius:inherit}
+/* the row of books */
+.books{display:flex;align-items:flex-end;gap:8px;height:244px;padding:0 24px;margin-bottom:-7px;
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;position:relative;z-index:1}
+.books::-webkit-scrollbar{height:8px}
+.books::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:99px}
 
-.logo{flex:none;width:58px;height:58px;border-radius:15px;overflow:hidden;margin-bottom:18px;
-  box-shadow:0 16px 32px -14px color-mix(in srgb,var(--c) 65%,transparent),0 3px 8px rgba(0,0,0,.45)}
-.logo svg{width:100%;height:100%;display:block}
+/* ---------- books (spines) ---------- */
+.book{
+  position:relative;flex:0 0 auto;width:var(--w);height:var(--h);
+  border:0;padding:0;cursor:pointer;border-radius:4px 4px 2px 2px;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--c) 72%, #fff) 0%,
+    color-mix(in srgb,var(--c) 88%, #fff) 7%,
+    var(--c) 22%,
+    color-mix(in srgb,var(--c) 84%, #000) 100%);
+  box-shadow:
+    inset 5px 0 8px -3px rgba(255,255,255,.30),
+    inset -6px 0 9px -4px rgba(0,0,0,.42),
+    inset 0 4px 5px -3px rgba(255,255,255,.38),
+    0 10px 12px -8px rgba(0,0,0,.6);
+  transition:transform .22s ease, box-shadow .22s ease;
+}
+.book::before,.book::after{content:'';position:absolute;left:6px;right:6px;height:3px;border-radius:2px;
+  background:rgba(255,255,255,.5);box-shadow:0 7px 0 -0.5px rgba(0,0,0,.32)}
+.book::before{top:15px}
+.book::after{bottom:40px}
+.book:hover,.book:focus-visible{
+  transform:translateY(-13px);
+  box-shadow:
+    inset 5px 0 8px -3px rgba(255,255,255,.30),
+    inset -6px 0 9px -4px rgba(0,0,0,.42),
+    inset 0 4px 5px -3px rgba(255,255,255,.38),
+    0 22px 24px -10px rgba(0,0,0,.65);
+  z-index:4;outline:none;
+}
+.book:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+/* spine title, read top-to-bottom */
+.b-title{position:absolute;top:32px;bottom:46px;left:50%;transform:translateX(-50%);
+  writing-mode:vertical-rl;text-orientation:mixed;white-space:nowrap;overflow:hidden;
+  font:700 14px 'Space Grotesk',sans-serif;letter-spacing:.08em;color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,.45)}
+.b-mark{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  width:21px;height:21px;border-radius:50%;display:grid;place-items:center;
+  font:700 10px 'Space Grotesk',sans-serif;color:rgba(255,255,255,.95);
+  background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.4)}
+/* bookmark ribbon for favorites */
+.ribbon{position:absolute;top:-14px;right:9px;width:11px;height:32px;display:none;
+  background:linear-gradient(180deg,#f4c65a,#d9992a);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 72%,0 100%);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.book.fav .ribbon{display:block;animation:ribbonIn .3s ease}
+@keyframes ribbonIn{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
 
-.card h3{font:600 20px 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0}
-.tagline{display:block;color:var(--c);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-top:3px}
-.desc{color:var(--muted);font-size:13px;line-height:1.65;margin:11px 0 0}
+/* ---------- shelf decorations ---------- */
+.deco{flex:0 0 auto;position:relative;filter:drop-shadow(0 9px 9px rgba(0,0,0,.38));pointer-events:none}
+/* a small stack of lying books */
+.deco.stack{display:flex;flex-direction:column;justify-content:flex-end}
+.deco.stack i{display:block;height:13px;border-radius:2px;position:relative;
+  box-shadow:0 2px 3px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -2px 3px rgba(0,0,0,.22)}
+.deco.stack i::after{content:'';position:absolute;top:2px;bottom:2px;right:3px;width:13px;border-radius:1px;
+  background:repeating-linear-gradient(180deg,#e7d9bc 0 1.5px,#d3c19c 1.5px 3px)}
+.deco.stack i:nth-child(1){width:86px;background:linear-gradient(180deg,#69807a,#4b5f57)}
+.deco.stack i:nth-child(2){width:102px;margin-top:2px;background:linear-gradient(180deg,#8a5252,#6b3c3c)}
+.deco.stack i:nth-child(3){width:116px;margin-top:2px;background:linear-gradient(180deg,#77563a,#57391f)}
+/* the laptop that makes up space on the bottom shelf */
+.laptop{pointer-events:auto;transition:transform .22s ease, filter .22s ease}
+.laptop:hover,.laptop:focus-visible{transform:translateY(-7px)}
+.laptop:hover .scr-glow,.laptop:focus-visible .scr-glow{opacity:.22}
+.laptop .blink{animation:caret 1.1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
 
-.meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:14px;font-size:11.5px;color:var(--faint)}
-.status{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:700;letter-spacing:.03em}
-.status i{width:7px;height:7px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 0 0 rgba(52,211,153,.5);animation:pulse 2.2s infinite}
-@keyframes pulse{70%{box-shadow:0 0 0 6px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
-.meta .sep{opacity:.45}
-.opens{color:var(--gold);font-weight:600}
+/* ---------- the wooden board ---------- */
+.board{height:17px;border-radius:3px;position:relative;z-index:2;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.11) 0 2px, transparent 2px 13px),
+    linear-gradient(180deg,#8a5a30 0,#6b4423 30%,#503015 88%,#3a2110 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 26px 36px -14px rgba(0,0,0,.7),
+    0 8px 16px rgba(0,0,0,.42);
+}
+.board::before{content:'';position:absolute;left:0;right:0;top:-5px;height:5px;border-radius:3px 3px 0 0;
+  background:linear-gradient(180deg,#a2693a,#7c4e27)}
 
-.go{margin-top:auto;padding-top:20px;display:flex;align-items:center;justify-content:space-between;
-  color:var(--c);font-size:13.5px;font-weight:700}
-.go .arrow{font-size:17px;transition:transform .2s}
-.card:hover .go .arrow{transform:translateX(5px)}
-
-mark{background:color-mix(in srgb,var(--c,#ff6b47) 32%,transparent);color:inherit;border-radius:3px;padding:0 2px}
-
-/* favorite star */
-.star{position:absolute;top:14px;right:14px;z-index:3;width:34px;height:34px;
-  display:grid;place-items:center;border-radius:10px;cursor:pointer;
-  background:color-mix(in srgb,var(--panel-2) 80%,transparent);border:1px solid var(--line);
-  color:var(--faint);transition:.18s}
-.star svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
-.star:hover{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 55%,transparent);transform:scale(1.06)}
-.star.is-fav{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 60%,transparent);
-  background:color-mix(in srgb,var(--gold) 16%,var(--panel-2));animation:pop .35s ease}
-.star.is-fav svg{fill:currentColor;stroke:none}
-@keyframes pop{40%{transform:scale(1.25)}100%{transform:scale(1)}}
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-
-/* ---------- list view ---------- */
-.grid.list .card-link{flex-direction:row;align-items:center;gap:19px;padding:16px 20px 16px 68px}
-.grid.list .logo{width:54px;height:54px;margin:0;border-radius:14px}
-.grid.list .card-body{flex:1;min-width:0}
-.grid.list h3{display:inline}
-.grid.list .tagline{display:inline;margin:0 0 0 10px;letter-spacing:.04em}
-.grid.list .desc{margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.grid.list .meta{margin-top:8px}
-.grid.list .go{margin:0;padding:0;flex:none}
-.grid.list .go .label{display:none}
-.grid.list .go .arrow{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:15px;
-  border:1px solid color-mix(in srgb,var(--c) 42%,transparent);
-  background:color-mix(in srgb,var(--c) 11%,transparent)}
-.grid.list .star{top:50%;left:15px;right:auto;transform:translateY(-50%)}
-.grid.list .star:hover{transform:translateY(-50%) scale(1.1)}
-.grid.list .star.is-fav{animation:none}
-@media (max-width:640px){.grid.list .star{display:none}.grid.list .card-link{padding-left:20px}}
+/* empty shelf note (when a search empties one shelf, the wood simply shows) */
+.shelf-note{color:var(--faint);font-size:12px;font-style:italic;align-self:center;margin-left:6px;flex:0 0 auto}
 
 /* ---------- empty state ---------- */
-.empty{display:none;text-align:center;padding:70px 20px 80px;border:1px dashed var(--line-2);border-radius:var(--radius);margin:40px 0 60px}
+.empty{display:none;text-align:center;padding:56px 20px 64px;border:1px dashed var(--line-2);border-radius:var(--radius);margin:26px 0 50px}
 .empty.show{display:block}
 .empty .e-ic{width:74px;height:74px;margin:0 auto 20px;border-radius:22px;display:grid;place-items:center;
   color:var(--faint);background:var(--panel);border:1px solid var(--line)}
 .empty .e-ic svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
 .empty h3{font:600 22px 'Space Grotesk',sans-serif;margin:0 0 8px}
-.empty p{color:var(--muted);font-size:14px;margin:0 auto 22px;max-width:430px}
-.empty p em{color:var(--orange);font-style:normal;font-weight:600}
-.empty .btn{display:inline-flex;align-items:center;gap:8px;font:700 13px Inter,sans-serif;color:#0b0d12;
-  background:var(--orange);border:0;border-radius:11px;padding:11px 20px;cursor:pointer;transition:.2s}
-.empty .btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px -10px rgba(255,107,71,.55)}
+.empty p{color:var(--muted);font-size:14px;margin:0 auto 22px;max-width:440px}
+.empty p em{color:var(--gold);font-style:normal;font-weight:600}
+.empty .btn{display:inline-flex;align-items:center;gap:8px;font:700 13px Inter,sans-serif;color:#1c1207;
+  background:var(--gold);border:0;border-radius:11px;padding:11px 20px;cursor:pointer;transition:.2s}
+.empty .btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px -10px rgba(232,169,59,.55)}
 
 /* ---------- noscript ---------- */
 .noscript{margin:40px 0;padding:22px;border:1px solid var(--line-2);border-radius:var(--radius);background:var(--panel)}
 .noscript ul{margin:12px 0 0;padding-left:20px;color:var(--muted)}
-.noscript a{color:var(--orange)}
+.noscript a{color:var(--gold)}
 
 /* ---------- footer ---------- */
-footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:30px 0 38px}
 .foot-grid{display:flex;flex-wrap:wrap;gap:26px 40px;align-items:flex-start;justify-content:space-between}
 .foot-brand{display:flex;align-items:center;gap:10px;font:700 16px 'Space Grotesk',sans-serif;letter-spacing:-.02em}
 .foot-brand em{font-style:normal;color:var(--orange)}
 .foot-tag{color:var(--faint);font-size:12.5px;margin:8px 0 0}
-.foot-links{display:flex;flex-wrap:wrap;gap:7px 8px;max-width:560px;justify-content:flex-end}
+.foot-links{display:flex;flex-wrap:wrap;gap:8px;max-width:560px;justify-content:flex-end}
 .foot-links a{font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line);
   background:var(--panel);border-radius:99px;padding:6px 12px;transition:.18s}
 .foot-links a:hover{color:var(--text);border-color:var(--line-2);transform:translateY(-1px)}
 .foot-fine{color:var(--faint);font-size:11.5px;margin-top:24px;display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between}
 
+/* ============================================================
+   THE OPEN BOOK (modal)
+   ============================================================ */
+.veil{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:22px;
+  background:rgba(12,7,4,.74);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  animation:fadeIn .2s ease}
+.veil[hidden]{display:none}
+@keyframes fadeIn{from{opacity:0}}
+.m-book{position:relative;width:min(880px,100%);max-height:calc(100vh - 44px);overflow:auto;
+  display:grid;grid-template-columns:1fr 26px 1.15fr;
+  border-radius:14px;box-shadow:0 46px 100px -24px rgba(0,0,0,.8);
+  animation:unfold .38s cubic-bezier(.2,.7,.25,1);transform-origin:50% 40%}
+@keyframes unfold{from{opacity:0;transform:perspective(1400px) rotateY(-13deg) scale(.96)}to{opacity:1;transform:none}}
+.page{background:var(--paper);padding:36px 32px;position:relative;min-width:0}
+.page.left{border-radius:14px 0 0 14px;
+  background:linear-gradient(200deg,#fbf5e8,#f0e4ca);
+  box-shadow:inset -16px 0 20px -14px rgba(0,0,0,.24);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.page.right{border-radius:0 14px 14px 0;
+  box-shadow:inset 16px 0 20px -14px rgba(0,0,0,.24);
+  display:flex;flex-direction:column}
+/* stacked page edges on the outer sides */
+.page.left::before{content:'';position:absolute;left:0;top:0;bottom:0;width:7px;border-radius:14px 0 0 14px;
+  background:repeating-linear-gradient(180deg,#e5d8ba 0 2px,#f2e8d0 2px 4px)}
+.page.right::after{content:'';position:absolute;right:0;top:0;bottom:0;width:7px;border-radius:0 14px 14px 0;
+  background:repeating-linear-gradient(180deg,#e5d8ba 0 2px,#f2e8d0 2px 4px)}
+/* centre gutter */
+.gutter{background:linear-gradient(90deg,rgba(0,0,0,.18),rgba(0,0,0,.05) 45%,rgba(0,0,0,.18))}
+/* title page (left) */
+.frame{position:absolute;inset:15px;border:1.5px solid #b9a276;border-radius:9px;pointer-events:none}
+.frame::before{content:'';position:absolute;inset:5px;border:1px solid #cdb88d;border-radius:5px}
+.m-cover{width:118px;height:118px;border-radius:28px;overflow:hidden;margin-bottom:22px;
+  box-shadow:0 16px 30px -12px rgba(60,42,26,.5),0 3px 8px rgba(60,42,26,.3)}
+.m-cover svg{width:100%;height:100%;display:block}
+.m-title{font:600 32px/1.1 Lora,Georgia,serif;color:var(--ink);margin:0 0 6px;letter-spacing:-.01em}
+.m-tag{font:italic 500 15px Lora,Georgia,serif;color:#8a6f4a;margin:0 0 14px}
+.m-orn{color:#b9a276;font-size:17px;line-height:1;margin-bottom:14px}
+.m-cat{font:700 10.5px 'Space Grotesk',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#a08356;margin:0}
+/* details page (right) */
+.m-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;z-index:3;
+  border:1px solid #d6c49c;background:#f6eeda;color:#8a6f4a;font-size:14px;line-height:1;cursor:pointer;transition:.18s}
+.m-close:hover{background:#efe2c4;color:var(--ink);transform:rotate(90deg)}
+.m-h{font:700 11px 'Space Grotesk',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#a08356;margin:6px 0 9px}
+.m-desc{font:400 15px/1.75 Inter,sans-serif;color:#4a3826;margin:0 0 22px}
+.m-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px}
+.m-tags span{font-size:12px;font-weight:600;color:var(--ink-soft);border:1px solid #d6c49c;background:#f8f1e0;
+  padding:4px 11px;border-radius:99px}
+.m-stats{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);margin-bottom:24px}
+.m-stats .status{display:inline-flex;align-items:center;gap:6px;color:#1c7a4f;font-weight:700}
+.m-stats .status i{width:7px;height:7px;border-radius:50%;background:#21a06a;box-shadow:0 0 0 0 rgba(33,160,106,.5);animation:pulse 2.2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 6px rgba(33,160,106,0)}100%{box-shadow:0 0 0 0 rgba(33,160,106,0)}}
+.m-stats .sep{opacity:.4}
+.m-actions{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap}
+.m-open{flex:1;min-width:200px;display:inline-flex;justify-content:center;align-items:center;gap:9px;
+  padding:14px 20px;border-radius:12px;background:var(--c);color:#fff;font:700 14.5px Inter,sans-serif;
+  box-shadow:0 10px 22px -8px var(--c);transition:.2s}
+.m-open:hover{transform:translateY(-2px);box-shadow:0 16px 30px -10px var(--c)}
+.m-open .arrow{font-size:17px;transition:transform .2s}
+.m-open:hover .arrow{transform:translateX(4px)}
+.m-fav{padding:14px 18px;border-radius:12px;border:1.5px solid #cbb98e;background:transparent;
+  color:var(--ink-soft);font:700 13px Inter,sans-serif;cursor:pointer;transition:.18s}
+.m-fav:hover{background:#f3e6c6;border-color:#d9a92f;color:#6b4c10}
+.m-fav.on{background:#f3e3b8;border-color:#d9a92f;color:#7a5a10}
+
 /* ---------- toast ---------- */
-.toast{position:fixed;left:50%;bottom:26px;z-index:100;transform:translate(-50%,16px);
+.toast{position:fixed;left:50%;bottom:26px;z-index:120;transform:translate(-50%,16px);
   opacity:0;pointer-events:none;transition:.28s cubic-bezier(.2,.7,.3,1);
   font:600 13px Inter,sans-serif;color:var(--text);
   background:var(--panel-2);border:1px solid var(--line-2);border-radius:12px;
@@ -330,33 +407,37 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
 /* ---------- responsive ---------- */
 @media (max-width:760px){
   .shell{width:calc(100% - 28px)}
-  .hero{padding:44px 0 22px}
+  .hero{padding:44px 0 20px}
   .top-link span{display:none}
-  .toolbar{position:static}
-  .controls{width:100%;justify-content:space-between}
-  .sort{flex:1}
+  .books{padding:0 16px}
   .foot-links{justify-content:flex-start}
+  .m-book{grid-template-columns:1fr;overflow:auto}
+  .gutter{height:22px;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.05) 45%,rgba(0,0,0,.18))}
+  .page.left{border-radius:14px 14px 0 0;box-shadow:inset 0 -14px 18px -12px rgba(0,0,0,.2);padding:28px 22px}
+  .page.right{border-radius:0 0 14px 14px;box-shadow:inset 0 14px 18px -12px rgba(0,0,0,.2);padding:26px 22px 28px}
+  .page.left::before,.page.right::after{display:none}
+  .m-cover{width:92px;height:92px;border-radius:22px}
+  .m-title{font-size:26px}
+  .m-open{min-width:100%}
 }
 @media (max-width:560px){
   .stats{gap:10px 24px}
   .stat strong{font-size:22px}
   .search kbd{display:none}
+  .deco.globe,.deco.plant{display:none}   /* keep small shelves readable */
 }
 
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
   html{scroll-behavior:auto}
+  .motes i{display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- animated backdrop -->
-<div class="bg" aria-hidden="true">
-  <div class="orb o1"></div>
-  <div class="orb o2"></div>
-</div>
+<div class="motes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
 <div class="shell">
 
@@ -364,33 +445,23 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
   <header class="topbar">
     <a class="brand" href="https://join365.eu.cc/" aria-label="Join365 home">
       <span class="wave-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-      JOIN<em>365</em><span class="crumb">/</span><span class="here">Tools</span>
+      JOIN<em>365</em><span class="crumb">/</span><span class="here">The Library</span>
     </a>
-    <div class="top-actions">
-      <div class="vt" role="group" aria-label="Card layout">
-        <button id="viewGrid" aria-pressed="true" title="Grid view" aria-label="Grid view">
-          <svg viewBox="0 0 20 20"><rect x="3.2" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="3.2" y="10.8" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="10.8" width="6.2" height="6.2" rx="1.6"/></svg>
-        </button>
-        <button id="viewList" aria-pressed="false" title="List view" aria-label="List view">
-          <svg viewBox="0 0 20 20"><path d="M8 5.4h9M8 10h9M8 14.6h9"/><circle cx="4.3" cy="5.4" r="1.2"/><circle cx="4.3" cy="10" r="1.2"/><circle cx="4.3" cy="14.6" r="1.2"/></svg>
-        </button>
-      </div>
-      <a class="top-link" href="https://join365.eu.cc/" title="Join365 home"><span>Join365 home</span> ↗</a>
-    </div>
+    <a class="top-link" href="https://join365.eu.cc/" title="Join365 home"><span>Join365 home</span> ↗</a>
   </header>
 
   <main>
     <!-- ============ hero + search ============ -->
     <section class="hero">
-      <div class="eyebrow">The Join365 toolbox</div>
-      <h1>Every tool.<br><em>One place.</em></h1>
-      <p class="lede">All six Join365 apps on one dashboard — talk, meet, mail, write, play and browse.
-        Search by name, filter by category, and pin your favorites with the ★.</p>
+      <div class="eyebrow">The Join365 library</div>
+      <h1>Pick a book.<br><em>Open a tool.</em></h1>
+      <p class="lede">Every Join365 app lives on this shelf. Pull out a book to read what it's about —
+        then jump straight into the tool. Star a book and it keeps a gold bookmark.</p>
 
       <div class="search">
         <svg class="s-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7.2"/><path d="m16.4 16.4 4.3 4.3"/></svg>
-        <input id="q" type="search" placeholder="Search tools — try “games”, “video”, “book” or “browser”…"
-               autocomplete="off" spellcheck="false" aria-label="Search tools by name, description or tag"
+        <input id="q" type="search" placeholder="Search the shelf — try “games”, “video”, “book” or “email”…"
+               autocomplete="off" spellcheck="false" aria-label="Search books by name, description or tag"
                aria-describedby="kbdHint">
         <button class="clear" id="clearSearch" aria-label="Clear search" title="Clear search">✕</button>
         <kbd id="kbdHint" title="Press / to search">/</kbd>
@@ -402,54 +473,61 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
         <button data-q="email">email</button>
         <button data-q="book">book</button>
         <button data-q="games">games</button>
-        <button data-q="browser">browser</button>
       </div>
 
-      <div class="stats" aria-label="Toolbox stats">
-        <div class="stat"><strong id="statTools">0</strong><span>tools</span></div>
-        <div class="stat"><strong id="statCats">0</strong><span>categories</span></div>
-        <div class="stat"><strong id="statFavs">0</strong><span>favorites</span></div>
+      <div class="stats" aria-label="Library stats">
+        <div class="stat"><strong id="statBooks">0</strong><span>books</span></div>
+        <div class="stat"><strong id="statShelves">0</strong><span>shelves</span></div>
+        <div class="stat"><strong id="statMarks">0</strong><span>bookmarks</span></div>
         <div class="stat"><strong id="statOpens">0</strong><span>all-time opens</span></div>
       </div>
     </section>
 
-    <!-- ============ filter toolbar ============ -->
+    <!-- ============ toolbar ============ -->
     <div class="toolbar">
-      <div class="chips" id="chips" role="group" aria-label="Filter tools by category"></div>
-      <div class="controls">
-        <select class="sort" id="sort" aria-label="Sort tools">
+      <div class="tools-left">
+        <label class="switch" for="favOnly">
+          <input type="checkbox" id="favOnly">
+          <span class="track" aria-hidden="true"></span>
+          <span class="lbl">Bookmarked only</span>
+        </label>
+        <select class="sort" id="sort" aria-label="Sort books">
           <option value="curated">Sort · Curated</option>
-          <option value="az">Sort · Name A–Z</option>
-          <option value="za">Sort · Name Z–A</option>
+          <option value="az">Sort · Title A–Z</option>
+          <option value="za">Sort · Title Z–A</option>
           <option value="opens">Sort · Most opened</option>
-          <option value="favs">Sort · Favorites first</option>
+          <option value="favs">Sort · Bookmarked first</option>
         </select>
-        <div class="vt" role="group" aria-label="Card layout (mobile)">
-          <button id="viewGrid2" aria-pressed="true" title="Grid view" aria-label="Grid view">
-            <svg viewBox="0 0 20 20"><rect x="3.2" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="3.2" width="6.2" height="6.2" rx="1.6"/><rect x="3.2" y="10.8" width="6.2" height="6.2" rx="1.6"/><rect x="10.8" y="10.8" width="6.2" height="6.2" rx="1.6"/></svg>
-          </button>
-          <button id="viewList2" aria-pressed="false" title="List view" aria-label="List view">
-            <svg viewBox="0 0 20 20"><path d="M8 5.4h9M8 10h9M8 14.6h9"/><circle cx="4.3" cy="5.4" r="1.2"/><circle cx="4.3" cy="10" r="1.2"/><circle cx="4.3" cy="14.6" r="1.2"/></svg>
-          </button>
-        </div>
+      </div>
+      <div class="meta-row" style="margin:0">
+        <div id="resultsMeta" aria-live="polite"></div>
+        <button class="reset" id="resetBtn">✕ Clear search &amp; filters</button>
       </div>
     </div>
 
-    <div class="meta-row">
-      <div id="resultsMeta" aria-live="polite"></div>
-      <button class="reset" id="resetBtn">✕ Clear search &amp; filters</button>
+    <!-- ============ the bookcase ============ -->
+    <div class="case" id="library" aria-label="The Join365 bookshelf">
+      <div class="case-top"><span class="nameplate">The Join365 Library</span></div>
+      <div class="case-side l" aria-hidden="true"></div>
+      <div class="case-side r" aria-hidden="true"></div>
+      <div class="row">
+        <div class="books" id="rowTop" aria-label="Top shelf"></div>
+        <div class="board" aria-hidden="true"></div>
+      </div>
+      <div class="row">
+        <div class="books" id="rowBottom" aria-label="Bottom shelf"></div>
+        <div class="board" aria-hidden="true"></div>
+      </div>
+      <div class="case-base" aria-hidden="true"></div>
     </div>
-
-    <!-- everything below renders from JS -->
-    <div id="output"></div>
 
     <!-- ============ empty state ============ -->
     <div class="empty" id="empty">
       <div class="e-ic" aria-hidden="true">
         <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7"/><path d="m15.9 15.9 4.6 4.6"/><path d="m8 8 5 5m0-5-5 5" opacity=".55"/></svg>
       </div>
-      <h3 id="emptyTitle">No tools found</h3>
-      <p id="emptyBody">Nothing matches your search. Try a different word, or reset the filters.</p>
+      <h3 id="emptyTitle">No books found</h3>
+      <p id="emptyBody">Nothing on the shelf matches your search. Try another word, or reset the filters.</p>
       <button class="btn" id="emptyReset">Clear search &amp; filters</button>
     </div>
 
@@ -462,7 +540,6 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
           <li><a href="https://join365.eu.cc/Mail/">Mail — your Join365 email</a></li>
           <li><a href="https://join365.eu.cc/Folio/">Folio — write your book</a></li>
           <li><a href="https://join365.eu.cc/Game365/">Game365 — play &amp; publish games</a></li>
-          <li><a href="https://join365.eu.cc/Gust/">Gust — browser-in-a-browser</a></li>
         </ul>
       </div>
     </noscript>
@@ -476,15 +553,20 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
           <span class="wave-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
           JOIN<em>365</em>
         </div>
-        <p class="foot-tag">One workspace. Many possibilities.</p>
+        <p class="foot-tag">One bookshelf. Every tool.</p>
       </div>
       <nav class="foot-links" aria-label="All Join365 tools" id="footLinks"></nav>
     </div>
     <div class="foot-fine">
-      <span>© 2026 Join365 — Tools dashboard</span>
-      <span>Plain HTML, CSS &amp; JS · favorites &amp; history stay in your browser</span>
+      <span>© 2026 Join365 — The Library</span>
+      <span>Plain HTML, CSS &amp; JS · bookmarks stay in your browser</span>
     </div>
   </footer>
+</div>
+
+<!-- ============ the open book (modal) ============ -->
+<div class="veil" id="veil" hidden>
+  <div id="modalHost" style="display:contents"></div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -494,30 +576,22 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:30px 0 38px}
 'use strict';
 
 /* ============================================================
-   1 · DATA — categories, tools, and hand-drawn SVG logos
+   1 · DATA — shelves, books, logos, decorations
    ============================================================ */
 
 var CATEGORIES = [
   { id:'connect', name:'Communication', color:'#ff8f6b',
-    blurb:'Talk, meet and message — everything you need to stay in touch.',
+    blurb:'Talk, meet and message — pull a book to peek inside.',
     icon:'<svg viewBox="0 0 20 20"><rect x="2.4" y="3.4" width="11" height="8" rx="2.2"/><path d="M6 11.4v3.4l3.4-3.4"/><path d="M15.3 6.4h1.1a2 2 0 0 1 2 2v3.1a2 2 0 0 1-2 2h-4.5l-2.5 2.3v-2.3"/></svg>' },
   { id:'create', name:'Create', color:'#c084fc',
-    blurb:'Slow down and make something — books, chapters, ideas that last.',
+    blurb:'Write it down and make it last.',
     icon:'<svg viewBox="0 0 20 20"><path d="M14.7 2.6a2.4 2.4 0 0 1 3.4 3.4L7.1 17 3 18.1 4.1 14Z"/><path d="m12.9 4.4 3.2 3.2"/></svg>' },
   { id:'play', name:'Play', color:'#4ade80',
-    blurb:'Kick back — your personal browser arcade is waiting.',
-    icon:'<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4"/><path d="M8.2 6.8 13.5 10l-5.3 3.2Z" data-fill/></svg>' },
-  { id:'browse', name:'Explore', color:'#60a5fa',
-    blurb:'Wander the web without ever leaving Join365.',
-    icon:'<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4"/><path d="m13.2 6.8-1.8 4.6-4.6 1.8 1.8-4.6Z" data-fill/></svg>' }
+    blurb:'Press start whenever you like.',
+    icon:'<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.4"/><path d="M8.2 6.8 13.5 10l-5.3 3.2Z" data-fill/></svg>' }
 ];
 
-/* ---- app-icon factory ------------------------------------------------
-   Every tool gets a glossy "app icon": a rounded squircle with a rich
-   3-stop gradient, a glass sheen across the top, a soft shadow along the
-   bottom, and a crisp inner rim. Gradient ids carry a __ID__ placeholder
-   that gets swapped for a unique value on every render, so the same icon
-   can safely appear twice on the page (e.g. pinned favorites). */
+/* ---- app-icon factory (glossy book-cover logos for the modal) ---- */
 function appIcon(stops, glyph){
   return '<svg viewBox="0 0 64 64" aria-hidden="true">'
     + '<defs><linearGradient id="bg__ID__" x1="0" y1="0" x2="52" y2="64" gradientUnits="userSpaceOnUse">' + stops + '</linearGradient></defs>'
@@ -534,8 +608,8 @@ var TOOLS = [
     tagline:'Real-time messaging',
     desc:'Message friends, join servers, and explore communities. Create your character, hop into DMs, and stay connected in real time.',
     tags:['chat','messaging','messages','dm','direct messages','servers','community','friends','talk','real-time','characters'],
+    book:{ w:58, h:208, mark:'C', lean:0 },
     logo: appIcon('<stop stop-color="#ffb37c"/><stop offset=".55" stop-color="#ff7a45"/><stop offset="1" stop-color="#f2410f"/>',
-      /* two overlapping speech bubbles + the Join365 wave */
       '<rect x="30" y="10" width="22" height="17" rx="6.5" fill="#fff" opacity=".55"/>'
       + '<path d="M20 15h12a8 8 0 0 1 8 8v8a8 8 0 0 1-8 8h-2.4l-7.6 5.8V39H20a8 8 0 0 1-8-8v-8a8 8 0 0 1 8-8Z" fill="#fff"/>'
       + '<g fill="url(#bg__ID__)">'
@@ -550,8 +624,8 @@ var TOOLS = [
     tagline:'Video meetings',
     desc:'Start an instant call, join with a room code, or schedule your next meeting — clear, simple video calls for your people.',
     tags:['call','calling','video call','video','meet','meetings','room code','room','schedule','voice','camera','conference'],
+    book:{ w:50, h:190, mark:'C3', lean:0 },
     logo: appIcon('<stop stop-color="#8ff5e2"/><stop offset=".55" stop-color="#22c9b2"/><stop offset="1" stop-color="#0a8f80"/>',
-      /* camcorder with lens + sparkle rays */
       '<g stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".9" fill="none">'
       +   '<path d="M13.5 14.2 11.3 12M18.5 11.5l-1-3M9 20.5l-3.6-.9"/>'
       + '</g>'
@@ -564,8 +638,8 @@ var TOOLS = [
     tagline:'Your Join365 email',
     desc:'Get your own @join365.eu.cc address, send and receive mail, search your inbox, and keep every conversation together.',
     tags:['mail','email','inbox','compose','send','address','@join365.eu.cc','messages'],
+    book:{ w:47, h:199, mark:'@', lean:0 },
     logo: appIcon('<stop stop-color="#d9c8ff"/><stop offset=".55" stop-color="#a78bfa"/><stop offset="1" stop-color="#7048d0"/>',
-      /* envelope with a wax-seal @ badge */
       '<rect x="10" y="17" width="44" height="30" rx="8" fill="#fff"/>'
       + '<path d="M13.5 21.5 32 35l18.5-13.5" fill="none" stroke="url(#bg__ID__)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>'
       + '<circle cx="32" cy="34" r="9.5" fill="url(#bg__ID__)"/>'
@@ -579,8 +653,8 @@ var TOOLS = [
     tagline:'Write your book',
     desc:'A quiet place to write. Build your library, organize chapters, and shape rough ideas into a finished book.',
     tags:['folio','book','books','write','writing','chapters','library','author','story','reading','publish'],
+    book:{ w:60, h:184, mark:'F', lean:0 },
     logo: appIcon('<stop stop-color="#ffe29a"/><stop offset=".55" stop-color="#f0b13e"/><stop offset="1" stop-color="#c97a12"/>',
-      /* open book, page lines, red bookmark ribbon */
       '<path d="M32 22c-3.8-3.4-8.9-4.8-14.5-4.4v24.4c5.6-.4 10.7 1 14.5 4 3.8-3 8.9-4.4 14.5-4V17.6c-5.6-.4-10.7 1-14.5 4.4Z" fill="#fff"/>'
       + '<path d="M32 22v24" stroke="url(#bg__ID__)" stroke-width="2.4" stroke-linecap="round" fill="none"/>'
       + '<g stroke="url(#bg__ID__)" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".9">'
@@ -592,8 +666,8 @@ var TOOLS = [
     tagline:'Play & publish games',
     desc:'Your browser arcade. Publish self-contained HTML games, build a collection, favorite the good ones, and play instantly in a sandbox.',
     tags:['game','games','gaming','arcade','play','publish','build','sandbox','fun','browser games'],
+    book:{ w:53, h:178, mark:'G', lean:0 },
     logo: appIcon('<stop stop-color="#ffb3da"/><stop offset=".55" stop-color="#f4699f"/><stop offset="1" stop-color="#c53d80"/>',
-      /* controller: D-pad + four-button diamond */
       '<path d="M25.5 21h13c6.7 0 12 5.3 12 11.8 0 4.2-1.9 7.7-5 7.7-2.3 0-3.5-1.4-5-3-1.4-1.5-3.3-2.1-5.9-2.1h-5.2c-2.6 0-4.5.6-5.9 2.1-1.5 1.6-2.7 3-5 3-3.1 0-5-3.5-5-7.7C13.5 26.3 18.8 21 25.5 21Z" fill="#fff"/>'
       + '<path d="M26.5 26.5v8M22.5 30.5h8" stroke="url(#bg__ID__)" stroke-width="3.4" stroke-linecap="round" fill="none"/>'
       + '<g fill="url(#bg__ID__)">'
@@ -601,29 +675,83 @@ var TOOLS = [
       +   '<circle cx="45.4" cy="30.5" r="2.2" opacity=".65"/>'
       +   '<circle cx="41.5" cy="34.5" r="2.2" opacity=".85"/>'
       +   '<circle cx="37.6" cy="30.5" r="2.2" opacity=".65"/>'
-      + '</g>') },
-
-  { id:'gust', name:'Gust', cat:'browse', color:'#38bdf8', url:'https://join365.eu.cc/Gust/',
-    tagline:'Browser-in-a-browser',
-    desc:'Open tabs and surf the web from inside Join365 — a service-worker-less web browser that runs right in your page.',
-    tags:['gust','browser','web','internet','surf','tabs','explore','sites','search the web'],
-    logo: appIcon('<stop stop-color="#a5e3ff"/><stop offset=".55" stop-color="#3fb4f0"/><stop offset="1" stop-color="#0c7ec4"/>',
-      /* browser window: traffic lights, address pill, wind on the screen */
-      '<rect x="10" y="13" width="44" height="38" rx="8" fill="#fff"/>'
-      + '<path d="M11 21a7 7 0 0 1 7-7h28a7 7 0 0 1 7 7v2.5H11Z" fill="#0f3a52" opacity=".16"/>'
-      + '<circle cx="17" cy="18.4" r="1.9" fill="#ff5f57"/><circle cx="22.6" cy="18.4" r="1.9" fill="#febc2e"/><circle cx="28.2" cy="18.4" r="1.9" fill="#28c840"/>'
-      + '<rect x="33" y="16.2" width="16.5" height="4.6" rx="2.3" fill="#0f3a52" opacity=".18"/>'
-      + '<rect x="14.5" y="25" width="35" height="22" rx="4.5" fill="url(#bg__ID__)"/>'
-      + '<g stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none">'
-      +   '<path d="M19.5 33.5h14a4.2 4.2 0 1 1-4.2 4.2"/>'
-      +   '<path d="M19.5 40.5h9.5a3.4 3.4 0 1 1-3.4 3.4" opacity=".85"/>'
       + '</g>') }
 ];
 
-var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.5 6 .9-4.35 4.2 1 6L12 16.9l-5.35 2.9 1-6L3.3 9.6l6-.9Z"/></svg>';
-var FAV_ICON = '<svg viewBox="0 0 20 20"><path d="M10 1.8l2.5 5.2 5.7.8-4.1 4 1 5.7L10 14.8l-5.1 2.7 1-5.7-4.1-4 5.7-.8Z" data-fill/></svg>';
+/* ---- shelf decorations ---- */
+var DECOR = {
+  stack: '<div class="deco stack" aria-hidden="true"><i></i><i></i><i></i></div>',
+  plant: '<div class="deco plant" aria-hidden="true">'
+    + '<svg viewBox="0 0 56 78" width="52" height="73">'
+    +   '<path d="M28 50C28 32 22 20 11 13c2 13 8 28 17 37Z" fill="#3f7d4e"/>'
+    +   '<path d="M28 50c0-19 6-31 17-38-2 13-8 29-17 38Z" fill="#569a5f"/>'
+    +   '<path d="M28 50c-3-14-3-27 0-38 3 11 3 24 0 38Z" fill="#2f6440"/>'
+    +   '<path d="M28 50c-6-11-13-17-21-19 6 11 14 17 21 19Z" fill="#4b8a58" opacity=".9"/>'
+    +   '<path d="M28 50c6-11 13-17 21-19-6 11-14 17-21 19Z" fill="#35714a" opacity=".9"/>'
+    +   '<rect x="15" y="49" width="26" height="7" rx="2" fill="#c9744a"/>'
+    +   '<path d="M16 56h24l-3.5 19h-17Z" fill="#b4653a"/>'
+    +   '<path d="M16 56h24l-1 5H17Z" fill="#9c5530" opacity=".5"/>'
+    + '</svg></div>',
+  globe: '<div class="deco globe" aria-hidden="true">'
+    + '<svg viewBox="0 0 64 86" width="60" height="81">'
+    +   '<defs><linearGradient id="glbGlobe" x1="0" y1="0" x2="1" y2="1">'
+    +     '<stop stop-color="#8fd0f2"/><stop offset="1" stop-color="#2f7fb8"/>'
+    +   '</linearGradient></defs>'
+    +   '<circle cx="32" cy="30" r="20" fill="url(#glbGlobe)"/>'
+    +   '<path d="M15 24c6-3 13-3 19 0s13 3 19 0M15 36c6-3 13-3 19 0s13 3 19 0" stroke="rgba(255,255,255,.55)" stroke-width="1.4" fill="none"/>'
+    +   '<ellipse cx="32" cy="30" rx="8.5" ry="20" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.4"/>'
+    +   '<path d="M12 30h40" stroke="rgba(255,255,255,.55)" stroke-width="1.4"/>'
+    +   '<path d="M22 22c4-3 9-2 10 1s-3 6-7 5-6-4-3-6Z" fill="#4d9c5f" opacity=".95"/>'
+    +   '<path d="M36 33c3-1 6 0 7 3s-2 5-5 4-5-5-2-7Z" fill="#57a868" opacity=".9"/>'
+    +   '<path d="M10 25v6a22 22 0 0 0 44 0v-6" fill="none" stroke="#6b4423" stroke-width="3.5" stroke-linecap="round"/>'
+    +   '<path d="M32 51v16" stroke="#6b4423" stroke-width="4"/>'
+    +   '<path d="M22 70h20l2 6H20Z" fill="#5b3619"/>'
+    +   '<rect x="18" y="76" width="28" height="4" rx="2" fill="#4a2c15"/>'
+    + '</svg></div>',
+  /* the mysterious laptop on the bottom shelf — click it… */
+  laptop: '<a class="deco laptop" href="https://join365.eu.cc/404" '
+    + 'title="A mysterious laptop… click it and see where it goes" '
+    + 'aria-label="A mysterious laptop — opens the Join365 404 page">'
+    + '<svg viewBox="0 0 130 96" width="138" height="102" role="img" aria-hidden="true">'
+    +   '<defs>'
+    +     '<linearGradient id="lpLid" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#454b54"/><stop offset="1" stop-color="#24272e"/></linearGradient>'
+    +     '<linearGradient id="lpScr" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#141d31"/><stop offset="1" stop-color="#0a0f1d"/></linearGradient>'
+    +     '<linearGradient id="lpBase" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d7dbe2"/><stop offset=".5" stop-color="#b8bec9"/><stop offset="1" stop-color="#949ba8"/></linearGradient>'
+    +   '</defs>'
+    /* screen lid */
+    +   '<rect x="27" y="1" width="76" height="56" rx="6.5" fill="url(#lpLid)"/>'
+    +   '<rect x="29" y="1.6" width="72" height="2.6" rx="1.3" fill="#5a626d" opacity=".85"/>'
+    +   '<circle cx="65" cy="5.2" r="1" fill="#12151b"/>'
+    /* glowing screen */
+    +   '<rect x="32" y="9" width="66" height="44" rx="3" fill="url(#lpScr)"/>'
+    +   '<ellipse class="scr-glow" cx="65" cy="31" rx="31" ry="20" fill="#ff7a4d" opacity=".08"/>'
+    /* a tiny browser window */
+    +   '<rect x="36" y="13" width="58" height="7" rx="2.4" fill="#1e2b47"/>'
+    +   '<circle cx="40" cy="16.5" r="1.3" fill="#ff6b5e"/><circle cx="44.4" cy="16.5" r="1.3" fill="#febc2e"/><circle cx="48.8" cy="16.5" r="1.3" fill="#28c840"/>'
+    +   '<rect x="53" y="14.6" width="37" height="3.8" rx="1.9" fill="#0d1420" opacity=".85"/>'
+    /* …displaying a 404 */
+    +   '<text x="63" y="42" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="17" font-weight="700" fill="#ff8a5c" letter-spacing="1">404</text>'
+    +   '<rect class="blink" x="79" y="32.5" width="5.5" height="11" rx="1" fill="#ff8a5c"/>'
+    /* hinge */
+    +   '<rect x="30" y="57" width="70" height="3.2" rx="1.6" fill="#191c22"/>'
+    /* keyboard base */
+    +   '<path d="M20 60.5h90c2.2 0 3.6 1.1 4.1 3l4.4 9.6c.8 3-1.1 5.9-4.1 5.9H15.6c-3 0-4.9-2.9-4.1-5.9l4.4-9.6c.5-1.9 1.9-3 4.1-3Z" fill="url(#lpBase)"/>'
+    +   '<path d="M13.5 76.5h103" stroke="#7c8492" stroke-width="1.3" opacity=".7"/>'
+    /* keys drawn as dashed rows, space bar shorter */
+    +   '<rect x="30" y="61.8" width="70" height="9.6" rx="2" fill="#3a3f47" opacity=".9"/>'
+    +   '<g stroke="#6a727e" stroke-width="2" stroke-linecap="round" fill="none">'
+    +     '<path d="M32.5 64.4h65" stroke-dasharray="2.2 1.6"/>'
+    +     '<path d="M32.5 67.6h65" stroke-dasharray="2.2 1.6"/>'
+    +     '<path d="M44 70.8h42" stroke-dasharray="2.2 1.6"/>'
+    +   '</g>'
+    /* trackpad */
+    +   '<rect x="51" y="72.6" width="28" height="4.4" rx="2.1" fill="#c6ccd5" stroke="#8b93a0" stroke-width=".7"/>'
+    /* power LED */
+    +   '<circle cx="107.5" cy="74.6" r="3.2" fill="#4ce08a" opacity=".25"/>'
+    +   '<circle cx="107.5" cy="74.6" r="1.3" fill="#4ce08a"/>'
+    + '</svg></a>'
+};
 
-/* pre-compute a lowercase search haystack per tool */
 var CAT_BY_ID = {};
 CATEGORIES.forEach(function(c){ CAT_BY_ID[c.id] = c; });
 TOOLS.forEach(function(t){
@@ -632,35 +760,29 @@ TOOLS.forEach(function(t){
 });
 
 /* ============================================================
-   2 · STATE + PERSISTENCE (favorites, open counts, view)
+   2 · STATE + PERSISTENCE
    ============================================================ */
 
-var LS_KEY = 'join365.tools.v1';
-
+var LS_KEY = 'join365.library.v1';
 function loadStore(){
   try{
     var raw = localStorage.getItem(LS_KEY);
     if(raw){ var o = JSON.parse(raw);
       return { favs: Array.isArray(o.favs) ? o.favs : [],
-               opens: o.opens && typeof o.opens === 'object' ? o.opens : {},
-               view: o.view === 'list' ? 'list' : 'grid' };
+               opens: o.opens && typeof o.opens === 'object' ? o.opens : {} };
     }
   }catch(e){}
-  return { favs:[], opens:{}, view:'grid' };
+  return { favs:[], opens:{} };
 }
 function saveStore(){
-  try{
-    localStorage.setItem(LS_KEY, JSON.stringify({ favs: favs.slice(), opens: opens, view: view }));
-  }catch(e){}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ favs: favs.slice(), opens: opens })); }catch(e){}
 }
-
 var store = loadStore();
-var favs  = store.favs;                 /* array of tool ids */
-var opens = store.opens;                /* { toolId: count } */
-var view  = store.view;                 /* 'grid' | 'list' */
+var favs  = store.favs;      /* book ids with a gold bookmark */
+var opens = store.opens;     /* { bookId: open count } */
 
-var state = { q:'', cat:'all', sort:'curated' };
-var curWords = [];                      /* current search words (for highlighting) */
+var state = { q:'', favOnly:false, sort:'curated' };
+var curWords = [];
 
 /* ============================================================
    3 · HELPERS
@@ -671,28 +793,16 @@ function words(q){ return q.trim().toLowerCase().split(/\s+/).filter(Boolean); }
 function isFav(id){ return favs.indexOf(id) !== -1; }
 function openCount(id){ return opens[id] || 0; }
 function totalOpens(){ var n = 0; for(var k in opens){ n += opens[k]; } return n; }
-
 function esc(s){
   return String(s).replace(/[&<>"']/g, function(c){
     return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
   });
 }
-function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-/* escape + wrap search matches in <mark> */
-function hl(text){
-  if(!curWords.length) return esc(text);
-  var re = new RegExp('(' + curWords.map(escRe).join('|') + ')', 'gi');
-  return text.split(re).map(function(part, i){
-    return i % 2 ? '<mark>' + esc(part) + '</mark>' : esc(part);
-  }).join('');
-}
-
 function matchTool(t, ws){
   if(!ws.length) return true;
   return ws.every(function(w){ return t.hay.indexOf(w) !== -1; });
 }
-function wordScore(t, w){                    /* lower = more relevant */
+function wordScore(t, w){
   var n = t.name.toLowerCase();
   if(n.indexOf(w) === 0) return 0;
   if(n.indexOf(w) !== -1) return 1;
@@ -700,24 +810,26 @@ function wordScore(t, w){                    /* lower = more relevant */
   if(t.tags.some(function(x){ return x.indexOf(w) !== -1; })) return 3;
   return 4;
 }
-function relScore(t, ws){
-  return ws.reduce(function(sum, w){ return sum + wordScore(t, w); }, 0);
+function relScore(t, ws){ return ws.reduce(function(s, w){ return s + wordScore(t, w); }, 0); }
+function sortList(list, ws){
+  var out = list.slice();
+  if(ws.length){ out.sort(function(a,b){ return relScore(a,ws) - relScore(b,ws); }); return out; }
+  if(state.sort === 'az')  out.sort(function(a,b){ return a.name.localeCompare(b.name); });
+  else if(state.sort === 'za') out.sort(function(a,b){ return b.name.localeCompare(a.name); });
+  else if(state.sort === 'opens') out.sort(function(a,b){ return openCount(b.id) - openCount(a.id); });
+  else if(state.sort === 'favs') out.sort(function(a,b){ return (isFav(b.id)?1:0) - (isFav(a.id)?1:0); });
+  return out;
 }
-
 var toastTimer = null;
 function toast(html){
   var el = $('#toast');
-  el.innerHTML = html;
-  el.classList.add('show');
+  el.innerHTML = html; el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1900);
 }
-
 function countUp(el, target, dur){
   var now = (window.performance && performance.now) ? function(){ return performance.now(); } : function(){ return Date.now(); };
-  var raf = window.requestAnimationFrame
-    ? function(f){ window.requestAnimationFrame(f); }
-    : function(f){ setTimeout(f, 16); };
+  var raf = window.requestAnimationFrame ? function(f){ window.requestAnimationFrame(f); } : function(f){ setTimeout(f, 16); };
   var t0 = now();
   (function step(){
     var p = Math.min(1, (now() - t0) / (dur || 700));
@@ -727,160 +839,158 @@ function countUp(el, target, dur){
 }
 
 /* ============================================================
-   4 · RENDERING
+   4 · RENDER — the bookcase (two shelves, no organization)
    ============================================================ */
 
-function cardHTML(t, i){
-  var fav = isFav(t.id), n = openCount(t.id);
-  var tags = t.tags.slice(0, 3).map(function(x){ return hl(x); }).join('<span class="sep">·</span>');
-  /* unique gradient ids per rendered card, so an icon can safely appear twice */
-  var logo = t.logo.replace(/__ID__/g, t.id + '-' + i);
-  return '<article class="card" style="--c:' + t.color + ';--i:' + i + '" data-id="' + t.id + '">' +
-    '<button class="star' + (fav ? ' is-fav' : '') + '" data-star="' + t.id + '" aria-pressed="' + fav + '" ' +
-      'title="' + (fav ? 'Remove' : 'Add') + ' ' + esc(t.name) + ' ' + (fav ? 'from' : 'to') + ' favorites" ' +
-      'aria-label="' + (fav ? 'Remove' : 'Add') + ' ' + esc(t.name) + ' ' + (fav ? 'from' : 'to') + ' favorites">' + STAR + '</button>' +
-    '<a class="card-link" href="' + t.url + '" data-open="' + t.id + '">' +
-      '<div class="logo" aria-hidden="true">' + logo + '</div>' +
-      '<div class="card-body">' +
-        '<h3>' + hl(t.name) + '</h3>' +
-        '<span class="tagline">' + hl(t.tagline) + '</span>' +
-        '<p class="desc">' + hl(t.desc) + '</p>' +
-        '<div class="meta">' +
-          '<span class="status"><i></i>Online</span><span class="sep">·</span>' +
-          '<span>' + tags + '</span>' +
-          (n ? '<span class="sep">·</span><span class="opens">↗ ' + n + ' open' + (n === 1 ? '' : 's') + '</span>' : '') +
-        '</div>' +
-        '<div class="go"><span class="label">Open ' + esc(t.name) + '</span><span class="arrow" aria-hidden="true">→</span></div>' +
-      '</div>' +
-    '</a>' +
-  '</article>';
+/* how the two shelves are dressed: books flow in, then decorations */
+var ROWS = [
+  { host:'rowTop',    decor:['stack','plant'] },
+  { host:'rowBottom', decor:['laptop','globe'] }
+];
+
+function bookHTML(t){
+  var cls = 'book' + (isFav(t.id) ? ' fav' : '');
+  return '<button class="' + cls + '" data-book="' + t.id + '" '
+    + 'style="--c:' + t.color + ';--w:' + t.book.w + 'px;--h:' + t.book.h + 'px" '
+    + 'title="' + esc(t.name) + ' — pull this book out" aria-haspopup="dialog">'
+    + '<i class="ribbon" aria-hidden="true"></i>'
+    + '<span class="b-title">' + esc(t.name) + '</span>'
+    + '<i class="b-mark" aria-hidden="true">' + t.book.mark + '</i>'
+    + '</button>';
 }
 
-function sectionHTML(catId, list, startIndex, opts){
-  var c = CAT_BY_ID[catId];
-  var cards = list.map(function(t, i){ return cardHTML(t, startIndex + i); }).join('');
-  return '<section class="cat" style="--c:' + (opts.color || c.color) + '">' +
-    '<div class="cat-head">' +
-      '<div class="cat-ic" aria-hidden="true">' + (opts.icon || c.icon) + '</div>' +
-      '<div><h2>' + esc(opts.title || c.name) + '</h2><p class="blurb">' + esc(opts.blurb || c.blurb) + '</p></div>' +
-      '<span class="cat-count"><b>' + list.length + '</b> ' + (list.length === 1 ? 'tool' : 'tools') + '</span>' +
-    '</div>' +
-    '<div class="grid' + (view === 'list' ? ' list' : '') + '">' + cards + '</div>' +
-  '</section>';
-}
-
-function renderChips(ws){
-  var html = '';
-  function count(list){ return list.filter(function(t){ return matchTool(t, ws); }).length; }
-  html += '<button class="chip' + (state.cat === 'all' ? ' active' : '') + '" data-cat="all" style="--c:#ff6b47">' +
-          'All tools <span class="n">' + count(TOOLS) + '</span></button>';
-  html += '<button class="chip' + (state.cat === 'favs' ? ' active' : '') + '" data-cat="favs" style="--c:#e8a93b">' +
-          '★ Favorites <span class="n">' + count(TOOLS.filter(function(t){ return isFav(t.id); })) + '</span></button>';
-  CATEGORIES.forEach(function(c){
-    html += '<button class="chip' + (state.cat === c.id ? ' active' : '') + '" data-cat="' + c.id + '" style="--c:' + c.color + '">' +
-            esc(c.name) + ' <span class="n">' + count(TOOLS.filter(function(t){ return t.cat === c.id; })) + '</span></button>';
-  });
-  $('#chips').innerHTML = html;
-}
-
-function renderMeta(visibleCount, ws){
-  var el = $('#resultsMeta'), bits = [];
-  if(ws.length){
-    bits.push('<b>' + visibleCount + '</b> ' + (visibleCount === 1 ? 'result' : 'results') +
-              ' for <mark>“' + esc(state.q.trim()) + '”</mark> · best matches first');
-  }else if(state.cat === 'favs'){
-    bits.push('<b>' + visibleCount + '</b> favorite' + (visibleCount === 1 ? '' : 's'));
-  }else if(state.cat !== 'all'){
-    bits.push('<b>' + visibleCount + '</b> ' + CAT_BY_ID[state.cat].name.toLowerCase() +
-              (visibleCount === 1 ? ' tool' : ' tools'));
-  }else{
-    bits.push('Showing all <b>' + visibleCount + '</b> tools across <b>' + CATEGORIES.length + '</b> categories');
-  }
-  el.innerHTML = bits.join('');
-  $('#resetBtn').classList.toggle('show', !!(ws.length || state.cat !== 'all' || state.sort !== 'curated'));
-}
-
-function renderEmpty(ws, list){
-  var box = $('#empty'), show = list.length === 0;
-  box.classList.toggle('show', show);
-  if(!show) return;
-  if(state.cat === 'favs' && !ws.length){
-    $('#emptyTitle').textContent = 'No favorites yet';
-    $('#emptyBody').innerHTML = 'Tap the <b style="color:var(--gold)">★</b> on any tool card to pin it here.';
-  }else{
-    $('#emptyTitle').textContent = 'No tools found';
-    $('#emptyBody').innerHTML = 'Nothing matches <em>“' + esc(state.q.trim()) + '”</em>' +
-      (state.cat !== 'all' ? ' in <b>' + esc(state.cat === 'favs' ? 'your favorites' : CAT_BY_ID[state.cat].name) + '</b>' : '') +
-      '. Try another word, or reset the filters.';
-  }
-}
-
-function renderStats(){
-  $('#statFavs').textContent = favs.length;
-  $('#statOpens').textContent = totalOpens();
-}
-
-/* main render — everything flows through here */
-function render(animate){
+function render(){
   var ws = words(state.q);
   curWords = ws;
 
-  /* 1 · filter by query */
-  var list = TOOLS.filter(function(t){ return matchTool(t, ws); });
+  /* filter + sort the whole collection, then split it across the two shelves */
+  var list = sortList(TOOLS.filter(function(t){
+    return matchTool(t, ws) && (!state.favOnly || isFav(t.id));
+  }), ws);
+  var topCount = Math.ceil(list.length / 2);
 
-  /* 2 · filter by category chip */
-  var scoped;
-  if(state.cat === 'favs')       scoped = list.filter(function(t){ return isFav(t.id); });
-  else if(state.cat !== 'all')   scoped = list.filter(function(t){ return t.cat === state.cat; });
-  else                           scoped = list.slice();
-
-  /* 3 · sort (search overrides with relevance) */
-  if(ws.length){
-    scoped.sort(function(a, b){ return relScore(a, ws) - relScore(b, ws); });
-  }else if(state.sort === 'az'){
-    scoped.sort(function(a, b){ return a.name.localeCompare(b.name); });
-  }else if(state.sort === 'za'){
-    scoped.sort(function(a, b){ return b.name.localeCompare(a.name); });
-  }else if(state.sort === 'opens'){
-    scoped.sort(function(a, b){ return openCount(b.id) - openCount(a.id); });
-  }else if(state.sort === 'favs'){
-    scoped.sort(function(a, b){ return (isFav(b.id) ? 1 : 0) - (isFav(a.id) ? 1 : 0); });
-  }/* 'curated' keeps original order */
-
-  /* 4 · chips, meta, stats, empty state */
-  renderChips(ws);
-  renderMeta(scoped.length, ws);
-  renderStats();
-  renderEmpty(ws, scoped);
-
-  /* 5 · build sections */
-  var out = [], idx = 0;
-
-  /* pinned favorites strip (only in clean browse mode) */
-  if(!ws.length && state.cat === 'all' && favs.length){
-    var favTools = TOOLS.filter(function(t){ return isFav(t.id); });
-    out.push(sectionHTML('connect', favTools, idx, {
-      color:'#e8a93b', title:'★ Your favorites', icon: FAV_ICON,
-      blurb:'Pinned for quick access — stored in this browser.'
-    }));
-    idx += favTools.length;
-  }
-
-  /* one section per category (in category order) */
-  CATEGORIES.forEach(function(c){
-    var inCat = scoped.filter(function(t){ return t.cat === c.id; });
-    if(!inCat.length) return;
-    out.push(sectionHTML(c.id, inCat, idx, {}));
-    idx += inCat.length;
+  ROWS.forEach(function(row, ri){
+    var slice = ri === 0 ? list.slice(0, topCount) : list.slice(topCount);
+    var html = slice.map(bookHTML).join('')
+      + row.decor.map(function(d){ return DECOR[d] || ''; }).join('')
+      + (slice.length === 0 ? '<span class="shelf-note">this shelf is empty for now…</span>' : '');
+    document.getElementById(row.host).innerHTML = html;
   });
 
-  var host = $('#output');
-  host.innerHTML = out.join('');
-  host.classList.toggle('no-anim', animate === false);
+  var visibleTotal = list.length;
+
+  /* meta line */
+  var meta = '';
+  if(ws.length){
+    meta = '<b>' + visibleTotal + '</b> ' + (visibleTotal === 1 ? 'book' : 'books') + ' for <mark>“' + esc(state.q.trim()) + '”</mark> · best matches first';
+  }else if(state.favOnly){
+    meta = 'Showing your <b>' + visibleTotal + '</b> bookmarked ' + (visibleTotal === 1 ? 'book' : 'books');
+  }else{
+    meta = 'On the shelf: <b>' + visibleTotal + '</b> of ' + TOOLS.length + ' books · ' + ROWS.length + ' shelves';
+  }
+  $('#resultsMeta').innerHTML = meta;
+  $('#resetBtn').classList.toggle('show', !!(ws.length || state.favOnly || state.sort !== 'curated'));
+
+  /* empty state */
+  var box = $('#empty');
+  box.classList.toggle('show', visibleTotal === 0);
+  if(visibleTotal === 0){
+    if(state.favOnly && !ws.length){
+      $('#emptyTitle').textContent = 'No bookmarks yet';
+      $('#emptyBody').innerHTML = 'Open any book and press <b style="color:var(--gold)">☆ Bookmark</b> — a gold ribbon will appear on its spine.';
+    }else{
+      $('#emptyTitle').textContent = 'No books found';
+      $('#emptyBody').innerHTML = 'Nothing on the shelf matches <em>“' + esc(state.q.trim()) + '”</em>. Try another word, or reset the filters.';
+    }
+  }
+
+  /* stats */
+  $('#statMarks').textContent = favs.length;
+  $('#statOpens').textContent = totalOpens();
 }
 
 /* ============================================================
-   5 · EVENTS
+   5 · THE OPEN BOOK (modal)
+   ============================================================ */
+
+var modalTool = null, lastFocusId = null;
+
+function modalHTML(t){
+  var fav = isFav(t.id), n = openCount(t.id);
+  var logo = t.logo.replace(/__ID__/g, 'm' + t.id);
+  return '<div class="m-book" role="dialog" aria-modal="true" aria-labelledby="mTitle" style="--c:' + t.color + '">'
+    + '<div class="page left">'
+    +   '<i class="frame" aria-hidden="true"></i>'
+    +   '<div class="m-cover">' + logo + '</div>'
+    +   '<h3 class="m-title" id="mTitle">' + esc(t.name) + '</h3>'
+    +   '<p class="m-tag">' + esc(t.tagline) + '</p>'
+    +   '<span class="m-orn" aria-hidden="true">❦</span>'
+    +   '<p class="m-cat">From the Join365 library</p>'
+    + '</div>'
+    + '<div class="gutter" aria-hidden="true"></div>'
+    + '<div class="page right">'
+    +   '<button class="m-close" data-close aria-label="Close this book">✕</button>'
+    +   '<h4 class="m-h">About this book</h4>'
+    +   '<p class="m-desc">' + esc(t.desc) + '</p>'
+    +   '<h4 class="m-h">What you&rsquo;ll find inside</h4>'
+    +   '<div class="m-tags">' + t.tags.slice(0, 6).map(function(x){ return '<span>' + esc(x) + '</span>'; }).join('') + '</div>'
+    +   '<div class="m-stats"><span class="status"><i></i>Online</span><span class="sep">·</span>'
+    +     '<span>opened ' + n + (n === 1 ? ' time' : ' times') + '</span></div>'
+    +   '<div class="m-actions">'
+    +     '<a class="m-open" href="' + t.url + '" data-open="' + t.id + '">Open ' + esc(t.name) + ' <span class="arrow" aria-hidden="true">→</span></a>'
+    +     '<button class="m-fav' + (fav ? ' on' : '') + '" data-fav="' + t.id + '">' + (fav ? '★ Bookmarked' : '☆ Bookmark') + '</button>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function openBook(id){
+  var t = TOOLS.filter(function(x){ return x.id === id; })[0];
+  if(!t) return;
+  modalTool = t;
+  lastFocusId = id;   /* shelf re-renders while open (bookmarks), so track the id, not the node */
+  $('#modalHost').innerHTML = modalHTML(t);
+  var veil = $('#veil');
+  veil.hidden = false;
+  document.body.style.overflow = 'hidden';
+  var close = veil.querySelector('.m-close');
+  if(close) close.focus();
+}
+function closeModal(){
+  $('#veil').hidden = true;
+  $('#modalHost').innerHTML = '';
+  modalTool = null;
+  document.body.style.overflow = '';
+  var btn = lastFocusId && document.querySelector('[data-book="' + lastFocusId + '"]');
+  if(btn) btn.focus();
+  lastFocusId = null;
+}
+function toggleFav(id){
+  var t = TOOLS.filter(function(x){ return x.id === id; })[0];
+  if(!t) return;
+  if(isFav(id)){
+    favs.splice(favs.indexOf(id), 1);
+    toast('<b>' + esc(t.name) + '</b> bookmark removed');
+  }else{
+    favs.push(id);
+    toast('★ <b>' + esc(t.name) + '</b> bookmarked');
+  }
+  saveStore();
+  /* refresh shelf ribbons + modal button + stats without closing anything */
+  render();
+  if(modalTool && modalTool.id === id){
+    var veil = $('#veil');
+    var btn = veil.querySelector('[data-fav]');
+    if(btn){
+      var fav = isFav(id);
+      btn.className = 'm-fav' + (fav ? ' on' : '');
+      btn.textContent = fav ? '★ Bookmarked' : '☆ Bookmark';
+    }
+  }
+}
+
+/* ============================================================
+   6 · EVENTS
    ============================================================ */
 
 var input = $('#q');
@@ -888,106 +998,78 @@ var input = $('#q');
 input.addEventListener('input', function(){
   state.q = input.value;
   $('#clearSearch').classList.toggle('show', !!input.value);
-  render(false);
-});
-input.addEventListener('search', function(){        /* native clear, if any */
-  state.q = input.value;
-  $('#clearSearch').classList.toggle('show', !!input.value);
-  render(true);
+  render();
 });
 input.addEventListener('keydown', function(e){
   if(e.key === 'Escape'){
-    if(input.value){ input.value = ''; state.q = ''; $('#clearSearch').classList.remove('show'); render(true); }
+    if(input.value){ input.value = ''; state.q = ''; $('#clearSearch').classList.remove('show'); render(); }
     else input.blur();
   }
 });
-
 $('#clearSearch').addEventListener('click', function(){
   input.value = ''; state.q = '';
   this.classList.remove('show');
-  render(true); input.focus();
+  render(); input.focus();
 });
 
-/* popular-search chips */
+/* popular searches */
 document.addEventListener('click', function(e){
   var b = e.target.closest ? e.target.closest('[data-q]') : null;
   if(b){
     input.value = b.getAttribute('data-q');
     state.q = input.value;
     $('#clearSearch').classList.toggle('show', !!input.value);
-    render(true); input.focus();
+    render(); input.focus();
   }
 });
 
-/* category chips (delegated) */
-$('#chips').addEventListener('click', function(e){
-  var chip = e.target.closest ? e.target.closest('.chip') : null;
-  if(!chip) return;
-  state.cat = chip.getAttribute('data-cat');
-  render(true);
-});
+$('#favOnly').addEventListener('change', function(){ state.favOnly = this.checked; render(); });
+$('#sort').addEventListener('change', function(){ state.sort = this.value; render(); });
 
-/* sort */
-$('#sort').addEventListener('change', function(){
-  state.sort = this.value;
-  render(true);
-});
-
-/* reset buttons */
 function resetAll(){
-  state.q = ''; state.cat = 'all'; state.sort = 'curated';
+  state.q = ''; state.favOnly = false; state.sort = 'curated';
   input.value = '';
   $('#clearSearch').classList.remove('show');
+  $('#favOnly').checked = false;
   $('#sort').value = 'curated';
-  render(true);
+  render();
 }
 $('#resetBtn').addEventListener('click', resetAll);
 $('#emptyReset').addEventListener('click', resetAll);
 
-/* view toggle (header + toolbar copies stay in sync) */
-function setView(v){
-  view = v; saveStore();
-  [['#viewGrid', true], ['#viewList', false], ['#viewGrid2', true], ['#viewList2', false]].forEach(function(p){
-    var el = $(p[0]);
-    el.setAttribute('aria-pressed', (v === 'grid') === p[1]);
-  });
-  render(true);
-}
-$('#viewGrid').addEventListener('click', function(){ setView('grid'); });
-$('#viewList').addEventListener('click', function(){ setView('list'); });
-$('#viewGrid2').addEventListener('click', function(){ setView('grid'); });
-$('#viewList2').addEventListener('click', function(){ setView('list'); });
-
-/* favorite stars (delegated) */
-$('#output').addEventListener('click', function(e){
-  var star = e.target.closest ? e.target.closest('[data-star]') : null;
-  if(!star) return;
-  e.preventDefault();
-  var id = star.getAttribute('data-star');
-  var t = TOOLS.filter(function(x){ return x.id === id; })[0];
-  if(!t) return;
-  if(isFav(id)){
-    favs.splice(favs.indexOf(id), 1);
-    toast('<b>' + esc(t.name) + '</b> removed from favorites');
-  }else{
-    favs.push(id);
-    toast('★ <b>' + esc(t.name) + '</b> added to favorites');
-  }
-  saveStore();
-  render(true);
+/* click a book on the shelf */
+$('#library').addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('[data-book]') : null;
+  if(b) openBook(b.getAttribute('data-book'));
 });
 
-/* open counter (lets navigation continue normally) */
-$('#output').addEventListener('click', function(e){
-  var link = e.target.closest ? e.target.closest('[data-open]') : null;
-  if(!link) return;
-  var id = link.getAttribute('data-open');
-  opens[id] = (opens[id] || 0) + 1;
-  saveStore();
-}, true);
+/* modal interactions */
+$('#veil').addEventListener('click', function(e){
+  if(e.target.closest('[data-close]')){ closeModal(); return; }
+  if(e.target.closest('[data-fav]')){ toggleFav(e.target.closest('[data-fav]').getAttribute('data-fav')); return; }
+  if(e.target.closest('[data-open]')){
+    var id = e.target.closest('[data-open]').getAttribute('data-open');
+    opens[id] = (opens[id] || 0) + 1;
+    saveStore();
+    return; /* let the link navigate */
+  }
+  if(e.target === this) closeModal();
+});
 
-/* keyboard shortcuts: "/" or Ctrl/Cmd+K focuses search */
+/* keyboard: Esc closes the book, / focuses search, Tab stays trapped in the book */
 document.addEventListener('keydown', function(e){
+  var veil = $('#veil');
+  if(!veil.hidden){
+    if(e.key === 'Escape'){ e.preventDefault(); closeModal(); return; }
+    if(e.key === 'Tab'){
+      var f = veil.querySelectorAll('.m-close, .m-open, .m-fav');
+      if(!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+    return;
+  }
   var tag = (e.target.tagName || '').toLowerCase();
   var typing = tag === 'input' || tag === 'textarea' || tag === 'select';
   if(e.key === '/' && !typing){ e.preventDefault(); input.focus(); input.select(); }
@@ -995,22 +1077,21 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ============================================================
-   6 · INIT
+   7 · INIT
    ============================================================ */
 
 function buildFooterLinks(){
   var html = TOOLS.map(function(t){
     return '<a href="' + t.url + '" style="color:' + t.color + '">' + esc(t.name) + ' ↗</a>';
   }).join('');
-  html += '<a href="https://join365.eu.cc/" style="color:#9aa8bd">Join365 home ↗</a>';
+  html += '<a href="https://join365.eu.cc/" style="color:#b39e88">Join365 home ↗</a>';
   $('#footLinks').innerHTML = html;
 }
 
 buildFooterLinks();
-setView(view);                 /* sync toggle buttons + grid class */
-countUp($('#statTools'), TOOLS.length, 650);
-countUp($('#statCats'), CATEGORIES.length, 800);
-render(true);
+countUp($('#statBooks'), TOOLS.length, 650);
+countUp($('#statShelves'), ROWS.length, 800);
+render();
 
 })();
 </script>
