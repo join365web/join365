@@ -16,14 +16,16 @@
   --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{height:100%}
+html{height:100%}
 body{
-  margin:0;background:
+  margin:0;min-height:100%;background:
     radial-gradient(900px 500px at 12% -10%,rgba(124,92,255,.16),transparent 60%),
     radial-gradient(700px 420px at 100% 0%,rgba(34,211,238,.10),transparent 55%),
     var(--bg);
   color:var(--txt);font-family:var(--sans);font-size:15px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;overflow-y:auto;            /* page scrolls when the window is short */
+  overscroll-behavior-y:contain;
 }
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 button{cursor:pointer;background:none;border:none}
@@ -33,10 +35,11 @@ button{cursor:pointer;background:none;border:none}
 ::-webkit-scrollbar-track{background:transparent}
 
 /* ============================  LAYOUT  ============================ */
-.app{display:grid;grid-template-columns:262px 1fr;height:100vh;height:100dvh}
+.app{display:grid;grid-template-columns:262px 1fr;height:100vh;height:100dvh;min-height:540px}
 .sidebar{
   background:linear-gradient(180deg,rgba(16,23,36,.92),rgba(10,14,22,.92));
-  border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;backdrop-filter:blur(8px)
+  border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;
+  backdrop-filter:blur(8px);min-height:0
 }
 .brand{display:flex;align-items:center;gap:10px;padding:16px 16px 12px}
 .logo{width:32px;height:32px;border-radius:9px;flex:none;background:linear-gradient(135deg,var(--acc),var(--acc2));
@@ -46,7 +49,7 @@ button{cursor:pointer;background:none;border:none}
 .newchat{margin:4px 12px 10px;padding:9px 12px;border-radius:10px;border:1px dashed var(--line2);
   color:var(--dim);display:flex;align-items:center;gap:8px;font-size:13.5px;transition:.15s}
 .newchat:hover{border-color:var(--acc);color:var(--txt);background:var(--acc-soft)}
-.convos{flex:1;overflow-y:auto;padding:4px 8px 8px}
+.convos{flex:1;min-height:0;overflow-y:auto;padding:4px 8px 8px;-webkit-overflow-scrolling:touch}
 .convo{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;color:var(--dim);
   font-size:13.5px;cursor:pointer;transition:.12s;position:relative}
 .convo:hover{background:#151f30;color:var(--txt)}
@@ -70,9 +73,10 @@ button{cursor:pointer;background:none;border:none}
 .main{display:flex;flex-direction:column;min-width:0;height:100%}
 .topbar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);
   background:rgba(10,14,22,.6);backdrop-filter:blur(10px);flex-wrap:wrap}
-.picker{position:relative;min-width:0;flex:1;max-width:430px}
+.picker{position:relative;min-width:0;flex:1;max-width:540px}
 .picker select{width:100%;appearance:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;
-  padding:9px 34px 9px 12px;font-size:13.5px;font-weight:550;cursor:pointer}
+  padding:9px 32px 9px 12px;font-size:13.5px;font-weight:550;cursor:pointer;
+  text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 .picker select:hover{border-color:var(--line2)}
 .picker select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
 .picker .chev{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--dim2);font-size:11px}
@@ -90,7 +94,7 @@ button{cursor:pointer;background:none;border:none}
 .iconbtn:hover{border-color:var(--line2);color:var(--txt);background:#141d2c}
 .iconbtn.active{border-color:var(--acc);color:#d9d2ff;background:var(--acc-soft)}
 
-.chatwrap{flex:1;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth}
+.chatwrap{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .chat{max-width:900px;margin:0 auto;padding:26px 20px 40px;display:flex;flex-direction:column;gap:22px}
 
 /* ============================  MESSAGES  ============================ */
@@ -167,7 +171,15 @@ button{cursor:pointer;background:none;border:none}
 .ctl select:focus,.ctl input:focus{outline:none;border-color:var(--acc)}
 .ctl .sep{width:1px;height:18px;background:var(--line);margin:0 3px}
 .switch{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
-.switch input{accent-color:var(--acc);width:14px;height:14px}
+.switch input{appearance:none;-webkit-appearance:none;width:30px;height:17px;border-radius:99px;background:#1b2537;
+  border:1px solid var(--line2);position:relative;transition:.18s;flex:none;cursor:pointer;margin:0}
+.switch input::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;
+  background:var(--dim2);transition:.18s}
+.switch input:checked{background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:transparent}
+.switch input:checked::after{left:15px;background:#0b0f16}
+.switch input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.ic{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ic.lg{width:17px;height:17px}
 .inputbar{display:flex;gap:9px;align-items:flex-end;border:1px solid var(--line);background:var(--panel);
   border-radius:15px;padding:9px 10px 9px 13px;transition:.15s}
 .inputbar:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
@@ -182,20 +194,6 @@ textarea#prompt::placeholder{color:var(--dim2)}
 .foot{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:11.5px;color:var(--dim2);flex-wrap:wrap}
 .rec{color:var(--err);font-weight:600}
 
-/* ============================  COMPARE  ============================ */
-.compare{flex:1;overflow:auto;padding:18px 20px 40px}
-.cols{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));align-items:start}
-.col{border:1px solid var(--line);background:var(--panel);border-radius:13px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.col header{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);background:#0e1622;font-size:13px;font-weight:600}
-.col header .dot{margin-left:auto}
-.col .out{padding:12px 13px;font-size:13.6px;max-height:60vh;overflow-y:auto;min-height:70px}
-.col.small .out{max-height:34vh}
-.cmpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-bottom:12px}
-.cmp{cursor:pointer}
-.cmp span{font-size:12.5px;font-weight:550}
-.cmp small{display:block;color:var(--dim2);font-size:11px;margin-top:2px}
-.cmp.on{border-color:var(--acc);background:var(--acc-soft)}
-.cmp.on span{color:#ddd6ff}
 
 /* ============================  MODAL / TOAST  ============================ */
 .scrim{position:fixed;inset:0;background:rgba(4,7,12,.72);backdrop-filter:blur(3px);display:none;place-items:center;z-index:50;padding:20px}
@@ -226,12 +224,15 @@ textarea#prompt::placeholder{color:var(--dim2)}
   color:#ffd6dd;border-radius:999px;padding:7px 15px;font-size:13px;display:none;gap:9px;align-items:center}
 .record-pill.on{display:flex}
 .hidden{display:none !important}
+@media (min-width:761px){ #sidebarToggle{display:none} }   /* sidebar is always visible on desktop */
+
 @media (max-width:760px){
   .app{grid-template-columns:1fr}
   .sidebar{position:fixed;inset:0 auto 0 0;width:262px;z-index:40;transform:translateX(-100%);transition:.22s}
   .sidebar.open{transform:none;box-shadow:0 0 60px rgba(0,0,0,.6)}
   .chat{padding:18px 13px 30px}
-  .picker{max-width:none;order:3;width:100%}
+  .picker{max-width:none;order:-1;flex-basis:100%;width:100%}
+  .badges{order:0}
   .topactions{margin-left:auto}
   .sidefoot .ghost{}
 }
@@ -253,8 +254,8 @@ textarea#prompt::placeholder{color:var(--dim2)}
         <div class="status"><span class="dot" id="dot"></span><span id="statusText">connecting…</span></div>
       </div>
       <div class="row">
-        <button class="ghost" style="flex:1" id="openSettings">⚙ Settings</button>
-        <button class="ghost" id="exportBtn" title="Export this chat">⤓</button>
+        <button class="ghost" style="flex:1" id="openSettings"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v2.2M12 19.2v2.2M4.7 7.3l1.9 1.1M17.4 15.6l1.9 1.1M4.7 16.7l1.9-1.1M17.4 8.4l1.9-1.1"/></svg> Settings</button>
+        <button class="ghost" id="exportBtn" title="Export this chat as Markdown"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></button>
       </div>
       <div style="font-size:11px;color:var(--dim2);text-align:center" id="footNote">key stays server-side 🔒</div>
     </div>
@@ -265,12 +266,11 @@ textarea#prompt::placeholder{color:var(--dim2)}
     <div class="topbar">
       <div class="picker">
         <select id="modelSelect" aria-label="Model"></select>
-        <span class="chev">▼</span>
+        <span class="chev" style="display:flex"><svg class="ic" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
       </div>
       <div class="badges" id="modelBadges"></div>
       <div class="topactions">
-        <button class="iconbtn" id="compareBtn" title="Ask several models the same thing">⇄ Compare</button>
-        <button class="iconbtn" id="sidebarToggle" title="Chats">☰</button>
+        <button class="iconbtn" id="sidebarToggle" title="Chats"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       </div>
     </div>
 
@@ -284,19 +284,6 @@ textarea#prompt::placeholder{color:var(--dim2)}
         <div class="statrow" id="statRow"></div>
       </div>
       <div class="chat hidden" id="chat"></div>
-    </div>
-
-    <!-- compare -->
-    <div class="compare hidden" id="compareView">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <b style="font-size:14px">Compare models</b>
-        <span class="badge" id="cmpCount">0 selected</span>
-        <button class="iconbtn" id="cmpAll">select top 4</button>
-        <button class="iconbtn" id="cmpClear">clear</button>
-        <button class="iconbtn" id="cmpClose" style="margin-left:auto">✕ close</button>
-      </div>
-      <div class="cmpgrid" id="cmpGrid"></div>
-      <div class="cols" id="cmpCols"></div>
     </div>
 
     <!-- composer -->
@@ -320,8 +307,8 @@ textarea#prompt::placeholder{color:var(--dim2)}
         </div>
         <div class="inputbar">
           <textarea id="prompt" rows="1" placeholder="Ask anything…  (Enter to send · Shift+Enter for a new line)"></textarea>
-          <button class="iconbtn" id="micBtn" title="Dictate (Whisper)">🎙</button>
-          <button class="send" id="sendBtn" title="Send">▲</button>
+          <button class="iconbtn" id="micBtn" title="Dictate with Whisper"><svg class="ic lg" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"/></svg></button>
+          <button class="send" id="sendBtn" title="Send"><svg class="ic lg" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
         </div>
         <div class="foot">
           <span id="hint">Enter to send · Shift+Enter newline · ⌘/Ctrl+K model</span>
@@ -381,7 +368,13 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<'
 const DEFAULT_WORKER = 'https://laura-ai.dzt399890.workers.dev';
 
 const LS = {
-  get(k, d) { try { const v = localStorage.getItem('laura.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  get(k, d) {
+    try {
+      const v = localStorage.getItem('laura.' + k);
+      if (v == null) return d;
+      try { return JSON.parse(v); } catch { return v; }   // tolerate hand-written values
+    } catch { return d; }
+  },
   set(k, v) { try { localStorage.setItem('laura.' + k, JSON.stringify(v)); } catch { } },
 };
 
@@ -397,7 +390,6 @@ const S = {
   model: LS.get('model', 'openai/gpt-oss-120b'),
   convos: LS.get('convos', []),
   active: LS.get('active', null),
-  compare: [],
   busy: false,
   ctrl: null,
 };
@@ -408,6 +400,14 @@ function newConvo() {
   const c = { id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title: 'New chat', model: S.model, messages: [], at: Date.now() };
   S.convos.unshift(c); S.active = c.id; saveConvos(); renderConvos(); renderChat(); return c;
 }
+
+/* ------------------------------- icons ------------------------------- */
+const ICON = {
+  send: '<svg class="ic lg" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+  stop: '<svg class="ic lg" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor" stroke="none"/></svg>',
+  brain: '<svg class="ic" viewBox="0 0 24 24"><path d="M9.5 4.5A2.5 2.5 0 0 0 7 7a2.5 2.5 0 0 0-1.6 4.4A2.6 2.6 0 0 0 6 16.2 2.5 2.5 0 0 0 9.5 19.5V4.5zM14.5 4.5A2.5 2.5 0 0 1 17 7a2.5 2.5 0 0 1 1.6 4.4A2.6 2.6 0 0 1 18 16.2a2.5 2.5 0 0 1-3.5 3.3V4.5z"/></svg>',
+  speaker: '<svg class="ic" viewBox="0 0 24 24"><path d="M11 5.5 6.5 9H3.5v6h3L11 18.5zM15 9.5a3.5 3.5 0 0 1 0 5M17.6 7a7 7 0 0 1 0 10"/></svg>',
+};
 
 /* ------------------------------- helpers ------------------------------- */
 function toast(msg, kind = '', ms = 3600) {
@@ -520,7 +520,11 @@ async function loadModels() {
     const r = await api('/api/models');
     const j = await r.json();
     if (!r.ok) throw new Error(j.error?.message || ('HTTP ' + r.status));
-    S.models = j.data || [];
+    // Guard against an older/other Worker build answering with a different shape.
+    if (!Array.isArray(j.data) || !j.data.length) {
+      throw new Error('unexpected /api/models shape — redeploy the bundled worker.js');
+    }
+    S.models = j.data;
     S.offline = false;
     setStatus('on', S.models.filter(m => m.kind === 'chat').length + ' chat models ready');
   } catch (e) {
@@ -530,8 +534,9 @@ async function loadModels() {
     setStatus('bad', 'worker unreachable');
     toast('Worker not reachable (' + e.message + '). Showing a bundled model list — sending will fail until the Worker URL in Settings responds.', 'bad', 9000);
   }
-  renderModelSelect(); renderCompareGrid(); renderStats();
+  renderModelSelect(); renderStats();
   if (!S.models.some(m => m.id === S.model)) { S.model = (S.models.find(m => m.kind === 'chat') || {}).id || S.model; renderModelSelect(); }
+  renderChat();   // repaint restored messages now that model labels are known
   $('#footNote').textContent = (S.offline ? '⚠ offline list · ' : '') + S.worker.replace(/^https?:\/\//, '').replace(/\/$/, '');
 }
 function setStatus(kind, text) {
@@ -545,9 +550,8 @@ function renderModelSelect() {
   const opt = (m) => {
     const bits = [m.label];
     if (m.ctx) bits.push(fmt(m.ctx) + ' ctx');
-    if (m.speed) bits.push(m.speed + ' tok/s');
-    if (CAP(m).reasoning) bits.push('reasoning');
-    bits.push(m.tier === 'production' ? 'stable' : m.tier === 'preview' ? 'preview' : '');
+    if (m.speed) bits.push(m.speed + ' t/s');
+    if (m.kind !== 'chat') bits.push(m.kind);
     return '<option value="' + esc(m.id) + '">' + esc(bits.filter(Boolean).join(' · ')) + '</option>';
   };
   sel.innerHTML =
@@ -611,12 +615,12 @@ function msgHTML(m, idx) {
     ? '<div class="usertext">' + esc(m.content) + '</div>'
     : (m.error
       ? '<div class="errbox"><b>Request failed.</b><br>' + esc(m.error) + '</div>'
-      : (m.thinking ? '<details class="think"' + (S.cfg.thinkOpen ? ' open' : '') + '><summary>🧠 reasoning</summary><div class="body">' + esc(m.thinking) + '</div></details>' : '') +
+      : (m.thinking ? '<details class="think"' + (S.cfg.thinkOpen ? ' open' : '') + '><summary>' + ICON.brain + ' reasoning</summary><div class="body">' + esc(m.thinking) + '</div></details>' : '') +
       '<div class="md">' + md(m.content || '') + (m.streaming ? '<span class="caret"></span>' : '') + '</div>');
   const acts = !isUser && !m.streaming && !m.error ? '<div class="msgacts">' +
     '<button data-act="copy" data-i="' + idx + '">copy</button>' +
     '<button data-act="regen" data-i="' + idx + '">regenerate</button>' +
-    '<button data-act="speak" data-i="' + idx + '">🔊 speak</button>' +
+    '<button data-act="speak" data-i="' + idx + '"><svg class="ic" viewBox="0 0 24 24"><path d="M11 5.5 6.5 9H3.5v6h3L11 18.5zM15 9.5a3.5 3.5 0 0 1 0 5M17.6 7a7 7 0 0 1 0 10"/></svg> speak</button>' +
     '<button data-act="del" data-i="' + idx + '">delete</button></div>' : '';
   const meta = (!isUser && m.meta && !m.streaming) ? '<div class="meta">' +
     [m.meta.model && ('model <b>' + esc(m.meta.model) + '</b>'), m.meta.tokens && (m.meta.tokens + ' tok'),
@@ -624,7 +628,7 @@ function msgHTML(m, idx) {
      m.meta.fellBack && ('fell back → ' + esc(m.meta.fellBack))].filter(Boolean).join(' ') + '</div>' : '';
   return '<div class="msg ' + (isUser ? 'user' : 'assistant') + '" data-idx="' + idx + '">' +
     '<div class="avatar">' + (isUser ? 'You' : 'L') + '</div>' +
-    '<div class="bubble"><div class="who">' + (isUser ? '<b>You</b>' : '<b>' + esc((S.models.find(x => x.id === (m.model || S.model)) || {}).label || m.model || 'Assistant') + '</b>') + '</div>' +
+    '<div class="bubble">' + (isUser ? '' : '<div class="who"><b>' + esc((S.models.find(x => x.id === (m.model || S.model)) || {}).label || m.model || 'Assistant') + '</b></div>') +
     body + meta + acts + '</div></div>';
 }
 function renderChat() {
@@ -649,7 +653,7 @@ function renderWelcome() {
   $$('#startCards .card').forEach(el => el.onclick = () => { $('#prompt').value = el.dataset.p; grow(); $('#prompt').focus(); });
   const avail = picks.filter(p => S.models.some(m => m.id === p));
   $('#welcomeSub').innerHTML = S.models.length
-    ? 'Pick a model above and start typing. ' + (avail.length ? 'Try ' + avail.map(a => '<b>' + esc((S.models.find(m => m.id === a) || {}).label || a) + '</b>').join(', ') + ' — or hit <b>⇄ Compare</b> to race them side by side.' : '')
+    ? 'Pick a model above and start typing. ' + (avail.length ? 'Try ' + avail.map(a => '<b>' + esc((S.models.find(m => m.id === a) || {}).label || a) + '</b>').join(', ') + '.' : '')
     : 'Pick a model above and start typing. Responses stream straight from your Cloudflare Worker.';
 }
 function scrollDown(force) {
@@ -777,7 +781,7 @@ function setBusy(b) {
   S.busy = b;
   const btn = $('#sendBtn');
   btn.classList.toggle('stop', b);
-  btn.innerHTML = b ? '■' : '▲';
+  btn.innerHTML = b ? ICON.stop : ICON.send;
   btn.title = b ? 'Stop' : 'Send';
 }
 function stopStream() { S.ctrl?.abort(); }
@@ -847,59 +851,6 @@ async function toggleMic() {
 }
 function stopMic() { if (rec) { rec.stop(); $('#micBtn').style.color = ''; } }
 
-/* ------------------------------- compare ------------------------------- */
-function renderCompareGrid() {
-  const g = $('#cmpGrid');
-  g.innerHTML = S.models.filter(m => m.kind === 'chat').map(m =>
-    '<div class="cmp card' + (S.compare.includes(m.id) ? ' on' : '') + '" data-id="' + esc(m.id) + '">' +
-    '<span>' + esc(m.label) + '</span><small>' + fmt(m.ctx) + ' ctx · ' + (m.speed || '?') + ' tok/s' + (CAP(m).reasoning ? ' · reasoning' : '') + '</small></div>').join('');
-  $$('.cmp', g).forEach(el => el.onclick = () => {
-    const id = el.dataset.id;
-    S.compare = S.compare.includes(id) ? S.compare.filter(x => x !== id) : S.compare.concat(id).slice(-6);
-    el.classList.toggle('on'); $('#cmpCount').textContent = S.compare.length + ' selected';
-  });
-  $('#cmpCount').textContent = S.compare.length + ' selected';
-}
-function renderCompareCols(results) {
-  $('#cmpCols').innerHTML = results.map((r, i) =>
-    '<div class="col' + (results.length > 2 ? ' small' : '') + '"><header>' +
-    '<span>' + esc(r.label) + '</span><span class="dot ' + (r.state === 'done' ? 'on' : r.state === 'bad' ? 'bad' : 'wait') + '"></span>' +
-    '</header><div class="out">' + (r.error
-      ? '<div class="errbox">' + esc(r.error) + '</div>'
-      : (r.thinking ? '<details class="think"' + (S.cfg.thinkOpen ? ' open' : '') + '><summary>🧠 reasoning</summary><div class="body">' + esc(r.thinking) + '</div></details>' : '') +
-      '<div class="md">' + md(r.text) + (r.state === 'run' ? '<span class="caret"></span>' : '') + '</div>') +
-    (r.meta ? '<div class="meta">' + [r.meta.ms ? ((r.meta.ms / 1000).toFixed(1) + 's') : '', r.meta.tokens ? r.meta.tokens + ' tok' : '', r.meta.tps ? r.meta.tps + ' tok/s' : '', r.meta.fellBack ? '↪ ' + esc(r.meta.fellBack) : ''].filter(Boolean).join(' ') + '</div>' : '') +
-    '</div></div>').join('');
-}
-async function sendCompare() {
-  const text = $('#prompt').value.trim();
-  if (!text) return toast('Type a prompt first.', 'bad');
-  if (S.compare.length < 2) return toast('Pick at least 2 models to compare.', 'bad');
-  $('#prompt').value = ''; grow();
-  const ctx = [];
-  if (S.cfg.system.trim()) ctx.push({ role: 'system', content: S.cfg.system.trim() });
-  ctx.push({ role: 'user', content: text });
-  const results = S.compare.map(id => ({ id, label: (S.models.find(m => m.id === id) || {}).label || id, text: '', thinking: '', state: 'run' }));
-  renderCompareCols(results);
-  setBusy(true);
-  S.ctrl = new AbortController();
-  const { signal } = S.ctrl;
-  let raf = null;
-  const paint = () => { raf = null; renderCompareCols(results); };
-  await Promise.all(results.map(async (r) => {
-    try {
-      const res = await streamCompletion(payloadFor(ctx, r.id), { signal,
-        onDelta: ({ text, thinking }) => { if (text) r.text += text; if (thinking) r.thinking += thinking; if (!raf) raf = requestAnimationFrame(paint); },
-      });
-      r.text = res.text || r.text; r.thinking = res.thinking || r.thinking; r.meta = res.meta; r.state = 'done';
-    } catch (e) { r.error = e.name === 'AbortError' ? 'stopped' : e.message; r.state = 'bad'; }
-    if (raf) { cancelAnimationFrame(raf); raf = null; }
-    renderCompareCols(results);
-  }));
-  S.ctrl = null;
-  setBusy(false);
-}
-
 /* ------------------------------- composer ------------------------------- */
 function grow() {
   const ta = $('#prompt');
@@ -930,30 +881,15 @@ function drawVoices() {
 }
 
 /* ------------------------------- wiring ------------------------------- */
-$('#sendBtn').onclick = () => {
-  if (S.busy) return stopStream();
-  $('#compareView').classList.contains('hidden') ? send() : sendCompare();
-};
+$('#sendBtn').onclick = () => { if (S.busy) return stopStream(); send(); };
 $('#prompt').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('#compareView').classList.contains('hidden') ? send() : sendCompare(); }
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
 });
 $('#prompt').addEventListener('input', grow);
 $('#newChat').onclick = () => { newConvo(); $('#sidebar').classList.remove('open'); $('#prompt').focus(); };
 $('#micBtn').onclick = toggleMic;
 $('#recStop').onclick = stopMic;
 $('#sidebarToggle').onclick = () => $('#sidebar').classList.toggle('open');
-$('#compareBtn').onclick = () => {
-  const on = $('#compareView').classList.toggle('hidden');
-  $('#chatwrap').classList.toggle('hidden', !on);
-  $('#compareBtn').classList.toggle('active', !on);
-  if (!on) { if (!S.compare.length) S.compare = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile'].filter(id => S.models.some(m => m.id === id)); renderCompareGrid(); }
-  $('#sendBtn').title = on ? 'Send' : 'Race models';
-  $('#hint').textContent = on ? 'Prompt runs on every selected model at once · Enter to race'
-    : 'Enter to send · Shift+Enter newline · ⌘/Ctrl+K model';
-};
-$('#cmpClose').onclick = () => $('#compareBtn').click();
-$('#cmpAll').onclick = () => { S.compare = S.models.filter(m => m.kind === 'chat').slice(0, 4).map(m => m.id); renderCompareGrid(); };
-$('#cmpClear').onclick = () => { S.compare = []; renderCompareGrid(); };
 
 $('#exportBtn').onclick = () => {
   const c = activeConvo(); if (!c) return toast('Nothing to export.', 'bad');
