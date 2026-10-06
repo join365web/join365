@@ -1,47 +1,35 @@
-# F.R.I.D.A.Y. — Stark Industries assistant on Cloudflare Workers
+# F.R.I.D.A.Y. — Iron Man HUD chat, powered by Tavily
 
-*Female Replacement Intelligent Digital Assistant Youth.* An Iron Man–style
-HUD chat that talks to the live web through **Tavily**, deployed on your
-existing worker (`friday.dzt399890.workers.dev`) with your **`TAVILY_API`**
-secret. FRIDAY's personality (Irish sass, "boss", dry wit, boot sequence,
-voice) runs in the page; her knowledge comes from Tavily.
+*Female Replacement Intelligent Digital Assistant Youth.* One HTML file —
+no server, no build step, no deploy. FRIDAY's personality (Irish sass,
+"boss", dry wit, boot sequence, voice) runs in the page; her knowledge
+comes from the **Tavily** Search & Research APIs.
 
-## Files
+## Quick start (no worker, no deploy)
 
-| File | What it is |
-|---|---|
-| `worker.js` | **The deployable worker** — serves the HUD and proxies Tavily. Single self-contained file. |
-| `index.html` | The HUD itself (same UI that's embedded inside `worker.js`). Standalone-hostable. |
-| `embed.js` | Re-syncs `index.html` into `worker.js` after you edit the UI: `node embed.js` |
-| `wrangler.toml` | Wrangler config (`name = "friday"`, matches your existing worker). |
-| `preview.js` | **Local preview only** — serves the HUD with fake Tavily data. Never deployed. |
+1. Open **`friday/index.html`** — double-click it, or host it anywhere
+   (this repo → `join365.eu.cc/friday/` works too).
+2. On first boot the ⚙ settings panel opens — paste your Tavily key
+   (`tvly-…`, free at <https://app.tavily.com>) → **Save & Reconnect**.
+   Or tick **KEYLESS** for free rate-limited scans with no key at all.
+3. Chat with FRIDAY.
 
-## Deploy (2 minutes)
+### Three ways to connect (⚙ in the header)
 
-**Option A — Cloudflare Dashboard (no tools needed):**
-1. Dashboard → Workers & Pages → your **friday** worker → **Edit code**.
-2. Delete what's there, paste **all of `worker.js`**, hit **Deploy**.
-3. Your `TAVILY_API` secret survives redeploys — done. Open
-   `https://friday.dzt399890.workers.dev/`.
+| Mode | What happens | Key lives |
+|---|---|---|
+| **DIRECT** (default) | The page calls `api.tavily.com` itself | Browser localStorage |
+| **KEYLESS** | `X-Tavily-Access-Mode: keyless` — free, rate-limited, Search only | No key needed |
+| **WORKER** | Routes through your Cloudflare Worker (`friday/worker.js`) | Server-side secret |
 
-**Option B — Wrangler CLI:**
-```bash
-cd friday
-npx wrangler deploy          # updates the existing "friday" worker
-```
-
-**If the secret isn't set yet** (one time only):
-```bash
-npx wrangler secret put TAVILY_API     # paste your tvly-... key
-```
-or Dashboard → worker → Settings → Variables & Secrets → Add →
-Type: **Secret**, Name: `TAVILY_API`, Value: `tvly-…` → redeploy.
-Get a free key at <https://app.tavily.com> (1,000 credits/month, no card).
+If the page is *served by* the worker, WORKER mode is picked automatically.
+If the browser blocks direct calls (CORS), FRIDAY tells you and points you
+at the worker route.
 
 ## The Tavily models (free plan)
 
-Tavily doesn't host a chat LLM — its "models" are search depths and research
-models, all available on the free **Researcher** plan. FRIDAY wires them up:
+Tavily doesn't host a chat LLM — its "models" are search depths and
+research models, all on the free **Researcher** plan (1,000 credits/month):
 
 | Mode in the HUD | Tavily call | Credits |
 |---|---|---|
@@ -53,49 +41,55 @@ models, all available on the free **Researcher** plan. FRIDAY wires them up:
 
 Topics **GENERAL / NEWS / FINANCE** map to the search `topic` parameter.
 Small talk, jokes, easter eggs, math and `status` are answered locally and
-cost **0 credits**. The header chip and systems panel track your remaining
-credits live via `GET /usage`.
+cost **0 credits**. The header chip and systems panel track remaining
+credits live via `GET /usage`. Research needs a real key (not keyless).
 
-## How the personality works
+## Optional: the worker (key stays server-side)
 
-Tavily returns facts — FRIDAY supplies the attitude. The UI layer adds:
+`worker.js` is the same HUD plus an API proxy — use it if you'd rather not
+put your key in the browser:
+
+- **Dashboard:** your `friday` worker → Edit code → paste all of
+  `worker.js` → Deploy. Your existing `TAVILY_API` secret survives
+  redeploys, and the page it serves automatically routes through it.
+- **CLI:** `cd friday && npx wrangler deploy`
+
+Set the secret once if needed: `npx wrangler secret put TAVILY_API`
+(value `tvly-…`), or Dashboard → worker → Settings → Variables & Secrets.
+
+The worker API (also handy for your own projects): `GET /api/health`,
+`POST /api/chat`, `POST /api/research`, `GET /api/research/:id`,
+`GET /api/usage` — CORS-enabled, rate-limited 40/min per IP.
+
+## Files
+
+| File | What it is |
+|---|---|
+| `index.html` | **The whole app** — standalone HUD, direct/keyless/worker modes. |
+| `worker.js` | Optional Cloudflare Worker: same HUD + secret-keeping proxy. |
+| `embed.js` | Re-syncs `index.html` into `worker.js` after UI edits: `node embed.js` |
+| `wrangler.toml` | Wrangler config for the optional worker (`name = "friday"`). |
+| `preview.js` | **Local preview only** — serves the HUD with fake Tavily data. |
+
+## Personality
+
+Tavily returns facts — FRIDAY supplies the attitude:
 
 - **Boot sequence** — reactor spin-up, J.A.R.V.I.S. preference import,
-  sarcasm-module calibration, uplink check (detects missing/rejected key).
-- **Voice** — `speechSynthesis`, preferring an Irish (`en-IE`) voice.
-  Toggle 🔊 in the header. Mic input too (where the browser allows it).
-- **Chatter** — acks ("Right away, boss."), scan chatter, research
-  progress updates, HUD blips (♪ toggle).
-- **Easter eggs** — try *"activate the house party protocol"*, *"who are
-  you"*, *"tell me a joke"*, *"suit status"*, *"roll a dice"*…
+  sarcasm-module calibration, uplink check (missing / rejected key detected).
+- **Voice** — `speechSynthesis`, preferring an Irish (`en-IE`) voice; 🔊 toggle.
+  Mic input too (where the browser allows it).
+- **Chatter** — acks ("Right away, boss."), scan chatter, research progress,
+  HUD blips (♪ toggle).
+- **Easter eggs** — *"activate the house party protocol"*, *"who are you"*,
+  *"tell me a joke"*, *"suit status"*, *"roll a dice"*…
 - **Commands** — `status` (systems + credit report), `help`, `clear`.
-
-## Hosting the HTML separately (optional)
-
-`index.html` is standalone: open it locally or host it anywhere (e.g. this
-repo → `join365.eu.cc/friday/`) and it calls the worker cross-origin —
-CORS is enabled on the API. Point it at a different worker by editing
-`WORKER_URL` at the top of its script.
+- **Memory** — the session transcript persists in localStorage.
 
 ## Developing
 
 ```bash
 node preview.js      # local HUD with fake Tavily data → localhost:8080
-# edit index.html, then re-embed into the worker:
+# edit index.html, then re-embed it into the worker:
 node embed.js        # then npx wrangler deploy (or re-paste into Dashboard)
 ```
-
-## API the worker exposes
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /` | The HUD |
-| `GET /api/health` | Is the secret set & key valid? |
-| `POST /api/chat` | `{message, depth, topic}` → answer + sources + usage |
-| `POST /api/research` | `{input, model}` → `{request_id, status}` |
-| `GET /api/research/:id` | Poll → `{status, content, sources, usage}` |
-| `GET /api/usage` | Credit usage / plan |
-
-The API is unauthenticated but rate-limited (40 calls/min per IP, best
-effort) — anyone with the URL could burn your free credits, so keep the
-worker URL to yourself if that matters.

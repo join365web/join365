@@ -296,6 +296,32 @@ aside{
 .tgl.on{background:rgba(79,216,255,.28);border-color:var(--cyan)}
 .tgl.on::after{left:19px;background:var(--cyan);box-shadow:0 0 8px rgba(79,216,255,.8)}
 
+/* settings modal */
+.modal{position:fixed;inset:0;z-index:9994;display:none;align-items:center;justify-content:center;
+  background:rgba(2,6,12,.78);backdrop-filter:blur(6px);padding:20px}
+.modal.open{display:flex}
+.modal-card{width:min(460px,94vw);max-height:88vh;overflow-y:auto;border:1px solid var(--line);border-radius:12px;
+  background:linear-gradient(180deg,rgba(9,22,38,.97),rgba(5,12,22,.97));padding:20px 22px;
+  box-shadow:0 0 40px rgba(79,216,255,.18);animation:msgin .25s ease}
+.modal-title{font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:var(--cyan-2);margin-bottom:16px}
+.field{margin-bottom:15px}
+.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--dim);margin-bottom:7px}
+.field input[type=text],.field input[type=password]{width:100%;background:rgba(4,10,18,.8);border:1px solid var(--line);
+  border-radius:8px;color:var(--txt);font-family:var(--mono);font-size:13px;padding:10px 12px;outline:none}
+.field input:focus{border-color:rgba(79,216,255,.55);box-shadow:0 0 0 2px rgba(79,216,255,.12)}
+.hint{font-size:11px;color:var(--dim-2);margin-top:6px;line-height:1.5}
+.hint b{color:var(--dim)}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;border:1px solid var(--line-soft);background:rgba(9,20,34,.6);color:var(--dim);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;padding:9px 4px;border-radius:8px;cursor:pointer;transition:.16s}
+.seg button.active{color:#031018;background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px rgba(79,216,255,.35);font-weight:700}
+.checkline{display:flex!important;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px!important;
+  letter-spacing:.1em;color:var(--dim);cursor:pointer;user-select:none}
+.checkline input{accent-color:var(--cyan);width:15px;height:15px;cursor:pointer}
+.modal-actions{display:flex;gap:9px;margin-top:18px}
+.modal-actions .pbtn{margin-top:0}
+.pbtn.primary{color:#031018;background:linear-gradient(135deg,#9be8ff,#4fd8ff);border-color:var(--cyan);font-weight:700}
+
 /* toast */
 #toast{
   position:fixed;left:50%;bottom:118px;transform:translateX(-50%) translateY(18px);z-index:9995;opacity:0;
@@ -346,6 +372,7 @@ aside{
     <div class="spacer"></div>
     <span class="chip hidesm" id="chip-uplink" title="Tavily uplink status"><span class="led"></span>UPLINK</span>
     <span class="chip" id="chip-credits" title="Tavily credits this cycle — click for a status report" role="button" style="cursor:pointer">⌁ <b>—</b></span>
+    <button class="icon" id="btn-settings" title="Uplink settings — API key / worker">⚙</button>
     <button class="icon" id="btn-voice" title="Voice output (FRIDAY speaks)">🔊</button>
     <button class="icon" id="btn-sfx" title="HUD sound effects">♪</button>
   </header>
@@ -395,13 +422,46 @@ aside{
       <div class="pcard">
         <h3>ABOUT</h3>
         <div class="about">
-          F.R.I.D.A.Y. runs on your <b style="color:var(--cyan-2)">Cloudflare Worker</b> with the <b style="color:var(--cyan-2)">TAVILY_API</b> secret.
-          Personality layer runs locally; knowledge comes from the
-          <a href="https://docs.tavily.com" target="_blank" rel="noopener">Tavily</a> Search &amp; Research APIs.
+          This single file runs anywhere — no server needed. It talks straight to
+          <a href="https://docs.tavily.com" target="_blank" rel="noopener">Tavily</a> with a key stored in your browser (⚙),
+          works <b style="color:var(--cyan-2)">keyless</b> (free, rate-limited), or routes through your
+          <b style="color:var(--cyan-2)">Cloudflare Worker</b> (<b>friday/worker.js</b>) to keep the TAVILY_API secret server-side.
           Free Researcher plan: 1,000 credits/month.
         </div>
       </div>
     </aside>
+  </div>
+</div>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div id="settings" class="modal">
+  <div class="modal-card">
+    <div class="modal-title">◈ UPLINK CONFIGURATION</div>
+    <div class="field">
+      <label>CONNECTION</label>
+      <div class="seg" id="seg-mode">
+        <button type="button" data-v="direct">DIRECT · THIS FILE</button>
+        <button type="button" data-v="worker">WORKER · PROXY</button>
+      </div>
+      <div class="hint" id="mode-hint"></div>
+    </div>
+    <div class="field" id="f-worker">
+      <label>WORKER URL</label>
+      <input id="s-worker" placeholder="https://friday.dzt399890.workers.dev" spellcheck="false">
+      <div class="hint">The Cloudflare Worker running <b>friday/worker.js</b> — keeps your TAVILY_API secret server-side.</div>
+    </div>
+    <div class="field" id="f-key">
+      <label>TAVILY API KEY</label>
+      <input id="s-key" type="password" placeholder="tvly-… (from app.tavily.com)" spellcheck="false" autocomplete="off">
+      <div class="hint">Stored only in this browser's localStorage — sent only to api.tavily.com. Leave blank for keyless.</div>
+    </div>
+    <div class="field">
+      <label class="checkline"><input type="checkbox" id="s-keyless"> KEYLESS MODE — free scans, no key, rate-limited (Search only)</label>
+    </div>
+    <div class="modal-actions">
+      <button class="pbtn" id="s-cancel" type="button">CANCEL</button>
+      <button class="pbtn primary" id="s-save" type="button">SAVE &amp; RECONNECT</button>
+    </div>
   </div>
 </div>
 
@@ -412,17 +472,18 @@ aside{
 "use strict";
 
 /* ==================================================================
-   CONFIG — where does the worker live?
-   - Served BY the worker (friday.dzt399890.workers.dev): same-origin.
-   - Opened as a local file, or hosted elsewhere (e.g. join365.eu.cc):
-     calls go straight to the worker URL (CORS is enabled there).
-   Change WORKER_URL if you rename your worker.
+   CONFIG — three ways to reach Tavily (pick in ⚙ settings):
+   1. DIRECT (default): this HTML calls api.tavily.com itself; your
+      tvly- key lives in localStorage. No deploy needed — the file
+      works from anywhere, even opened straight from disk.
+   2. KEYLESS: same, but with Tavily's free rate-limited keyless mode
+      (X-Tavily-Access-Mode: keyless) — no key at all. Search only.
+   3. WORKER: route through your Cloudflare Worker (friday/worker.js)
+      so the TAVILY_API secret stays server-side. Auto-selected when
+      this page is served BY that worker.
    ================================================================== */
-const WORKER_URL = "https://friday.dzt399890.workers.dev";
-const API_BASE =
-  location.origin === WORKER_URL ? "" :
-  ["localhost","127.0.0.1","0.0.0.0"].includes(location.hostname) ? "" :
-  WORKER_URL;
+const WORKER_URL = "https://friday.dzt399890.workers.dev"; // change if you rename your worker
+const TAVILY_ORIGIN = "https://api.tavily.com";
 
 /* ---------- tiny helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -749,29 +810,93 @@ function showThinking(lines){
 const hideThinking = () => { clearInterval(chatterTimer); document.getElementById("thinking")?.remove(); };
 
 /* ==================================================================
-   API CALLS
+   CONNECTION — direct to Tavily, keyless, or via the worker
    ================================================================== */
-async function api(path, opts){
-  const r = await fetch(API_BASE + path, opts);
-  let data = null; try { data = await r.json(); } catch {}
-  return { status: r.status, ok: r.ok, data };
+const Conn = {
+  mode: pick("connMode", "direct"),        // "direct" | "worker"
+  workerUrl: pick("workerUrl", WORKER_URL),
+  key: pick("apiKey", ""),                 // tvly-… stays in localStorage
+  keyless: pick("keyless", false),
+  sameOrigin: false,                       // true → this origin IS the worker/preview
+  route(){ return this.mode === "worker" ? "WORKER" : "DIRECT"; },
+};
+
+/* Decide how we're connected:
+   - served by the worker (workers.dev origin) or a local preview → worker mode
+   - otherwise the stored preference (default: direct) */
+async function resolveConnection(){
+  if (location.protocol.startsWith("http")) {
+    const isWorkerOrigin = location.origin === Conn.workerUrl || /\.workers\.dev$/.test(location.hostname);
+    const isLocal = ["localhost","127.0.0.1","0.0.0.0"].includes(location.hostname);
+    if (isWorkerOrigin || isLocal) {
+      try {
+        const r = await fetch("/api/health");
+        const d = await r.json().catch(() => null);
+        if (r.ok && d && d.ok !== false) { Conn.mode = "worker"; Conn.sameOrigin = true; return; }
+      } catch {}
+    }
+  }
+  if (Conn.mode !== "worker") Conn.mode = "direct";
 }
+
+/* One fetch layer for every Tavily call.
+   Worker routes: /api/chat, /api/research, /api/research/:id, /api/usage, /api/health.
+   Direct mode maps those onto https://api.tavily.com/search|research|usage. */
+async function tavily(path, { method = "GET", body } = {}){
+  const headers = { "Content-Type": "application/json" };
+  let url;
+  if (Conn.mode === "worker") {
+    url = (Conn.sameOrigin ? "" : Conn.workerUrl.replace(/\/+$/, "")) + path;
+  } else {
+    let p = path.split("?")[0], q = path.split("?")[1] || "";
+    if (p.startsWith("/api/research/")) p = "/research/" + p.split("/")[3];
+    else p = ({ "/api/chat": "/search", "/api/research": "/research", "/api/usage": "/usage", "/api/health": "/usage" })[p] || p;
+    url = TAVILY_ORIGIN + p + (q ? "?" + q : "");
+    if (Conn.key) headers["Authorization"] = "Bearer " + Conn.key;
+    else if (Conn.keyless) headers["X-Tavily-Access-Mode"] = "keyless";
+  }
+  try {
+    const r = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    let data = null; try { data = await r.json(); } catch {}
+    return { status: r.status, ok: r.ok, data };
+  } catch (e) {
+    return { status: 0, ok: false, data: null, network: true, err: String(e?.message || e) };
+  }
+}
+
 function apiError(data, status){
+  if (status === 0)
+    return Conn.mode === "worker"
+      ? "I can't raise the worker at " + Conn.workerUrl + ", boss. Check that it's deployed and awake."
+      : "The browser blocked my direct line to Tavily, boss — CORS, most likely, or the network dropped. Two fixes: open this page from your Cloudflare Worker (friday/worker.js), or switch connection mode to WORKER in ⚙ settings.";
   if (data && data.error === "secret_missing")
     return "There's no TAVILY_API secret on the worker, boss. Dashboard → your worker → Settings → Variables & Secrets → Add → Type: Secret, Name: TAVILY_API, Value: your tvly- key. Then redeploy.";
   if (status === 401 || data?.error === "tavily_401")
-    return "The Tavily uplink rejected our key, sir. Double-check the TAVILY_API secret — it should start with tvly-.";
+    return Conn.mode === "worker"
+      ? "The Tavily uplink rejected our key, sir. Double-check the TAVILY_API secret — it should start with tvly-."
+      : "Tavily rejected the key, sir. Check the tvly- key in ⚙ settings — grab it from app.tavily.com.";
   if (status === 432 || data?.error === "tavily_432")
     return "We've used every credit in this cycle, boss. The free Researcher plan refills monthly — or top up at app.tavily.com.";
   if (status === 429 || data?.error === "tavily_429")
     return "Rate limited. Even I need a breath now and then, boss. Give it a minute.";
-  return (data && (data.detail || data.error)) ? String(data.detail || data.error) : "Something went wrong on the uplink, boss. Try again.";
+  const detail = data?.detail?.error || data?.detail || data?.error;
+  return detail ? String(detail) : "Something went wrong on the uplink, boss. Try again.";
 }
 
 /* ---------- usage / credits ---------- */
 async function refreshUsage({ quiet = true } = {}){
+  if (Conn.mode === "direct" && !Conn.key) {
+    // keyless: no usage endpoint — show mode instead of credits
+    state.uplink = "KEYLESS";
+    $("#chip-credits").innerHTML = "⌁ <b>KEYLESS</b>";
+    $("#sys-uplink").textContent = "KEYLESS · DIRECT";
+    $("#sys-uplink").className = "v";
+    $("#sys-plan").textContent = "KEYLESS · RATE-LIMITED";
+    $("#sys-credits").textContent = "—";
+    return null;
+  }
   try {
-    const { ok, data } = await api("/api/usage");
+    const { ok, data } = await tavily("/api/usage");
     if (!ok || !data?.key) throw 0;
     const used = data.key.usage ?? 0, limit = data.key.limit;
     state.uplink = "ONLINE";
@@ -805,9 +930,14 @@ async function runScan(text){
   const th = showThinking([ack + " " + rand(SCAN_CHATTER), ...SCAN_CHATTER]);
   const t0 = performance.now();
   try {
-    const { status, ok, data } = await api("/api/chat", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, depth: mode.depth, topic: state.topic }),
+    const { status, ok, data } = await tavily("/api/chat", {
+      method: "POST",
+      body: Conn.mode === "worker"
+        ? { message: text, depth: mode.depth, topic: state.topic }
+        : { query: text, search_depth: mode.depth, topic: state.topic,
+            include_answer: "advanced", max_results: 5, chunks_per_source: 3,
+            include_favicon: true, include_published_date: true, include_usage: true,
+            auto_parameters: false },
     });
     if (!ok) throw { data, status };
     hideThinking();
@@ -830,12 +960,16 @@ async function runScan(text){
     refreshUsage();
   } catch (e) {
     hideThinking(); SFX.err();
-    const msg = e && e.status === undefined ? "I can't raise my uplink, boss. The worker isn't answering — check that it's deployed." : apiError(e.data, e.status);
+    const msg = e && e.status === undefined ? "Something went sideways on the uplink, boss. Try again." : apiError(e.data, e.status);
     await fridaySay(msg, { persist: true });
   }
 }
 
 async function runResearch(text){
+  if (Conn.mode === "direct" && !Conn.key) {
+    await fridaySay("Research runs on Tavily's research models, boss — that needs a proper API key. Keyless covers quick scans only. Add your tvly- key in ⚙ settings and I'll go deep.", { persist: true });
+    return;
+  }
   const mode = MODES[state.mode];
   const card = document.createElement("div");
   card.className = "rcard";
@@ -859,14 +993,14 @@ async function runResearch(text){
   const fail = async (e) => {
     clearInterval(timer); clearInterval(chatter);
     card.remove(); SFX.err();
-    const msg = e && e.status === undefined ? "I can't raise my uplink, boss. The worker isn't answering — check that it's deployed." : apiError(e.data, e.status);
+    const msg = e && e.status === undefined ? "Something went sideways on the uplink, boss. Try again." : apiError(e.data, e.status);
     await fridaySay(msg, { persist: true });
   };
 
   try {
-    const { ok, status, data } = await api("/api/research", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input: text, model: mode.model }),
+    const { ok, status, data } = await tavily("/api/research", {
+      method: "POST",
+      body: { input: text, model: mode.model },
     });
     if (!ok) throw { data, status };
 
@@ -875,7 +1009,7 @@ async function runResearch(text){
       const deadline = Date.now() + 5 * 60 * 1000;
       while (Date.now() < deadline && result.status !== "completed" && result.status !== "failed") {
         await sleep(4000);
-        const r = await api(`/api/research/${encodeURIComponent(result.request_id)}`);
+        const r = await tavily(`/api/research/${encodeURIComponent(result.request_id)}?include_usage=true`);
         if (r.ok && r.data) result = r.data;
       }
     }
@@ -949,7 +1083,7 @@ async function reportStatus(){
     const left = limit ? limit - used : null;
     text = `Systems report, boss:\n\n- **Uplink:** ONLINE — Tavily reconnaissance grid responding\n- **Plan:** ${esc(String(data.account?.current_plan || "Researcher"))}\n- **Credits this cycle:** ${used}${limit ? " of " + limit : ""}${left != null ? ` — **${left} remaining**` : ""}\n- **Session mode:** ${MODES[state.mode].label}\n\nAll else nominal, sir.`;
   } else {
-    text = "I can't reach the uplink for a full diagnostic, boss. The worker at `" + (API_BASE || WORKER_URL) + "` isn't answering — check that it's deployed and the TAVILY_API secret is set.";
+    text = "I can't complete a full diagnostic, boss. Current route: " + (Conn.mode === "worker" ? "worker at `" + Conn.workerUrl + "`" : "direct to `api.tavily.com`" + (Conn.keyless ? " (keyless)" : "")) + ". " + (Conn.mode === "direct" && !Conn.key ? "No key on file — ⚙ settings has the options. " : "") + "Local systems are all green, for what it's worth.";
   }
   const m = addMsg("fr", { quip: "Running diagnostics…", body: md(text), meta: "<span>SYSTEMS REPORT</span><span>0 CREDITS</span>" });
   SFX.recv(); Voice.speak(text);
@@ -1108,7 +1242,25 @@ async function boot(){
     log.appendChild(d);
     log.appendChild(cur); // keep the cursor trailing below the newest line
   };
-  const health = api("/api/health").catch(() => null);
+  const connReady = (async () => {
+    await resolveConnection();
+    // health check for the resolved route
+    if (Conn.mode === "worker") {
+      const h = await tavily("/api/health");
+      if (h.ok && h.data?.ok !== false) return "worker-online";
+      if (h.data?.error === "secret_missing") return "worker-nokey";
+      if (h.status === 401 || h.data?.status === 401) return "badkey";
+      if (h.status === 0) return "worker-offline";
+      return "worker-offline";
+    }
+    if (!Conn.key && !Conn.keyless) return "nokey";
+    if (!Conn.key && Conn.keyless) return "keyless";
+    const h = await tavily("/api/usage");
+    if (h.ok) return "online";
+    if (h.status === 401) return "badkey";
+    if (h.status === 0) return "cors";
+    return "offline";
+  })();
 
   const lines = [
     "&gt; STARK INDUSTRIES · SECURE OS v45.1.7",
@@ -1119,14 +1271,27 @@ async function boot(){
   ];
   for (const ln of lines) { addLn(ln); SFX.beep(1100 + Math.random() * 400, .03, "sine", .018); await sleep(rand([260, 340, 420, 500])); }
 
-  // uplink line depends on health
-  let uplinkLine, uplinkState = "unknown";
-  const h = await health;
-  if (h && h.ok && h.data?.ok === true) { uplinkLine = "&gt; TAVILY RECONNAISSANCE GRID <span class='ok'>……… ONLINE</span>"; uplinkState = "online"; }
-  else if (h && h.ok && h.data?.error === "secret_missing") { uplinkLine = "&gt; TAVILY UPLINK KEY <span class='bad'>……… MISSING</span>"; uplinkState = "nokey"; }
-  else if (h && (h.data?.status === 401 || h.status === 401)) { uplinkLine = "&gt; TAVILY UPLINK <span class='bad'>……… KEY REJECTED</span>"; uplinkState = "badkey"; }
-  else { uplinkLine = "&gt; TAVILY RECONNAISSANCE GRID <span class='bad'>……… OFFLINE</span>"; uplinkState = "offline"; }
+  // uplink line depends on the resolved connection
+  const uplinkState = await connReady;
+  const routeTag = Conn.mode === "worker" ? "VIA WORKER" : "DIRECT";
+  const uplinkLine = {
+    "worker-online": `&gt; TAVILY RECONNAISSANCE GRID <span class='ok'>……… ONLINE · ${routeTag}</span>`,
+    "online":        `&gt; TAVILY RECONNAISSANCE GRID <span class='ok'>……… ONLINE · ${routeTag}</span>`,
+    "keyless":       `&gt; TAVILY RECONNAISSANCE GRID <span class='warn'>……… KEYLESS · ${routeTag}</span>`,
+    "nokey":         `&gt; TAVILY UPLINK KEY <span class='bad'>……… MISSING</span>`,
+    "worker-nokey":  `&gt; TAVILY UPLINK KEY <span class='bad'>……… MISSING ON WORKER</span>`,
+    "badkey":        `&gt; TAVILY UPLINK <span class='bad'>……… KEY REJECTED</span>`,
+    "cors":          `&gt; TAVILY DIRECT UPLINK <span class='bad'>……… BLOCKED (CORS)</span>`,
+    "worker-offline":`&gt; WORKER UPLINK <span class='bad'>……… UNREACHABLE</span>`,
+    "offline":       `&gt; TAVILY RECONNAISSANCE GRID <span class='bad'>……… OFFLINE</span>`,
+  }[uplinkState] || `&gt; TAVILY RECONNAISSANCE GRID <span class='bad'>……… OFFLINE</span>`;
   addLn(uplinkLine); await sleep(420);
+  const led = $("#chip-uplink .led");
+  if (led) {
+    if (uplinkState === "online" || uplinkState === "worker-online") led.className = "led";
+    else if (uplinkState === "keyless") led.className = "led busy";
+    else led.className = "led off";
+  }
   addLn("&gt; ALL SYSTEMS <span class='ok'>NOMINAL</span> — GOOD TO SEE YOU, BOSS");
   await sleep(650);
 
@@ -1140,44 +1305,75 @@ async function boot(){
   const h2 = new Date().getHours();
   const part = h2 < 12 ? "morning" : h2 < 18 ? "afternoon" : "evening";
   let hello;
-  if (uplinkState === "online") {
+  if (uplinkState === "online" || uplinkState === "worker-online") {
     const b = $("#chip-credits b");
     hello = restored
       ? `Welcome back, boss. Session restored — ${state.history.length} entries on record, ${b ? b.textContent + " credits" : "uplink"} in reserve. Where were we?`
-      : `Good ${part}, boss. F.R.I.D.A.Y. online and listening. Live uplink to the Tavily reconnaissance grid — ${b ? b.textContent + " credits" : "credits"} remaining this cycle. What are we building today?`;
+      : `Good ${part}, boss. F.R.I.D.A.Y. online and listening — ${Conn.route()} uplink to the Tavily reconnaissance grid, ${b ? b.textContent + " credits" : "credits"} remaining this cycle. What are we building today?`;
+  } else if (uplinkState === "keyless") {
+    hello = `Good ${part}, boss. F.R.I.D.A.Y. online, running keyless — free scans, no key, rate-limited. Paste a tvly- key in ⚙ settings for 1,000 credits a month and deep research. What are we building today?`;
+    $("#sys-uplink").textContent = "KEYLESS · DIRECT"; $("#sys-uplink").className = "v";
+    $("#chip-credits").innerHTML = "⌁ <b>KEYLESS</b>";
   } else if (uplinkState === "nokey") {
-    hello = `Good ${part}, boss. I'm up, but the Tavily uplink key is missing. Add a secret named TAVILY_API to the worker (tvly-…) and I'll have eyes on the whole web.`;
-    toast("TAVILY_API secret missing — see README. Local chat still works.", 7000);
+    hello = `Good ${part}, boss. I'm up, but I've no way to reach the web yet — I need an uplink. Give me your Tavily key (tvly-…, free at app.tavily.com) or run keyless; ⚙ settings is open now.`;
+    setTimeout(() => openSettings(true), 600);
+  } else if (uplinkState === "worker-nokey") {
+    hello = `Good ${part}, boss. I'm routing through your worker, but its TAVILY_API secret is missing. Add it on the Cloudflare dashboard, or switch to DIRECT mode in ⚙ and give me a key directly.`;
   } else if (uplinkState === "badkey") {
-    hello = `Good ${part}, boss. I'm up, but Tavily rejected our key. Check the TAVILY_API secret — it should start with tvly-.`;
+    hello = `Good ${part}, boss. I'm up, but Tavily rejected our key. ${Conn.mode === "worker" ? "Check the TAVILY_API secret on the worker." : "Check the tvly- key in ⚙ settings."} It should start with tvly-.`;
+  } else if (uplinkState === "cors") {
+    hello = `Good ${part}, boss. I'm up, but the browser blocked my direct line to Tavily — CORS. Two fixes: deploy friday/worker.js to your Cloudflare Worker and set mode to WORKER in ⚙, or open this page from the worker itself.`;
+    setTimeout(() => openSettings(true), 600);
+  } else if (uplinkState === "worker-offline") {
+    hello = `Good ${part}, boss. I can't raise the worker at ${Conn.workerUrl}. Deploy friday/worker.js, or switch to DIRECT mode with a tvly- key in ⚙ settings.`;
+    setTimeout(() => openSettings(true), 600);
   } else {
-    hello = `Good ${part}, boss. I'm up in standalone mode — I can't see the worker at ${API_BASE || WORKER_URL} from here, so web scans are offline. Small talk's still free.`;
+    hello = `Good ${part}, boss. I'm up, but the Tavily grid isn't answering right now. Small talk's still free — try me again in a minute.`;
   }
   await fridaySay(hello, { persist: false });
   state.history.push({ role: "fr", quip: hello, ts: nowTime() }); store("history", state.history);
   scrollDown(true);
 }
 
-/* init */
-renderModes(); renderSuggests(); syncToggles(); setupMic(); Voice.init();
-boot();
-
-})();
-</script>
-</body>
-</html>
-odes(); renderSuggests(); syncToggles(); setupMic(); Voice.init();
-boot();
-
-})();
-</script>
-</body>
-</html>
-html>
-{ persist: false });
-  state.history.push({ role: "fr", quip: hello, ts: nowTime() }); store("history", state.history);
-  scrollDown(true);
+/* ---------- settings modal ---------- */
+function openSettings(auto = false){
+  $("#s-worker").value = Conn.workerUrl;
+  $("#s-key").value = Conn.key;
+  $("#s-keyless").checked = Conn.keyless;
+  setSegMode(Conn.mode === "worker" ? "worker" : "direct");
+  $("#settings").classList.add("open");
+  if (auto) SFX.err(); else SFX.beep(880, .06);
 }
+function closeSettings(){ $("#settings").classList.remove("open"); }
+function setSegMode(v){
+  document.querySelectorAll("#seg-mode button").forEach(b => b.classList.toggle("active", b.dataset.v === v));
+  $("#mode-hint").textContent = v === "worker"
+    ? "Routes through your Cloudflare Worker — the TAVILY_API secret never touches this browser."
+    : "This page calls api.tavily.com itself. Your key stays in this browser's localStorage.";
+  $("#f-worker").style.display = v === "worker" ? "" : "none";
+  $("#f-key").style.display = v === "worker" ? "none" : "";
+}
+document.querySelectorAll("#seg-mode button").forEach(b => b.onclick = () => setSegMode(b.dataset.v));
+$("#btn-settings").onclick = () => openSettings();
+$("#s-cancel").onclick = closeSettings;
+$("#settings").addEventListener("click", e => { if (e.target.id === "settings") closeSettings(); });
+$("#s-save").onclick = async () => {
+  const mode = document.querySelector("#seg-mode button.active")?.dataset.v || "direct";
+  const workerUrl = $("#s-worker").value.trim() || WORKER_URL;
+  const key = $("#s-key").value.trim();
+  const keyless = $("#s-keyless").checked;
+  if (mode === "direct" && !key && !keyless) { toast("I need a key or keyless mode, boss."); return; }
+  if (mode === "direct" && key && !/^tvly-/.test(key)) { toast("Heads up — Tavily keys start with tvly-."); }
+  Conn.mode = mode; Conn.workerUrl = workerUrl; Conn.key = key; Conn.keyless = keyless;
+  Conn.sameOrigin = false;
+  store("connMode", mode); store("workerUrl", workerUrl); store("apiKey", key); store("keyless", keyless);
+  closeSettings();
+  await resolveConnection();
+  await refreshUsage();
+  const b = $("#chip-credits b");
+  await fridaySay(`Uplink reconfigured, boss — ${Conn.route()} route${Conn.mode === "direct" ? (Conn.keyless && !Conn.key ? ", keyless" : "") : ""}${b && b.textContent !== "—" && b.textContent !== "KEYLESS" ? ", " + b.textContent + " credits in reserve" : ""}. Ready when you are.`, { persist: false });
+};
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
 
 /* init */
 renderModes(); renderSuggests(); syncToggles(); setupMic(); Voice.init();
