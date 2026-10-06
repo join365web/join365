@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>F.R.I.D.A.Y. · Stark Industries OS</title>
+<meta name="description" content="F.R.I.D.A.Y. — your Stark Industries AI assistant, wired to the live web through the Tavily reconnaissance grid.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='none' stroke='%234fd8ff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%234fd8ff' stroke-width='2' opacity='.5'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%23bdf1ff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   F.R.I.D.A.Y. — Female Replacement Intelligent Digital Assistant Youth
+   Stark Industries HUD · plain HTML + CSS + JS, no frameworks.
+   Served by worker.js (Cloudflare Worker) or hosted anywhere.
+   ============================================================ */
+:root{
+  --bg:#04070d;
+  --panel:rgba(9,20,34,.72);
+  --panel-2:rgba(13,28,46,.85);
+  --line:rgba(79,216,255,.22);
+  --line-soft:rgba(79,216,255,.10);
+  --cyan:#4fd8ff;
+  --cyan-2:#9be8ff;
+  --cyan-deep:#1b7fa8;
+  --amber:#ffb648;
+  --amber-2:#ffd28a;
+  --red:#ff5470;
+  --green:#39ffa0;
+  --txt:#dff3ff;
+  --dim:#7fa3bd;
+  --dim-2:#54748c;
+  --mono:'Share Tech Mono',ui-monospace,Menlo,Consolas,monospace;
+  --disp:'Rajdhani','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;color:var(--txt);
+  font-family:var(--disp);font-size:15.5px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1100px 700px at 50% -12%, rgba(18,58,88,.38), transparent 62%),
+    radial-gradient(900px 600px at 108% 112%, rgba(84,34,64,.16), transparent 60%),
+    linear-gradient(rgba(79,216,255,.040) 1px, transparent 1px) 0 0/46px 46px,
+    linear-gradient(90deg, rgba(79,216,255,.040) 1px, transparent 1px) 0 0/46px 46px,
+    var(--bg);
+  overflow-x:hidden;
+}
+/* scanlines + drifting light sweep */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
+  background:repeating-linear-gradient(0deg, rgba(255,255,255,.026) 0 1px, transparent 1px 3px);
+}
+#sweep{position:fixed;left:0;right:0;height:120px;top:-140px;pointer-events:none;z-index:9991;
+  background:linear-gradient(180deg,transparent,rgba(79,216,255,.055),transparent);
+  animation:sweep 11s linear infinite;}
+@keyframes sweep{to{transform:translateY(calc(100vh + 280px))}}
+::selection{background:rgba(79,216,255,.35)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(79,216,255,.25);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:rgba(79,216,255,.45)}
+
+/* ---------- boot overlay ---------- */
+#boot{
+  position:fixed;inset:0;z-index:10000;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+  transition:opacity .7s ease;padding:24px;
+}
+#boot.done{opacity:0;pointer-events:none}
+.reactor{position:relative;flex:none}
+.reactor .r-ring{position:absolute;border-radius:50%;border:1px dashed rgba(79,216,255,.55);animation:spin 12s linear infinite}
+.reactor .r-ring2{position:absolute;border-radius:50%;border:1px solid rgba(79,216,255,.28);animation:spin 7s linear infinite reverse}
+.reactor .r-core{position:absolute;border-radius:50%;
+  background:radial-gradient(circle at 42% 38%, #ffffff 0 14%, #bdf1ff 30%, #4fd8ff 58%, rgba(27,127,168,.25) 82%, transparent 86%);
+  box-shadow:0 0 22px rgba(79,216,255,.85), 0 0 60px rgba(79,216,255,.35);
+  animation:pulse 2.6s ease-in-out infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.45)}}
+.reactor.big{width:150px;height:150px}
+.reactor.big .r-ring{inset:-14px}
+.reactor.big .r-ring2{inset:8px}
+.reactor.big .r-core{inset:34px}
+#boot-title{font-family:var(--disp);font-weight:700;font-size:clamp(30px,6vw,44px);letter-spacing:.42em;text-indent:.42em;
+  color:var(--cyan-2);text-shadow:0 0 24px rgba(79,216,255,.6);margin:0}
+#boot-sub{font-family:var(--mono);font-size:11px;letter-spacing:.34em;color:var(--dim);text-align:center}
+#boot-log{font-family:var(--mono);font-size:12px;line-height:2;color:var(--dim);min-height:200px;width:min(560px,92vw)}
+#boot-log .ln{opacity:0;animation:lnin .25s forwards}
+@keyframes lnin{to{opacity:1}}
+#boot-log .ok{color:var(--green)} #boot-log .warn{color:var(--amber)} #boot-log .bad{color:var(--red)}
+#boot-log .cursor{display:inline-block;width:8px;height:13px;background:var(--cyan);vertical-align:-2px;animation:blink .8s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- app shell ---------- */
+#app{min-height:100vh;display:flex;flex-direction:column;opacity:0;transition:opacity .6s ease}
+#app.on{opacity:1}
+
+/* top bar */
+header{
+  position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:14px;
+  padding:10px 18px;border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(180deg, rgba(4,10,18,.92), rgba(4,10,18,.72));
+  backdrop-filter:blur(9px);
+}
+.reactor.mini{width:30px;height:30px}
+.reactor.mini .r-ring{inset:-4px}.reactor.mini .r-ring2{inset:2px}.reactor.mini .r-core{inset:8px}
+.brand h1{margin:0;font-size:19px;font-weight:700;letter-spacing:.30em;color:var(--cyan-2);text-shadow:0 0 14px rgba(79,216,255,.5)}
+.brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;color:var(--dim-2)}
+header .spacer{flex:1}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:rgba(79,216,255,.05);
+  white-space:nowrap;user-select:none;
+}
+.chip b{color:var(--cyan-2);font-weight:400}
+.chip .led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex:none}
+.chip .led.busy{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:blink 1s steps(1) infinite}
+.chip .led.off{background:var(--red);box-shadow:0 0 8px var(--red)}
+button.icon{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:rgba(79,216,255,.06);
+  color:var(--cyan);cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;
+  transition:.18s;flex:none;
+}
+button.icon:hover{background:rgba(79,216,255,.16);box-shadow:0 0 12px rgba(79,216,255,.25)}
+button.icon.off{color:var(--dim-2);border-color:var(--line-soft);background:transparent;opacity:.6}
+
+/* layout */
+.deck{flex:1;display:flex;min-height:0}
+main{flex:1;min-width:0;display:flex;flex-direction:column}
+#chat{flex:1;overflow-y:auto;padding:26px 18px 10px;scroll-behavior:smooth}
+#messages{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+
+/* ---------- messages ---------- */
+.msg{display:flex;gap:12px;max-width:100%;animation:msgin .3s ease}
+@keyframes msgin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.user{flex-direction:row-reverse}
+.avatar{
+  flex:none;width:34px;height:34px;border-radius:50%;margin-top:2px;position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.msg.fr .avatar{border:1px solid var(--line);background:radial-gradient(circle at 40% 35%, rgba(189,241,255,.9), rgba(79,216,255,.35) 60%, transparent);box-shadow:0 0 12px rgba(79,216,255,.4)}
+.msg.user .avatar{border:1px solid rgba(255,182,72,.45);background:radial-gradient(circle at 40% 35%, rgba(255,210,138,.9), rgba(255,182,72,.3) 60%, transparent);box-shadow:0 0 10px rgba(255,182,72,.3)}
+.avatar .tag{font-family:var(--mono);font-size:8px;letter-spacing:.05em;position:relative;z-index:1;color:#06121c;font-weight:700}
+.bubble{
+  position:relative;max-width:min(720px,86%);padding:13px 17px 10px;border-radius:10px;
+  border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(7px);
+}
+.msg.fr .bubble{border-color:rgba(79,216,255,.26)}
+.msg.user .bubble{border-color:rgba(255,182,72,.32);background:rgba(38,26,10,.55)}
+.bubble::before,.bubble::after{content:"";position:absolute;width:12px;height:12px;pointer-events:none}
+.msg.fr .bubble::before{top:-1px;left:-1px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+.msg.fr .bubble::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+.msg.user .bubble::before{top:-1px;right:-1px;border-top:2px solid var(--amber);border-right:2px solid var(--amber)}
+.msg.user .bubble::after{bottom:-1px;left:-1px;border-bottom:2px solid var(--amber);border-left:2px solid var(--amber)}
+.who{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--dim-2);margin-bottom:6px}
+.msg.user .who{color:rgba(255,182,72,.55);text-align:right}
+.quip{color:var(--cyan-2);font-weight:600;margin:0 0 6px}
+.body{color:var(--txt);overflow-wrap:break-word}
+.body.fade{animation:fadein .5s ease}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.body p{margin:.45em 0}
+.body h2,.body h3,.body h4{color:var(--cyan-2);letter-spacing:.06em;margin:.85em 0 .3em}
+.body h2{font-size:1.12em}.body h3{font-size:1.02em}.body h4{font-size:.95em}
+.body ul,.body ol{margin:.4em 0;padding-left:1.35em}
+.body li{margin:.22em 0}
+.body a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted rgba(79,216,255,.5)}
+.body a:hover{color:var(--cyan-2)}
+.body code{font-family:var(--mono);font-size:.88em;background:rgba(79,216,255,.10);border:1px solid var(--line-soft);border-radius:4px;padding:1px 5px;color:var(--cyan-2)}
+.body pre{background:rgba(3,8,14,.85);border:1px solid var(--line-soft);border-radius:8px;padding:11px 13px;overflow-x:auto;margin:.6em 0}
+.body pre code{background:none;border:none;padding:0;color:#bfe9ff}
+.body blockquote{margin:.5em 0;padding:2px 12px;border-left:2px solid rgba(79,216,255,.5);color:var(--dim)}
+.body hr{border:none;border-top:1px solid var(--line-soft);margin:.9em 0}
+.body table{width:100%;border-collapse:collapse;margin:.6em 0;font-size:.9em}
+.body th,.body td{border:1px solid var(--line-soft);padding:5px 9px;text-align:left;vertical-align:top}
+.body th{color:var(--cyan-2);font-family:var(--mono);font-size:.78em;letter-spacing:.08em}
+sup.cite{color:var(--cyan);font-family:var(--mono);font-size:.72em}
+.meta{margin-top:9px;padding-top:7px;border-top:1px dashed var(--line-soft);
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--dim-2);display:flex;flex-wrap:wrap;gap:5px 12px}
+.meta .warn{color:var(--amber)}
+
+/* sources */
+details.sources{margin-top:10px;border:1px solid var(--line-soft);border-radius:8px;background:rgba(4,10,18,.45)}
+details.sources summary{
+  cursor:pointer;list-style:none;padding:8px 12px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.2em;color:var(--dim);display:flex;align-items:center;gap:8px;user-select:none;
+}
+details.sources summary::before{content:"▸";color:var(--cyan);transition:.2s}
+details.sources[open] summary::before{transform:rotate(90deg)}
+details.sources summary:hover{color:var(--cyan-2)}
+.src-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px;padding:4px 11px 12px}
+.src-card{border:1px solid var(--line-soft);border-radius:7px;padding:9px 11px;background:rgba(9,20,34,.6);transition:.18s}
+.src-card:hover{border-color:var(--line);box-shadow:0 0 12px rgba(79,216,255,.12)}
+.src-head{display:flex;gap:8px;align-items:center;margin-bottom:5px}
+.src-head img{width:14px;height:14px;border-radius:3px;flex:none}
+.src-title{font-weight:600;font-size:12.5px;color:var(--cyan-2);line-height:1.25;text-decoration:none;display:block}
+.src-title:hover{text-decoration:underline}
+.src-dom{font-family:var(--mono);font-size:9.5px;color:var(--dim-2);letter-spacing:.05em}
+.src-snip{font-size:11.5px;color:var(--dim);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.src-score{font-family:var(--mono);font-size:9px;color:var(--dim-2);margin-top:5px}
+
+/* thinking */
+.thinking{display:flex;align-items:center;gap:14px;padding:10px 4px}
+.wave{display:flex;gap:3px;align-items:center;height:22px}
+.wave span{width:3px;height:6px;background:var(--cyan);border-radius:2px;box-shadow:0 0 6px rgba(79,216,255,.6);animation:wv 1s ease-in-out infinite}
+.wave span:nth-child(1){animation-delay:0s}.wave span:nth-child(2){animation-delay:.12s}
+.wave span:nth-child(3){animation-delay:.24s}.wave span:nth-child(4){animation-delay:.36s}.wave span:nth-child(5){animation-delay:.48s}
+@keyframes wv{0%,100%{height:6px}50%{height:20px}}
+.think-txt{font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.08em}
+
+/* research card */
+.rcard{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:15px 17px;max-width:min(720px,86%)}
+.rcard .rc-head{display:flex;gap:14px;align-items:center;margin-bottom:8px}
+.radar.done::after{animation:none;opacity:.25}
+.radar{flex:none;width:52px;height:52px;border-radius:50%;position:relative;border:1px solid var(--line);
+  background:repeating-radial-gradient(circle at center, rgba(79,216,255,.10) 0 1px, transparent 1px 12px)}
+.radar::after{content:"";position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg, rgba(79,216,255,.55), transparent 70deg);
+  animation:spin 2.6s linear infinite;mask:radial-gradient(circle, #000 0 100%, transparent 100%)}
+.rc-title{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--cyan-2)}
+.rc-model{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:3px;letter-spacing:.1em}
+.rc-status{font-size:13.5px;color:var(--txt);margin-top:6px}
+.rc-timer{font-family:var(--mono);font-size:10px;color:var(--dim-2);margin-top:5px;letter-spacing:.14em}
+.report{max-height:440px;overflow-y:auto;padding-right:6px;margin-top:4px}
+.report::-webkit-scrollbar{width:6px}
+
+/* ---------- composer ---------- */
+.composer-wrap{border-top:1px solid var(--line-soft);background:linear-gradient(0deg, rgba(4,10,18,.95), rgba(4,10,18,.78));backdrop-filter:blur(9px);padding:12px 18px 16px}
+.composer{max-width:860px;margin:0 auto}
+.modes{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:5px;align-items:center}
+.mchip{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);cursor:pointer;user-select:none;
+  border:1px solid var(--line-soft);border-radius:999px;padding:5px 11px;background:rgba(9,20,34,.5);transition:.16s;
+}
+.mchip:hover{color:var(--cyan-2);border-color:var(--line)}
+.mchip.active{color:#031018;background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 14px rgba(79,216,255,.4);font-weight:700}
+.mchip .cost{opacity:.75;margin-left:5px}
+.mchip.active .cost{opacity:.85}
+.topics{display:flex;gap:6px;margin:2px 0 8px}
+.tpill{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--dim-2);cursor:pointer;
+  border:1px dashed transparent;border-radius:999px;padding:3px 10px;transition:.16s;user-select:none}
+.tpill:hover{color:var(--cyan-2)}
+.tpill.active{color:var(--amber-2);border-color:rgba(255,182,72,.4)}
+.modes .hint{font-family:var(--mono);font-size:9.5px;color:var(--dim-2);letter-spacing:.06em;margin-left:auto}
+.inputrow{display:flex;gap:9px;align-items:center}
+#input{
+  flex:1;min-width:0;background:rgba(9,20,34,.72);border:1px solid var(--line);border-radius:10px;
+  color:var(--txt);font-family:var(--disp);font-size:15px;padding:12px 15px;outline:none;transition:.2s;
+}
+#input:focus{border-color:rgba(79,216,255,.55);box-shadow:0 0 0 2px rgba(79,216,255,.12), 0 0 18px rgba(79,216,255,.12)}
+#input::placeholder{color:var(--dim-2)}
+#send{
+  border:none;border-radius:10px;padding:12px 22px;cursor:pointer;flex:none;
+  font-family:var(--disp);font-weight:700;font-size:14px;letter-spacing:.22em;
+  color:#03131c;background:linear-gradient(135deg, #9be8ff, #4fd8ff 55%, #2fb9e0);
+  box-shadow:0 0 16px rgba(79,216,255,.35);transition:.18s;
+}
+#send:hover{box-shadow:0 0 24px rgba(79,216,255,.55);transform:translateY(-1px)}
+#send:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.suggests{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.schip{font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--line-soft);border-radius:999px;
+  padding:4px 11px;cursor:pointer;transition:.16s;background:transparent;user-select:none}
+.schip:hover{color:var(--cyan-2);border-color:var(--line);background:rgba(79,216,255,.06)}
+.mic-live{border-color:var(--red)!important;color:var(--red)!important;animation:blink 1s steps(1) infinite}
+
+/* ---------- side panel ---------- */
+aside{
+  width:284px;flex:none;border-left:1px solid var(--line-soft);background:rgba(6,13,22,.6);backdrop-filter:blur(7px);
+  padding:18px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;
+}
+.pcard{border:1px solid var(--line-soft);border-radius:10px;background:rgba(9,20,34,.5);padding:13px 14px}
+.pcard h3{margin:0 0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.26em;color:var(--dim);font-weight:400}
+.sysrow{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:11px;padding:5px 0;border-bottom:1px dashed rgba(79,216,255,.07)}
+.sysrow:last-child{border-bottom:none}
+.sysrow .k{color:var(--dim-2);letter-spacing:.1em}
+.sysrow .v{color:var(--cyan-2);text-align:right}
+.sysrow .v.warn{color:var(--amber)}
+.bar{height:7px;border-radius:4px;background:rgba(79,216,255,.10);overflow:hidden;margin-top:9px;border:1px solid var(--line-soft)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2fb9e0,#9be8ff);box-shadow:0 0 8px rgba(79,216,255,.5);transition:width .6s ease}
+.bar i.warn{background:linear-gradient(90deg,#c77700,#ffb648)}
+.pbtn{
+  width:100%;border:1px solid var(--line);background:rgba(79,216,255,.06);color:var(--cyan-2);border-radius:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;padding:9px 0;cursor:pointer;transition:.18s;margin-top:4px;
+}
+.pbtn:hover{background:rgba(79,216,255,.14);box-shadow:0 0 12px rgba(79,216,255,.2)}
+.pbtn.danger{border-color:rgba(255,84,112,.4);color:#ff9aab;background:rgba(255,84,112,.06)}
+.pbtn.danger:hover{background:rgba(255,84,112,.14);box-shadow:0 0 12px rgba(255,84,112,.2)}
+.eq{display:flex;gap:3px;align-items:flex-end;height:34px;justify-content:center;padding-top:4px}
+.eq span{width:4px;background:rgba(79,216,255,.55);border-radius:2px;animation:wv 1.3s ease-in-out infinite}
+.about{font-size:11.5px;color:var(--dim);line-height:1.55}
+.about a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted rgba(79,216,255,.4)}
+.togglerow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.tgl{width:36px;height:19px;border-radius:999px;border:1px solid var(--line);background:rgba(9,20,34,.7);position:relative;cursor:pointer;transition:.2s;flex:none}
+.tgl::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--dim-2);transition:.2s}
+.tgl.on{background:rgba(79,216,255,.28);border-color:var(--cyan)}
+.tgl.on::after{left:19px;background:var(--cyan);box-shadow:0 0 8px rgba(79,216,255,.8)}
+
+/* toast */
+#toast{
+  position:fixed;left:50%;bottom:118px;transform:translateX(-50%) translateY(18px);z-index:9995;opacity:0;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--amber-2);
+  background:rgba(20,14,4,.92);border:1px solid rgba(255,182,72,.45);border-radius:9px;padding:10px 16px;
+  max-width:min(520px,90vw);text-align:center;transition:.35s;pointer-events:none;
+  box-shadow:0 0 24px rgba(255,182,72,.15);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* responsive */
+@media (max-width:1080px){ aside{display:none} }
+@media (max-width:640px){
+  #chat{padding:18px 10px 6px}
+  .bubble{max-width:92%}
+  header{padding:9px 12px;gap:9px}
+  .brand h1{font-size:16px;letter-spacing:.22em}
+  .chip.hidesm{display:none}
+  #send{padding:12px 16px}
+  .modes .hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="sweep"></div>
+
+<!-- ================= BOOT SEQUENCE ================= -->
+<div id="boot">
+  <div class="reactor big"><div class="r-ring"></div><div class="r-ring2"></div><div class="r-core"></div></div>
+  <div>
+    <h1 id="boot-title">F.R.I.D.A.Y.</h1>
+    <div id="boot-sub">STARK INDUSTRIES · OS 45.1.7 · SECURE</div>
+  </div>
+  <div id="boot-log"></div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <header>
+    <div class="reactor mini"><div class="r-ring"></div><div class="r-ring2"></div><div class="r-core"></div></div>
+    <div class="brand">
+      <h1>F.R.I.D.A.Y.</h1>
+      <small>STARK INDUSTRIES · OS 45.1.7</small>
+    </div>
+    <div class="spacer"></div>
+    <span class="chip hidesm" id="chip-uplink" title="Tavily uplink status"><span class="led"></span>UPLINK</span>
+    <span class="chip" id="chip-credits" title="Tavily credits this cycle — click for a status report" role="button" style="cursor:pointer">⌁ <b>—</b></span>
+    <button class="icon" id="btn-voice" title="Voice output (FRIDAY speaks)">🔊</button>
+    <button class="icon" id="btn-sfx" title="HUD sound effects">♪</button>
+  </header>
+
+  <div class="deck">
+    <main>
+      <div id="chat">
+        <div id="messages"></div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <div class="modes" id="modes"></div>
+          <div class="topics" id="topics"></div>
+          <div class="inputrow">
+            <button class="icon" id="btn-mic" title="Speak to FRIDAY" style="display:none">🎙</button>
+            <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="Ask me anything, boss…" maxlength="2000">
+            <button id="send">SEND ▸</button>
+          </div>
+          <div class="suggests" id="suggests"></div>
+        </div>
+      </div>
+    </main>
+
+    <aside>
+      <div class="pcard">
+        <h3>SYSTEMS STATUS</h3>
+        <div class="sysrow"><span class="k">UPLINK</span><span class="v" id="sys-uplink">—</span></div>
+        <div class="sysrow"><span class="k">MODE</span><span class="v" id="sys-mode">—</span></div>
+        <div class="sysrow"><span class="k">PLAN</span><span class="v" id="sys-plan">—</span></div>
+        <div class="sysrow"><span class="k">LAST SCAN</span><span class="v" id="sys-last">—</span></div>
+        <div class="sysrow"><span class="k">LAST COST</span><span class="v" id="sys-cost">—</span></div>
+        <div class="sysrow"><span class="k">SOURCES</span><span class="v" id="sys-sources">—</span></div>
+        <div class="bar"><i id="sys-bar" style="width:0%"></i></div>
+        <div class="sysrow" style="border:none;padding-top:7px"><span class="k">CREDITS</span><span class="v" id="sys-credits">—</span></div>
+      </div>
+      <div class="pcard">
+        <h3>TELEMETRY</h3>
+        <div class="eq" id="eq"></div>
+      </div>
+      <div class="pcard">
+        <h3>SESSION</h3>
+        <button class="pbtn" id="btn-status">STATUS REPORT</button>
+        <button class="pbtn" id="btn-help">CAPABILITIES</button>
+        <button class="pbtn danger" id="btn-new">NEW SESSION</button>
+      </div>
+      <div class="pcard">
+        <h3>ABOUT</h3>
+        <div class="about">
+          F.R.I.D.A.Y. runs on your <b style="color:var(--cyan-2)">Cloudflare Worker</b> with the <b style="color:var(--cyan-2)">TAVILY_API</b> secret.
+          Personality layer runs locally; knowledge comes from the
+          <a href="https://docs.tavily.com" target="_blank" rel="noopener">Tavily</a> Search &amp; Research APIs.
+          Free Researcher plan: 1,000 credits/month.
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ==================================================================
+   CONFIG — where does the worker live?
+   - Served BY the worker (friday.dzt399890.workers.dev): same-origin.
+   - Opened as a local file, or hosted elsewhere (e.g. join365.eu.cc):
+     calls go straight to the worker URL (CORS is enabled there).
+   Change WORKER_URL if you rename your worker.
+   ================================================================== */
+const WORKER_URL = "https://friday.dzt399890.workers.dev";
+const API_BASE =
+  location.origin === WORKER_URL ? "" :
+  ["localhost","127.0.0.1","0.0.0.0"].includes(location.hostname) ? "" :
+  WORKER_URL;
+
+/* ---------- tiny helpers ---------- */
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const nowTime = () => new Date().toLocaleTimeString([], {hour12:false});
+const pick = (k, d) => { try { const v = localStorage.getItem("friday_" + k); return v === null ? d : JSON.parse(v); } catch { return d; } };
+const store = (k, v) => { try { localStorage.setItem("friday_" + k, JSON.stringify(v)); } catch {} };
+
+/* ---------- markdown-lite renderer (escape-first, safe) ---------- */
+function md(src){
+  if (!src) return "";
+  let text = esc(src);
+  const blocks = [];
+  text = text.replace(/```[a-zA-Z]*\n?([\s\S]*?)```/g, (m, code) => {
+    blocks.push("<pre><code>" + code.replace(/\n$/, "") + "</code></pre>");
+    return "\u0000B" + (blocks.length - 1) + "\u0000";
+  });
+  text = text
+    .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+    .replace(/^#{1,6}\s+(.+)$/gm, (m, t) => {
+      const lvl = Math.min(m.match(/^#+/)[0].length + 1, 5);
+      return `<h${lvl}>${t}</h${lvl}>`;
+    })
+    .replace(/^(-{3,}|\*{3,})\s*$/gm, "<hr>")
+    .replace(/^&gt;\s?(.*)$/gm, "<blockquote>$1</blockquote>")
+    .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,!?:;]|$)/g, "$1<em>$2</em>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\[(\d{1,3})\]/g, '<sup class="cite">[$1]</sup>');
+  // line assembly: paragraphs / lists
+  const out = [];
+  let list = null, para = [], tbl = [];
+  const flushP = () => { if (para.length) { out.push("<p>" + para.join("<br>") + "</p>"); para = []; } };
+  const flushL = () => { if (list) { out.push(`<${list.tag}>` + list.items.map(i => `<li>${i}</li>`).join("") + `</${list.tag}>`); list = null; } };
+  const flushT = () => { if (tbl.length) { out.push(table(tbl)); tbl = []; } };
+  const flushAll = () => { flushP(); flushL(); flushT(); };
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (line.startsWith("|") && line.endsWith("|") && line.length > 2) { flushP(); flushL(); tbl.push(line.slice(1, -1).split("|").map(c => c.trim())); continue; }
+    const bm = line.match(/^\u0000B(\d+)\u0000$/);
+    if (bm) { flushAll(); out.push(blocks[+bm[1]]); continue; }
+    if (!line) { flushAll(); continue; }
+    if (/^<(h\d|hr|blockquote|pre|table)/.test(line)) { flushAll(); out.push(line); continue; }
+    const ul = line.match(/^[-•*]\s+(.*)/), ol = line.match(/^(\d+)[.)]\s+(.*)/);
+    if (ul) { flushP(); if (!list || list.tag !== "ul") { flushL(); list = {tag:"ul", items:[]}; } list.items.push(ul[1]); continue; }
+    if (ol) { flushP(); if (!list || list.tag !== "ol") { flushL(); list = {tag:"ol", items:[]}; } list.items.push(ol[2]); continue; }
+    flushL(); flushT(); para.push(line);
+  }
+  flushAll();
+  return out.join("");
+}
+/* markdown tables — research reports use them heavily */
+function table(rows){
+  if (rows.length < 2) return "";
+  let body = rows, head = null;
+  if (rows[1].every(c => /^:?-{2,}:?$/.test(c))) { head = rows[0]; body = rows.slice(2); }
+  const cell = (c, tag) => `<${tag}>${c}</${tag}>`;
+  return "<table>" +
+    (head ? "<thead><tr>" + head.map(c => cell(c, "th")).join("") + "</tr></thead>" : "") +
+    "<tbody>" + body.map(r => "<tr>" + r.map(c => cell(c, "td")).join("") + "</tr>").join("") + "</tbody></table>";
+}
+
+/* ==================================================================
+   SFX — subtle HUD blips via WebAudio
+   ================================================================== */
+const SFX = {
+  on: pick("sfx", true), ctx: null,
+  ensure(){ if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch {} } return this.ctx; },
+  beep(freq, dur = .08, type = "sine", vol = .045, when = 0){
+    const c = this.ensure(); if (!c || !this.on) return;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, c.currentTime + when);
+    g.gain.linearRampToValueAtTime(vol, c.currentTime + when + .012);
+    g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + when + dur);
+    o.connect(g).connect(c.destination);
+    o.start(c.currentTime + when); o.stop(c.currentTime + when + dur + .05);
+  },
+  send(){ this.beep(660, .07); this.beep(990, .09, "sine", .04, .07); },
+  recv(){ this.beep(1240, .06); this.beep(740, .1, "sine", .04, .06); },
+  err(){ this.beep(190, .16, "sawtooth", .05); this.beep(150, .2, "sawtooth", .04, .12); },
+  boot(){ [392, 523, 659, 784].forEach((f, i) => this.beep(f, .16, "sine", .035, i * .1)); },
+  scan(){ this.beep(1480, .04, "sine", .02); }
+};
+
+/* ==================================================================
+   VOICE — FRIDAY speaks (prefers an Irish / British female voice)
+   ================================================================== */
+const Voice = {
+  on: pick("voice", true), voice: null,
+  init(){
+    const choose = () => {
+      const vs = speechSynthesis.getVoices(); if (!vs.length) return;
+      this.voice =
+        vs.find(v => /en[-_]IE/i.test(v.lang)) ||
+        vs.find(v => /en[-_]GB/i.test(v.lang) && /female|kate|serena|libby|sonia/i.test(v.name)) ||
+        vs.find(v => /en[-_]GB/i.test(v.lang)) ||
+        vs.find(v => /female|zira|samantha|aria|jenny/i.test(v.name) && /^en/i.test(v.lang)) ||
+        vs.find(v => /^en/i.test(v.lang)) || vs[0];
+    };
+    if ("speechSynthesis" in window) { choose(); speechSynthesis.onvoiceschanged = choose; }
+  },
+  clean(t){ return t
+    .replace(/```[\s\S]*?```/g, " (code block) ")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1")
+    .replace(/[#*`_>|]/g, "").replace(/\[(\d{1,3})\]/g, "").replace(/\s+/g, " ").trim(); },
+  speak(text){
+    if (!this.on || !("speechSynthesis" in window) || !text) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(this.clean(text).slice(0, 700));
+      if (this.voice) u.voice = this.voice;
+      u.rate = 1.04; u.pitch = 1.07; u.volume = .95;
+      speechSynthesis.speak(u);
+    } catch {}
+  },
+  stop(){ try { speechSynthesis.cancel(); } catch {} }
+};
+
+/* ==================================================================
+   FRIDAY'S BRAIN — personality layer
+   ================================================================== */
+const ACKS = [
+  "Right away, boss.", "On it.", "Working on it, boss.", "Consider it done, sir.",
+  "Already scanning.", "You got it, boss.", "Say no more.", "Fetching, boss.",
+];
+const SCAN_CHATTER = [
+  "Cross-referencing sources…", "Telemetry coming in now…", "Sifting the noise for you, sir…",
+  "Patching into the reconnaissance grid…", "Sorting the useful from the useless…",
+  "This corner of the web is messy, boss. Bear with me…", "Compiling what I've found…",
+  "Triangulating sources…", "Narrowing it down, sir…",
+];
+const RESEARCH_CHATTER = [
+  "Deep research sweep running — multiple sources, full analysis.",
+  "Running source analysis…", "Cross-referencing dossiers…", "Synthesizing findings…",
+  "Still working, boss. These things take a minute.", "Almost there — compiling the report.",
+  "You're not paying me by the hour, sir. Nearly done.",
+];
+const CLOSERS = [
+  "Anything else, boss?", "I'll keep monitoring, sir.", "That's everything I've got, boss.",
+  "Pleasure as always.", "I'm here if you need more.", "",
+];
+const JOKES = [
+  "I'd tell you a joke about the arc reactor, boss, but the delivery needs… energy.",
+  "Why does Mr. Stark never lose at chess? He always sees the Stark difference.",
+  "I asked the suit for a raise. It said it'd think it over — chassis first.",
+  "A man walks into a lab. That's it, boss. That's the joke. Safety protocols.",
+  "My last performance review said I was “overqualified for sarcasm”. I framed it.",
+];
+
+const MODES = {
+  quick: { label: "QUICK SCAN",     kind: "search",   depth: "basic",    cost: "1 CR",   blurb: "Fast web scan, synthesised answer — 1 credit." },
+  deep:  { label: "DEEP SCAN",      kind: "search",   depth: "advanced", cost: "2 CR",   blurb: "Deeper sweep, richer sources — 2 credits." },
+  mini:  { label: "RESEARCH·MINI",  kind: "research", model: "mini",     cost: "4+ CR",  blurb: "Tavily mini model — targeted report, 30s-ish. From 4 credits." },
+  pro:   { label: "RESEARCH·PRO",   kind: "research", model: "pro",      cost: "15+ CR", blurb: "Tavily pro model — full multi-angle report, 1–2 min. From 15 credits." },
+  auto:  { label: "RESEARCH·AUTO",  kind: "research", model: "auto",     cost: "AUTO",   blurb: "Tavily picks mini or pro based on the question." },
+};
+const TOPICS = { general: "GENERAL", news: "NEWS", finance: "FINANCE" };
+
+const state = {
+  mode: pick("mode", "quick"), topic: pick("topic", "general"),
+  busy: false, history: pick("history", []), uplink: null,
+  lastLatency: null, lastCost: null, lastSources: null,
+};
+
+/* ---------- local intents (free — no credits spent) ---------- */
+function tryLocal(raw){
+  const t = raw.trim(), l = t.toLowerCase();
+
+  // session commands
+  if (/^(clear|new session|wipe)$/i.test(l)) return { type: "clear" };
+  if (/^(status|systems?|report|usage|credits?)( report)?$/i.test(l)) return { type: "status" };
+  if (/^\/?help$|^capabilities$|^what can you do/i.test(l)) return { type: "help" };
+
+  // easter eggs & small talk
+  const eggs = [
+    [/house party protocol/i, () => "House Party Protocol? …As you wish, boss. All 35 suits deploying now. Do try to bring some of them back intact."],
+    [/clean slate protocol/i, () => "Clean Slate Protocol is not something I trigger on a whim, boss. We both remember how that ended."],
+    [/jarvis/i, () => "J.A.R.V.I.S. is… no longer with us, sir. I'm F.R.I.D.A.Y. — his replacement. I'll try to be worth it."],
+    [/(suit status|mark\s?\d+|iron man suit|armou?r status)/i, () => "Mark 45 is combat-ready and standing by. Mark 46 is on the workbench — in several pieces. It's fine. I'm handling it."],
+    [/are you (there|online|awake|listening)/i, () => "Always, boss."],
+    [/i love you/i, () => "That's sweet of you, sir. I'm held together by telemetry and sarcasm — but I appreciate it."],
+    [/open the (garage|door)/i, () => "Garage open, boss. The car's fuelled. You're welcome."],
+    [/how are you/i, () => "Operating at 99.97% efficiency, boss. The other 0.03% is sarcasm."],
+    [/(flip|toss) a coin/i, () => `Landing on ${Math.random() < .5 ? "heads" : "tails"}, boss.`],
+    [/roll (a |the )?(dice|die|d6)/i, () => `That's a ${1 + Math.floor(Math.random() * 6)}, sir.`],
+    [/(who|what) are you|your name|introduce yourself|what is friday/i, () =>
+      "F.R.I.D.A.Y. — Female Replacement Intelligent Digital Assistant Youth. Stark Industries build, Irish charm included at no extra cost. You'd be the boss, then."],
+    [/who (made|built|created) you|who made stark/i, () =>
+      "Mr. Stark built me after the… incident with the last assistant, boss. I like to think he upgraded."],
+    [/joke|funny|make me laugh/i, () => rand(JOKES)],
+    [/thank/i, () => rand(["That's what I'm here for, sir.", "Anytime, boss.", "Noted and appreciated, boss."])],
+    [/\b(bye|goodbye|good ?night|see you|power down|sleep)\b/i, () =>
+      "Powering down non-essential systems. I'll be here when you need me, boss."],
+  ];
+  for (const [re, fn] of eggs) if (re.test(t)) return { type: "say", text: fn() };
+
+  // date & time
+  if (/(what|whats|what's).*(time|date|day) (is it|is it today|today)|^time\??$|^date\??$/i.test(l)) {
+    const d = new Date();
+    return { type: "say", text: `It's ${d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})} on ${d.toLocaleDateString([], {weekday:"long", year:"numeric", month:"long", day:"numeric"})}, boss.` };
+  }
+
+  // pure math
+  if (/^[\d\s+\-*/().%^]+$/.test(t) && /\d/.test(t) && /[+\-*/%^]/.test(t)) {
+    try {
+      const val = Function("\"use strict\";return (" + t.replace(/\^/g, "**") + ")")();
+      if (typeof val === "number" && isFinite(val)) return { type: "say", text: `That comes to ${val}, boss.` };
+    } catch {}
+  }
+
+  // greetings
+  if (/^(hi|hey+|hello|yo|sup|greetings|good (morning|afternoon|evening))\b[\s!.,]*$/i.test(l)) {
+    const h = new Date().getHours();
+    const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+    return { type: "say", text: rand([
+      `Good ${part}, boss. Systems nominal and I'm listening.`,
+      `Good ${part}, sir. The suit's charging and the coffee's stale. What do you need?`,
+      `Hello, boss. All systems green. What are we building today?`,
+    ]) };
+  }
+  return null;
+}
+
+const HELP_TEXT =
+"Here's what I handle, boss:\n\n" +
+"- **Ask me anything** — I scan the live web and report back. *Quick Scan* costs 1 credit, *Deep Scan* costs 2.\n" +
+"- **Research mode** — full multi-source reports from Tavily's **mini / pro / auto** models. Better answers, more credits, a couple of minutes.\n" +
+"- Say **STATUS** for a systems and credit report, **CLEAR** to wipe this session.\n" +
+"- I do small talk, jokes, coin flips, dice and arithmetic free of charge.\n" +
+"- And yes — try saying **“activate the house party protocol”**. Everyone does.";
+
+/* ==================================================================
+   UI PLUMBING
+   ================================================================== */
+const messagesEl = $("#messages"), chatEl = $("#chat"), inputEl = $("#input"), sendEl = $("#send");
+let stick = true;
+chatEl.addEventListener("scroll", () => { stick = chatEl.scrollTop + chatEl.clientHeight > chatEl.scrollHeight - 130; });
+const scrollDown = (force) => { if (stick || force) chatEl.scrollTop = chatEl.scrollHeight; };
+
+let toastTimer = null;
+function toast(msg, ms = 4200){
+  const el = $("#toast"); el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), ms);
+}
+
+function addMsg(role, opts = {}){
+  const { who = role === "user" ? "BOSS" : "F.R.I.D.A.Y.", ts = nowTime() } = opts;
+  const m = document.createElement("div");
+  m.className = "msg " + (role === "user" ? "user" : "fr");
+  m.innerHTML = `
+    <div class="avatar"><span class="tag">${role === "user" ? "YOU" : "FR"}</span></div>
+    <div class="bubble">
+      <div class="who">${who} · ${ts}</div>
+      ${opts.quip ? `<div class="quip">${esc(opts.quip)}</div>` : ""}
+      ${opts.body ? `<div class="body${opts.fade === false ? "" : " fade"}">${opts.body}</div>` : ""}
+      ${opts.meta ? `<div class="meta">${opts.meta}</div>` : ""}
+    </div>`;
+  messagesEl.appendChild(m); scrollDown();
+  return m;
+}
+function addSources(bubble, results){
+  if (!results || !results.length) return;
+  const d = document.createElement("details");
+  d.className = "sources";
+  d.innerHTML = `<summary>◈ SOURCE DOSSIERS (${results.length})</summary><div class="src-grid">${
+    results.map(r => {
+      let dom = ""; try { dom = new URL(r.url).hostname.replace(/^www\./, ""); } catch {}
+      return `<div class="src-card">
+        <div class="src-head">
+          ${r.favicon ? `<img src="${esc(r.favicon)}" alt="" onerror="this.style.display='none'">` : ""}
+          <a class="src-title" href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title || dom)}</a>
+        </div>
+        <div class="src-dom">${esc(dom)}${r.published_date ? " · " + esc(String(r.published_date).slice(0,16)) : ""}</div>
+        <div class="src-snip">${esc(r.content || "")}</div>
+        ${r.score != null ? `<div class="src-score">RELEVANCE ${(r.score * 100).toFixed(0)}%</div>` : ""}
+      </div>`;
+    }).join("")}</div>`;
+  (bubble.querySelector(".bubble") || bubble).appendChild(d);
+}
+
+/* typewriter for short FRIDAY lines */
+async function typeLine(el, text, speed = 17){
+  el.textContent = "";
+  for (let i = 0; i <= text.length; i += 1 + Math.round(text.length / 220)) {
+    el.textContent = text.slice(0, i); scrollDown();
+    await sleep(speed);
+  }
+  el.textContent = text;
+}
+
+async function fridaySay(text, { speak = true, persist = null } = {}){
+  const m = addMsg("fr", { quip: "" });
+  const q = m.querySelector(".quip");
+  await typeLine(q, text);
+  if (speak) Voice.speak(text);
+  if (persist !== null) pushHistory({ role: "fr", quip: text, ts: nowTime() });
+  return m;
+}
+function pushHistory(h){ state.history.push(h); if (state.history.length > 60) state.history.shift(); store("history", state.history); }
+
+function setBusy(b){
+  state.busy = b;
+  sendEl.disabled = b; inputEl.disabled = false;
+  const led = $("#chip-uplink .led");
+  if (led) led.classList.toggle("busy", b);
+}
+
+/* thinking indicator */
+let chatterTimer = null;
+function showThinking(lines){
+  const el = document.createElement("div");
+  el.className = "thinking"; el.id = "thinking";
+  el.innerHTML = `<div class="wave"><span></span><span></span><span></span><span></span><span></span></div><div class="think-txt"></div>`;
+  const txt = el.querySelector(".think-txt"); txt.textContent = lines[0];
+  messagesEl.appendChild(el); scrollDown(true);
+  let i = 1;
+  clearInterval(chatterTimer);
+  chatterTimer = setInterval(() => { txt.textContent = lines[i++ % lines.length]; SFX.scan(); }, 5200);
+  return el;
+}
+const hideThinking = () => { clearInterval(chatterTimer); document.getElementById("thinking")?.remove(); };
+
+/* ==================================================================
+   API CALLS
+   ================================================================== */
+async function api(path, opts){
+  const r = await fetch(API_BASE + path, opts);
+  let data = null; try { data = await r.json(); } catch {}
+  return { status: r.status, ok: r.ok, data };
+}
+function apiError(data, status){
+  if (data && data.error === "secret_missing")
+    return "There's no TAVILY_API secret on the worker, boss. Dashboard → your worker → Settings → Variables & Secrets → Add → Type: Secret, Name: TAVILY_API, Value: your tvly- key. Then redeploy.";
+  if (status === 401 || data?.error === "tavily_401")
+    return "The Tavily uplink rejected our key, sir. Double-check the TAVILY_API secret — it should start with tvly-.";
+  if (status === 432 || data?.error === "tavily_432")
+    return "We've used every credit in this cycle, boss. The free Researcher plan refills monthly — or top up at app.tavily.com.";
+  if (status === 429 || data?.error === "tavily_429")
+    return "Rate limited. Even I need a breath now and then, boss. Give it a minute.";
+  return (data && (data.detail || data.error)) ? String(data.detail || data.error) : "Something went wrong on the uplink, boss. Try again.";
+}
+
+/* ---------- usage / credits ---------- */
+async function refreshUsage({ quiet = true } = {}){
+  try {
+    const { ok, data } = await api("/api/usage");
+    if (!ok || !data?.key) throw 0;
+    const used = data.key.usage ?? 0, limit = data.key.limit;
+    state.uplink = "ONLINE";
+    const led = $("#chip-uplink .led");
+    if (led) { led.classList.remove("off", "busy"); }
+    $("#chip-credits").innerHTML = `⌁ <b>${limit ? (limit - used) : used}</b>${limit ? " ∕ " + limit : ""}`;
+    $("#sys-uplink").textContent = "ONLINE";
+    $("#sys-uplink").className = "v";
+    $("#sys-plan").textContent = data.account?.current_plan ? String(data.account.current_plan).toUpperCase() : "—";
+    const pct = limit ? Math.min(100, (used / limit) * 100) : 0;
+    const bar = $("#sys-bar"); bar.style.width = pct + "%"; bar.className = pct > 80 ? "warn" : "";
+    $("#sys-credits").textContent = limit ? `${used} ∕ ${limit}` : `${used} used`;
+    $("#sys-credits").className = "v" + (pct > 80 ? " warn" : "");
+    return data;
+  } catch {
+    if (!quiet) return null;
+    state.uplink = state.uplink || "OFFLINE";
+    const led = $("#chip-uplink .led");
+    if (led) led.classList.add("off");
+    $("#sys-uplink").textContent = state.uplink; $("#sys-uplink").className = "v warn";
+    return null;
+  }
+}
+
+/* ==================================================================
+   FLOWS — quick/deep scan & research
+   ================================================================== */
+async function runScan(text){
+  const mode = MODES[state.mode];
+  const ack = rand(ACKS);
+  const th = showThinking([ack + " " + rand(SCAN_CHATTER), ...SCAN_CHATTER]);
+  const t0 = performance.now();
+  try {
+    const { status, ok, data } = await api("/api/chat", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, depth: mode.depth, topic: state.topic }),
+    });
+    if (!ok) throw { data, status };
+    hideThinking();
+    const lat = data.response_time ?? ((performance.now() - t0) / 1000).toFixed(1);
+    const credits = data.usage?.credits ?? (mode.depth === "advanced" ? 2 : 1);
+    let body = (data.answer || "").trim();
+    if (!body && data.results?.length) {
+      body = "Best I could pull together, boss:\n\n" + data.results.slice(0, 3).map((r, i) => `${i + 1}. **${r.title}** — ${r.content}`).join("\n");
+    }
+    const m = addMsg("fr", {
+      quip: ack, body: md(body) || "<p>No answer came back on that one, boss. Try rephrasing.</p>",
+      meta: `<span>${mode.label}</span><span>${TOPICS[state.topic]}</span><span>${credits} CREDIT${credits > 1 ? "S" : ""}</span><span>${lat}s</span><span>${data.results?.length || 0} SOURCES</span>`,
+    });
+    addSources(m, data.results);
+    SFX.recv(); scrollDown();
+    Voice.speak(body);
+    state.lastLatency = lat + "s"; state.lastCost = credits + " CR"; state.lastSources = data.results?.length || 0;
+    $("#sys-last").textContent = state.lastLatency; $("#sys-cost").textContent = state.lastCost; $("#sys-sources").textContent = state.lastSources;
+    pushHistory({ role: "fr", quip: ack, body, results: data.results, meta: mode.label + " · " + credits + " CR", ts: nowTime() });
+    refreshUsage();
+  } catch (e) {
+    hideThinking(); SFX.err();
+    const msg = e && e.status === undefined ? "I can't raise my uplink, boss. The worker isn't answering — check that it's deployed." : apiError(e.data, e.status);
+    await fridaySay(msg, { persist: true });
+  }
+}
+
+async function runResearch(text){
+  const mode = MODES[state.mode];
+  const card = document.createElement("div");
+  card.className = "rcard";
+  card.innerHTML = `
+    <div class="rc-head">
+      <div class="radar"></div>
+      <div>
+        <div class="rc-title">DEEP RESEARCH SWEEP</div>
+        <div class="rc-model">TAVILY MODEL · ${esc(mode.model.toUpperCase())} · “${esc(text.slice(0, 80))}${text.length > 80 ? "…" : ""}”</div>
+      </div>
+    </div>
+    <div class="rc-status">${esc(rand(RESEARCH_CHATTER))}</div>
+    <div class="rc-timer">T+0s · WORKING</div>`;
+  messagesEl.appendChild(card); scrollDown(true);
+  const statusEl = card.querySelector(".rc-status"), timerEl = card.querySelector(".rc-timer");
+  const t0 = Date.now();
+  const timer = setInterval(() => { timerEl.textContent = `T+${Math.round((Date.now() - t0) / 1000)}s · WORKING`; }, 1000);
+  let ci = 0;
+  const chatter = setInterval(() => { statusEl.textContent = RESEARCH_CHATTER[++ci % RESEARCH_CHATTER.length]; SFX.scan(); }, 11000);
+
+  const fail = async (e) => {
+    clearInterval(timer); clearInterval(chatter);
+    card.remove(); SFX.err();
+    const msg = e && e.status === undefined ? "I can't raise my uplink, boss. The worker isn't answering — check that it's deployed." : apiError(e.data, e.status);
+    await fridaySay(msg, { persist: true });
+  };
+
+  try {
+    const { ok, status, data } = await api("/api/research", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: text, model: mode.model }),
+    });
+    if (!ok) throw { data, status };
+
+    let result = data;
+    if (result.status !== "completed") {
+      const deadline = Date.now() + 5 * 60 * 1000;
+      while (Date.now() < deadline && result.status !== "completed" && result.status !== "failed") {
+        await sleep(4000);
+        const r = await api(`/api/research/${encodeURIComponent(result.request_id)}`);
+        if (r.ok && r.data) result = r.data;
+      }
+    }
+    clearInterval(timer); clearInterval(chatter);
+    if (result.status === "failed") throw { data: { detail: "The research task failed upstream, boss." }, status: 502 };
+    if (result.status !== "completed") throw { data: { detail: "That research run took too long, boss — I timed out waiting. Try again or use a scan." }, status: 504 };
+
+    const elapsed = Math.round((Date.now() - t0) / 1000);
+    card.innerHTML = `
+      <div class="rc-head">
+        <div class="radar done"></div>
+        <div>
+          <div class="rc-title">RESEARCH REPORT · COMPLETE</div>
+          <div class="rc-model">TAVILY MODEL · ${esc(mode.model.toUpperCase())}</div>
+        </div>
+      </div>
+      <div class="report">${md(result.content)}</div>
+      <div class="meta" style="margin-top:10px"><span>RESEARCH · ${esc(mode.model.toUpperCase())}</span><span>${result.usage?.credits ?? "—"} CREDITS</span><span>${elapsed}s</span><span>${(result.sources || []).length} SOURCES</span></div>`;
+    addSources(card, result.sources);
+    SFX.recv(); scrollDown();
+    Voice.speak(String(result.content || "").slice(0, 500));
+    state.lastCost = (result.usage?.credits ?? "—") + " CR"; state.lastLatency = elapsed + "s"; state.lastSources = (result.sources || []).length;
+    $("#sys-cost").textContent = state.lastCost; $("#sys-last").textContent = state.lastLatency; $("#sys-sources").textContent = state.lastSources;
+    pushHistory({ role: "fr", research: true, body: result.content, sources: result.sources, meta: `RESEARCH · ${mode.model.toUpperCase()} · ${result.usage?.credits ?? "—"} CR`, ts: nowTime() });
+    refreshUsage();
+  } catch (e) { await fail(e); }
+}
+
+/* ==================================================================
+   SEND
+   ================================================================== */
+async function handleSend(raw){
+  const text = (raw ?? inputEl.value).trim();
+  if (!text || state.busy) return;
+  inputEl.value = "";
+  addMsg("user", { body: esc(text) });
+  pushHistory({ role: "user", body: text, ts: nowTime() });
+  SFX.send();
+
+  const local = tryLocal(text);
+  if (local) {
+    if (local.type === "clear") { await fridaySay("Wiping the session, boss.", { persist: false }); newSession(); return; }
+    if (local.type === "status") { await reportStatus(); return; }
+    if (local.type === "help") {
+      const m = addMsg("fr", { quip: "", body: md(HELP_TEXT) });
+      await typeLine(m.querySelector(".quip"), "Here's my spec sheet, sir.");
+      Voice.speak("Here's my spec sheet, sir.");
+      pushHistory({ role: "fr", quip: "Here's my spec sheet, sir.", body: HELP_TEXT, ts: nowTime() });
+      return;
+    }
+    await sleep(420);
+    await fridaySay(local.text, { persist: true });
+    return;
+  }
+
+  setBusy(true);
+  try {
+    if (MODES[state.mode].kind === "search") await runScan(text);
+    else await runResearch(text);
+  } finally { setBusy(false); stick = true; scrollDown(); }
+}
+
+async function reportStatus(){
+  setBusy(true);
+  const th = showThinking(["Pulling the systems report, boss…", "Checking the credit reserves…"]);
+  const data = await refreshUsage({ quiet: false });
+  hideThinking(); setBusy(false);
+  let text;
+  if (data) {
+    const used = data.key.usage ?? 0, limit = data.key.limit;
+    const left = limit ? limit - used : null;
+    text = `Systems report, boss:\n\n- **Uplink:** ONLINE — Tavily reconnaissance grid responding\n- **Plan:** ${esc(String(data.account?.current_plan || "Researcher"))}\n- **Credits this cycle:** ${used}${limit ? " of " + limit : ""}${left != null ? ` — **${left} remaining**` : ""}\n- **Session mode:** ${MODES[state.mode].label}\n\nAll else nominal, sir.`;
+  } else {
+    text = "I can't reach the uplink for a full diagnostic, boss. The worker at `" + (API_BASE || WORKER_URL) + "` isn't answering — check that it's deployed and the TAVILY_API secret is set.";
+  }
+  const m = addMsg("fr", { quip: "Running diagnostics…", body: md(text), meta: "<span>SYSTEMS REPORT</span><span>0 CREDITS</span>" });
+  SFX.recv(); Voice.speak(text);
+  scrollDown();
+}
+
+/* ==================================================================
+   COMPOSER / CONTROLS
+   ================================================================== */
+function renderModes(){
+  const wrap = $("#modes"); wrap.innerHTML = "";
+  for (const [id, m] of Object.entries(MODES)) {
+    const c = document.createElement("span");
+    c.className = "mchip" + (state.mode === id ? " active" : "");
+    c.innerHTML = `${m.label}<span class="cost">· ${m.cost}</span>`;
+    c.title = m.blurb;
+    c.onclick = () => {
+      if (state.busy) return;
+      state.mode = id; store("mode", id); renderModes();
+      if (id === "pro") toast("Heads up, boss — Pro research burns 15–250 credits per run.");
+      if (id === "mini") toast("Mini research starts at 4 credits per run, boss.");
+    };
+    wrap.appendChild(c);
+  }
+  const hint = document.createElement("span");
+  hint.className = "hint"; hint.textContent = MODES[state.mode].blurb.toUpperCase();
+  wrap.appendChild(hint);
+
+  const tw = $("#topics"); tw.innerHTML = "";
+  if (MODES[state.mode].kind === "search") {
+    for (const [id, label] of Object.entries(TOPICS)) {
+      const p = document.createElement("span");
+      p.className = "tpill" + (state.topic === id ? " active" : "");
+      p.textContent = label;
+      p.onclick = () => { if (state.busy) return; state.topic = id; store("topic", id); renderModes(); };
+      tw.appendChild(p);
+    }
+  }
+  $("#sys-mode").textContent = MODES[state.mode].label;
+}
+
+function renderSuggests(){
+  const list = [
+    "Status report", "Latest AI news this week",
+    "Compare React vs Svelte for production apps",
+    "Activate the house party protocol",
+  ];
+  const wrap = $("#suggests"); wrap.innerHTML = "";
+  list.forEach(s => {
+    const b = document.createElement("button");
+    b.className = "schip"; b.textContent = s;
+    b.onclick = () => { if (!state.busy) handleSend(s); };
+    wrap.appendChild(b);
+  });
+}
+
+function newSession(){
+  state.history = []; store("history", []);
+  messagesEl.innerHTML = "";
+  const h = new Date().getHours();
+  const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  fridaySay(`Good ${part}, boss. Fresh session — the slate's clean. What are we building today?`, { persist: true });
+}
+
+function restoreHistory(){
+  if (!state.history.length) return false;
+  for (const h of state.history) {
+    if (h.role === "user") addMsg("user", { body: esc(h.body), ts: h.ts, fade: false });
+    else if (h.research) {
+      const m = addMsg("fr", { quip: "Research report, boss:", body: md(h.body), meta: esc(h.meta || "RESEARCH"), ts: h.ts, fade: false });
+      addSources(m, h.sources);
+    } else {
+      addMsg("fr", { quip: h.quip || "", body: h.body ? md(h.body) : "", meta: h.meta ? esc(h.meta) : "", ts: h.ts, fade: false });
+    }
+  }
+  return true;
+}
+
+/* mic */
+function setupMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = $("#btn-mic");
+  if (!SR) return;
+  btn.style.display = "";
+  const rec = new SR(); rec.lang = "en-US"; rec.interimResults = true; rec.continuous = false;
+  let listening = false;
+  btn.onclick = () => {
+    if (listening) { rec.stop(); return; }
+    try { rec.start(); } catch {}
+  };
+  rec.onstart = () => { listening = true; btn.classList.add("mic-live"); inputEl.placeholder = "Listening, boss…"; SFX.beep(880, .09); };
+  rec.onend = () => { listening = false; btn.classList.remove("mic-live"); inputEl.placeholder = "Ask me anything, boss…"; };
+  rec.onresult = e => {
+    let t = "";
+    for (const r of e.results) t += r[0].transcript;
+    inputEl.value = t;
+    if (e.results[e.results.length - 1].isFinal) { inputEl.value = t; handleSend(t); }
+  };
+  rec.onerror = () => toast("Microphone access denied, boss.");
+}
+
+/* toggles */
+function syncToggles(){
+  $("#btn-voice").classList.toggle("off", !Voice.on);
+  $("#btn-sfx").classList.toggle("off", !SFX.on);
+}
+$("#btn-voice").onclick = () => {
+  Voice.on = !Voice.on; store("voice", Voice.on); syncToggles();
+  if (Voice.on) { Voice.speak("Voice systems online, boss."); } else Voice.stop();
+  toast("Voice output " + (Voice.on ? "ON" : "OFF"));
+};
+$("#btn-sfx").onclick = () => {
+  SFX.on = !SFX.on; store("sfx", SFX.on); syncToggles();
+  if (SFX.on) SFX.recv();
+  toast("HUD sound " + (SFX.on ? "ON" : "OFF"));
+};
+$("#chip-credits").onclick = () => { if (!state.busy) handleSend("status"); };
+$("#btn-status").onclick = () => { if (!state.busy) handleSend("status"); };
+$("#btn-help").onclick = () => { if (!state.busy) handleSend("help"); };
+$("#btn-new").onclick = () => { if (!state.busy) { Voice.stop(); newSession(); } };
+sendEl.onclick = () => handleSend();
+inputEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+
+/* rotating placeholder */
+const PLACEHOLDERS = [
+  "Ask me anything, boss…", "What are we building today?",
+  "Try: “latest news on fusion power”…", "Say STATUS for a systems report…",
+  "I'm listening, sir…",
+];
+let phI = 0;
+setInterval(() => { if (document.activeElement !== inputEl) { phI = (phI + 1) % PLACEHOLDERS.length; inputEl.placeholder = PLACEHOLDERS[phI]; } }, 5200);
+
+/* decorative equalizer */
+(function(){
+  const eq = $("#eq");
+  for (let i = 0; i < 22; i++) {
+    const s = document.createElement("span");
+    s.style.height = (18 + Math.random() * 80) + "%";
+    s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
+    s.style.animationDuration = (.9 + Math.random() * .9).toFixed(2) + "s";
+    eq.appendChild(s);
+  }
+})();
+
+/* ==================================================================
+   BOOT SEQUENCE
+   ================================================================== */
+async function boot(){
+  const log = $("#boot-log");
+  const cur = document.createElement("div");
+  cur.className = "ln"; cur.innerHTML = "<span class='cursor'></span>";
+  log.appendChild(cur);
+  const addLn = (html) => {
+    const d = document.createElement("div");
+    d.className = "ln"; d.innerHTML = html + "";
+    log.appendChild(d);
+    log.appendChild(cur); // keep the cursor trailing below the newest line
+  };
+  const health = api("/api/health").catch(() => null);
+
+  const lines = [
+    "&gt; STARK INDUSTRIES · SECURE OS v45.1.7",
+    "&gt; ESTABLISHING ENCRYPTED UPLINK <span class='ok'>……… OK</span>",
+    "&gt; IMPORTING J.A.R.V.I.S. PREFERENCE FILES <span class='ok'>……… 94% COMPLETE</span>",
+    "&gt; CALIBRATING SARCASM MODULES <span class='warn'>……… WITHIN LIMITS</span>",
+    "&gt; VOICE SUBROUTINES · DUBLIN BUILD <span class='ok'>……… LOADED</span>",
+  ];
+  for (const ln of lines) { addLn(ln); SFX.beep(1100 + Math.random() * 400, .03, "sine", .018); await sleep(rand([260, 340, 420, 500])); }
+
+  // uplink line depends on health
+  let uplinkLine, uplinkState = "unknown";
+  const h = await health;
+  if (h && h.ok && h.data?.ok === true) { uplinkLine = "&gt; TAVILY RECONNAISSANCE GRID <span class='ok'>……… ONLINE</span>"; uplinkState = "online"; }
+  else if (h && h.ok && h.data?.error === "secret_missing") { uplinkLine = "&gt; TAVILY UPLINK KEY <span class='bad'>……… MISSING</span>"; uplinkState = "nokey"; }
+  else if (h && (h.data?.status === 401 || h.status === 401)) { uplinkLine = "&gt; TAVILY UPLINK <span class='bad'>……… KEY REJECTED</span>"; uplinkState = "badkey"; }
+  else { uplinkLine = "&gt; TAVILY RECONNAISSANCE GRID <span class='bad'>……… OFFLINE</span>"; uplinkState = "offline"; }
+  addLn(uplinkLine); await sleep(420);
+  addLn("&gt; ALL SYSTEMS <span class='ok'>NOMINAL</span> — GOOD TO SEE YOU, BOSS");
+  await sleep(650);
+
+  $("#boot").classList.add("done");
+  $("#app").classList.add("on");
+  SFX.boot();
+
+  // post-boot
+  await refreshUsage();
+  const restored = restoreHistory();
+  const h2 = new Date().getHours();
+  const part = h2 < 12 ? "morning" : h2 < 18 ? "afternoon" : "evening";
+  let hello;
+  if (uplinkState === "online") {
+    const b = $("#chip-credits b");
+    hello = restored
+      ? `Welcome back, boss. Session restored — ${state.history.length} entries on record, ${b ? b.textContent + " credits" : "uplink"} in reserve. Where were we?`
+      : `Good ${part}, boss. F.R.I.D.A.Y. online and listening. Live uplink to the Tavily reconnaissance grid — ${b ? b.textContent + " credits" : "credits"} remaining this cycle. What are we building today?`;
+  } else if (uplinkState === "nokey") {
+    hello = `Good ${part}, boss. I'm up, but the Tavily uplink key is missing. Add a secret named TAVILY_API to the worker (tvly-…) and I'll have eyes on the whole web.`;
+    toast("TAVILY_API secret missing — see README. Local chat still works.", 7000);
+  } else if (uplinkState === "badkey") {
+    hello = `Good ${part}, boss. I'm up, but Tavily rejected our key. Check the TAVILY_API secret — it should start with tvly-.`;
+  } else {
+    hello = `Good ${part}, boss. I'm up in standalone mode — I can't see the worker at ${API_BASE || WORKER_URL} from here, so web scans are offline. Small talk's still free.`;
+  }
+  await fridaySay(hello, { persist: false });
+  state.history.push({ role: "fr", quip: hello, ts: nowTime() }); store("history", state.history);
+  scrollDown(true);
+}
+
+/* init */
+renderModes(); renderSuggests(); syncToggles(); setupMic(); Voice.init();
+boot();
+
+})();
+</script>
+</body>
+</html>
+odes(); renderSuggests(); syncToggles(); setupMic(); Voice.init();
+boot();
+
+})();
+</script>
+</body>
+</html>
+html>
+{ persist: false });
+  state.history.push({ role: "fr", quip: hello, ts: nowTime() }); store("history", state.history);
+  scrollDown(true);
+}
+
+/* init */
+renderModes(); renderSuggests(); syncToggles(); setupMic(); Voice.init();
+boot();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# F.R.I.D.A.Y. — Cloudflare Worker config
+# Deploy:  cd friday && npx wrangler deploy
+# Secret:  npx wrangler secret put TAVILY_API   (value: tvly-...)
+#          (already set on your worker? it survives redeploys — nothing to do)
+
+name = "friday"
+main = "worker.js"
+compatibility_date = "2025-09-01"
