@@ -1,0 +1,7 @@
+# F.R.I.D.A.Y. — Stark AI relay → Groq
+# Deploy:  npx wrangler login && npx wrangler secret put GROQ_API && npx wrangler deploy
+
+name = "friday4"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
