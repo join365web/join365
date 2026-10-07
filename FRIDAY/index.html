@@ -675,8 +675,9 @@ select.tb-sel:focus{outline:none;border-color:var(--cyan);box-shadow:var(--glow)
         <div class="field">
           <label>UPLINK ENDPOINT (the worker that already holds the key)</label>
           <input type="text" id="workerUrl" placeholder="https://laura-ai.dzt399890.workers.dev">
-          <div class="note">Called as <code>POST /api/chat</code>. Leave empty to use the default baked into
-            the <code>WORKER</code> constant.</div>
+          <div class="note">Called as <code>POST /api/chat</code>. Empty uses <code>WORKER</code>
+            (<code>friday2.dzt399890.workers.dev</code> — the worker in this repo), falling back once at
+            boot to <code>WORKER_BACKUP</code> if that deploy is not live yet.</div>
         </div>
         <div class="field">
           <label>GROQ API KEY — optional direct mode</label>
@@ -770,16 +771,23 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
  * roster, no picker and no auto-routing.
  *
  *  MODEL    the single model id this build uses.
- *  WORKER   a proxy that already holds the Groq secret key, so the key never
- *           appears in this file and never reaches a visitor's browser.
+ *  WORKER   your own uplink — the worker in this repo (worker.js) deployed on
+ *           friday2. It holds the Groq secret key, so the key never appears in
+ *           this file and never reaches a visitor's browser. Because it also
+ *           serves the site, this page and the API share one origin.
+ *  WORKER_BACKUP
+ *           tried once at boot if WORKER can't answer /api/chat yet, so the
+ *           interface keeps working before you deploy (and falls back to
+ *           WORKER automatically once you do).
  *  API_KEY  OPTIONAL direct mode. Paste a Groq key here and she skips the
  *           worker and calls Groq from the browser. WARNING: this file is
  *           public — anyone who views source can read that key and burn your
  *           quota. Leave it "" unless you want that.
  * ------------------------------------------------------------------ */
-const MODEL   = "openai/gpt-oss-120b";
-const WORKER  = "https://laura-ai.dzt399890.workers.dev";
-const API_KEY = "";
+const MODEL         = "openai/gpt-oss-120b";
+const WORKER        = "https://friday2.dzt399890.workers.dev";
+const WORKER_BACKUP = "https://laura-ai.dzt399890.workers.dev";
+const API_KEY       = "";
 
 /* Ids tried in order if MODEL above is not entitled on the account behind the
    key. The first one that actually answers becomes the live model. */
@@ -840,7 +848,8 @@ const state = {
   sessionId: null,
   model: MODEL,        // the one live model id (re-pinned at boot if the key says otherwise)
   uplink: null,        // { ok, mode, ms, at, error } from the last uplink probe
-  busy: false, abort: null, consolidations: 0, probing: false
+  busy: false, abort: null, consolidations: 0, probing: false,
+  uplinkWorker: "", backupTried: false   // in-memory only: re-try the primary on every load
 };
 
 /* ------------------------------------------------------------------ *
@@ -851,9 +860,10 @@ const state = {
  *   3. neither -> offline. Honest errors, no improvised theatre.
  * ------------------------------------------------------------------ */
 const directKey = () => String(state.settings.apiKey || API_KEY || "").trim();
+const chosenWorker = () => state.uplinkWorker || WORKER;
 const proxyBase = () => {
   const qs = new URLSearchParams(location.search);
-  const w = String(state.settings.workerUrl || qs.get("api") || WORKER || "").trim();
+  const w = String(state.settings.workerUrl || qs.get("api") || chosenWorker() || "").trim();
   if (!w) return (location.protocol === "http:" || location.protocol === "https:") ? location.origin : "";
   return w.replace(/\/+$/, "");
 };
@@ -862,6 +872,11 @@ const hasUplink = () => mode() !== "off";
 const baseUrl = () => mode() === "direct" ? "https://api.groq.com" : proxyBase();
 const chatUrl = () => mode() === "direct" ? "https://api.groq.com/openai/v1/chat/completions"
                                           : proxyBase() + "/api/chat";
+/* If a worker was deployed with ACCESS_CODE, hand it over in the link:
+   FRIDAY/?code=9032 — same lazy trick as ?api=, and never a place for a real key. */
+const accessCode = () => String(state.settings.accessCode ||
+  new URLSearchParams(location.search).get("code") || "").trim();
+
 const activeModel = () => state.model || MODEL;
 const session = () => state.sessions.find((s) => s.id === state.sessionId) || null;
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -1241,7 +1256,10 @@ function inline(s) {
  * ------------------------------------------------------------------ */
 function headers() {
   const h = { "Content-Type": "application/json" };
+  // The key only ever travels in DIRECT mode. To the worker: just the pass-code,
+  // if that worker was deployed with ACCESS_CODE (FRIDAY/?code=9032, remembered).
   if (mode() === "direct") h["Authorization"] = "Bearer " + directKey();
+  else if (accessCode()) h["x-friday-code"] = accessCode();
   return h;
 }
 
@@ -1259,13 +1277,19 @@ function uplinkError(status, bodyText) {
     }
   }
   const hint =
-    status === 401 || status === 403 ? "key rejected \u2014 re-check the key in CORE \u25b8 LINK" :
+    status === 401 || status === 403
+      ? (mode() === "direct" ? "key rejected \u2014 re-check the key in CORE \u25b8 LINK"
+                              : "your worker has no usable key \u2014 set GROQ_API_KEY on it as a secret") :
     status === 404 ? "no /api/chat route there \u2014 point LINK at the worker, not the site" :
     status === 413 ? "payload too large \u2014 lower the context budget in PARAMS" :
     status === 429 ? "rate limited \u2014 hold a second, then send again" :
     status >= 500 ? "upstream fault at the provider" : "";
-  return new Error("Uplink refused (HTTP " + status + ")" + (hint ? " \u2014 " + hint : "") +
-    (detail ? " \u00b7 " + detail.slice(0, 300) : ""));
+  /* If the endpoint explained itself, that explanation leads — it knows what we
+     cannot. Canned hints only fill silence, or add retry timing that is ours to own. */
+  const parts = [];
+  if (detail) parts.push(detail.slice(0, 300));
+  if (hint && (!detail || status === 429 || status === 413)) parts.push(hint);
+  return new Error("Uplink refused (HTTP " + status + ")" + (parts.length ? " \u2014 " + parts.join(" \u00b7 ") : ""));
 }
 function readLimits(res) {
   const rt = res.headers.get("x-ratelimit-remaining-tokens");
@@ -1848,7 +1872,8 @@ function renderLink() {
   $("#sbState").textContent = live ? "NOMINAL" : (up ? "UNVERIFIED" : "OFFLINE");
   renderModelTag();
   diag("LINK: " + (up ? (mode() === "direct" ? "api.groq.com (key held by this page)" : chatUrl())
-                      : "(no endpoint configured)") + " \u00b7 model " + activeModel());
+                      : "(no endpoint configured)") + " \u00b7 model " + activeModel() +
+    (state.uplinkWorker ? " \u00b7 on the BACKUP uplink (deploy worker.js and I switch back)" : ""));
 }
 
 /* A one-token round trip is the only honest uplink test: it proves the
@@ -1873,9 +1898,10 @@ async function probeUplink(quiet) {
   try {
     for (let attempt = 0; attempt < order.length; attempt++) {
       const t0 = performance.now();
+      const tried = activeModel();               // the id actually going out on this attempt
       try {
         await callGroq({
-          model: activeModel(),
+          model: tried,
           messages: [{ role: "user", content: "ping" }],
           max_completion_tokens: 8, stream: false
         }, { silent: true });
@@ -1893,8 +1919,22 @@ async function probeUplink(quiet) {
         const msg = String((e && e.message) || e);
         state.uplink = { ok: false, mode: mode(), at: now(), error: msg };
         diag("UPLINK FAULT: " + msg);
-        const entitledProblem = /model|not found|unsupported|decommission|entitled|no access|permission/i.test(msg);
-        const mine = order.indexOf(state.model) >= 0 && order.indexOf(state.model) < order.length - 1;
+        /* Primary uplink not answering (not deployed yet, or it is the site
+           rather than an API)? Try the backup once before calling it dark. */
+        const transport = /No contact|HTML page|no \/api\/chat route|not JSON|HTTP 404|HTTP 405|Not found/i.test(msg);
+        const primary = !state.settings.workerUrl && mode() === "proxy" && proxyBase() === WORKER.replace(/\/+$/, "");
+        if (transport && primary && WORKER_BACKUP && !state.backupTried) {
+          state.backupTried = true;
+          state.uplinkWorker = WORKER_BACKUP.replace(/\/+$/, "");
+          state.probing = false;          // otherwise the retry below trips our own guard
+          diag("PRIMARY UPLINK DARK (" + WORKER + ") \u2014 falling back to " + WORKER_BACKUP);
+          toast("<b>YOUR WORKER ISN'T ANSWERING YET.</b> Using the backup uplink; deploy worker.js and I switch back.", "gold", 9000);
+          state.model = MODEL;
+          return probeUplink(true);
+        }
+        const entitledProblem = /model|not found|unsupported|decommission|entitled|no access|permission|not permitted/i.test(msg);
+        const at = order.indexOf(tried);          // NOT state.model — that is still null at boot
+        const mine = at >= 0 && at < order.length - 1;
         if (!entitledProblem || !mine) {
           state.model = knownGood;                // nothing answered: show the configured model
           renderModelTag();
@@ -1902,7 +1942,7 @@ async function probeUplink(quiet) {
           renderLink();
           return false;
         }
-        pinModel(order[order.indexOf(state.model) + 1], "auto-retry after an availability fault", false);
+        pinModel(order[at + 1], "your key serves this one instead", false);
       }
     }
     state.model = knownGood;
@@ -2308,6 +2348,7 @@ function wire() {
   $("#reasonEffort").addEventListener("change", (e) => { state.settings.reasoningEffort = e.target.value; save(); });
   $("#workerUrl").addEventListener("change", (e) => {
     state.settings.workerUrl = e.target.value.trim();
+    state.uplinkWorker = ""; state.backupTried = false;   // Boss picked one; stop second-guessing
     state.uplink = null;
     save(); renderLink(); probeUplink(true);
   });
