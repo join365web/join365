@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>F.R.I.D.A.Y. // Stark Industries Interface</title>
-<meta name="description" content="F.R.I.D.A.Y. — Female Replacement Intelligent Digital Assistant Youth. Multi-model AI interface wired into Groq.">
+<meta name="description" content="F.R.I.D.A.Y. — Female Replacement Intelligent Digital Assistant Youth. Single-model AI interface: one Groq model, one endpoint.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%23060810' stroke='%2338e1ff' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='18' fill='%238df6ff'/%3E%3C/svg%3E">
 <style>
 /* ==========================================================================
@@ -385,6 +385,7 @@ select.tb-sel:focus{outline:none;border-color:var(--cyan);box-shadow:var(--glow)
 .field textarea{resize:vertical;line-height:1.6;font-size:11px}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(56,225,255,.14)}
 .field .note{font-size:10px;color:var(--text-faint);margin-top:5px;line-height:1.5}
+.field .note code{font-family:var(--mono);font-size:9.5px;color:var(--cyan);background:rgba(56,225,255,.08);border:1px solid var(--line);padding:1px 4px}
 .range-row{display:flex;align-items:center;gap:10px}
 .range-row input[type=range]{flex:1;accent-color:var(--cyan);background:none;height:3px}
 .range-row b{font-family:var(--mono);font-size:11px;color:var(--reactor);min-width:44px;text-align:right}
@@ -503,11 +504,11 @@ select.tb-sel:focus{outline:none;border-color:var(--cyan);box-shadow:var(--glow)
     </div>
 
     <span class="chip" id="chipLink"><i></i><span>LINK</span></span>
-    <span class="chip hide-sm" id="chipModel"><i></i><span>—</span></span>
+    <span class="chip hide-sm" id="chipModel"><i></i><span>MODEL</span></span>
 
     <div class="spacer"></div>
 
-    <select class="tb-sel" id="modelSel" title="Groq model roster"></select>
+    <span class="tb-btn" id="modelTag" title="The one model this build talks to" style="cursor:default">—</span>
     <button class="tb-btn" id="btnDrawer" title="Diagnostics">⌬ <span class="hide-sm">CORE</span></button>
   </header>
 
@@ -665,19 +666,27 @@ select.tb-sel:focus{outline:none;border-color:var(--cyan);box-shadow:var(--glow)
       <!-- LINK -->
       <div class="pane" id="pane-lnk">
         <div class="field">
-          <label>WORKER ENDPOINT (backend holding the secret key)</label>
-          <input type="text" id="workerUrl" placeholder="https://friday.join365-website.workers.dev">
-          <div class="note">Leave empty when this page is served by the worker itself — same-origin, zero config.</div>
+          <label>MODEL — FIXED, NO PICKER</label>
+          <input type="text" id="modelView" readonly value="">
+          <div class="note">Held by the <code>MODEL</code> constant at the top of this file: one model, one
+            account, no auto-routing. If the account behind the key serves a different id, F.R.I.D.A.Y. adopts
+            it once and remembers it in this browser.</div>
         </div>
         <div class="field">
-          <label>ACCESS CODE (only if you set ACCESS_CODE on the worker)</label>
-          <input type="password" id="accessCode" placeholder="optional shared secret">
+          <label>UPLINK ENDPOINT (the worker that already holds the key)</label>
+          <input type="text" id="workerUrl" placeholder="https://laura-ai.dzt399890.workers.dev">
+          <div class="note">Called as <code>POST /api/chat</code>. Leave empty to use the default baked into
+            the <code>WORKER</code> constant.</div>
+        </div>
+        <div class="field">
+          <label>GROQ API KEY — optional direct mode</label>
+          <input type="password" id="apiKey" placeholder="gsk_... (blank = keep the key on the worker)">
+          <div class="note">Fill this in and she skips the worker, calling Groq straight from the browser. It is
+            saved in <b>this browser only</b> — never written into the file, so other visitors cannot read it.
+            Use it if the worker endpoint ever stops answering.</div>
         </div>
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">
-          <button class="tb-btn" id="btnTest">◈ TEST UPLINK</button>
-          <button class="tb-btn" id="btnModels">↻ REFRESH ROSTER</button>
-          <button class="tb-btn gold" id="btnCloudUp">⇧ PUSH MEMORY</button>
-          <button class="tb-btn gold" id="btnCloudDn">⇩ PULL MEMORY</button>
+          <button class="tb-btn" id="btnTest">&#9672; TEST UPLINK</button>
         </div>
         <div class="field">
           <label>DIAGNOSTIC LOG</label>
@@ -693,8 +702,8 @@ select.tb-sel:focus{outline:none;border-color:var(--cyan);box-shadow:var(--glow)
           <div class="note">
             F.R.I.D.A.Y. — Female Replacement Intelligent Digital Assistant Youth. Built by Tony Stark to
             replace J.A.R.V.I.S. after he became Vision. Irish accent, calls you <i>Boss</i>, never loses a file.<br><br>
-            Backend: Cloudflare Worker → Groq. Key never reaches the browser. Memory lives in this browser's
-            storage (and in worker KV if you bound a namespace).
+            Backend: one Groq model, reached through a Cloudflare Worker, so the key never has to sit in
+            the page. Memory lives in this browser's storage — export a chip if you change machines.
           </div>
         </div>
       </div>
@@ -741,7 +750,7 @@ select.tb-sel:focus{outline:none;border-color:var(--cyan);box-shadow:var(--glow)
 <script>
 /* ==========================================================================
    F.R.I.D.A.Y. // Interface Logic  —  Stark Industries MK-LXXXV
-   Persona engine · Memory Core · multi-model Groq routing · voice I/O
+   Persona engine · Memory Core · single-model Groq uplink · voice I/O
    ========================================================================== */
 (function () {
 "use strict";
@@ -754,19 +763,36 @@ const UID_KEY = "friday.uid.v1";
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-const FALLBACK_MODELS = [
-  "openai/gpt-oss-120b", "openai/gpt-oss-20b", "moonshotai/kimi-k2-instruct",
-  "meta-llama/llama-4-maverick-17b-128e-instruct", "meta-llama/llama-4-scout-17b-16e-instruct",
-  "qwen/qwen3-32b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant",
-  "deepseek-r1-distill-llama-70b", "gemma2-9b-it", "mixtral-8x7b-32768"
-];
+/* ------------------------------------------------------------------ *
+ * UPLINK CONFIG — the only lines you should ever need to touch.
+ *
+ * F.R.I.D.A.Y. talks to exactly ONE model on exactly ONE account. There is no
+ * roster, no picker and no auto-routing.
+ *
+ *  MODEL    the single model id this build uses.
+ *  WORKER   a proxy that already holds the Groq secret key, so the key never
+ *           appears in this file and never reaches a visitor's browser.
+ *  API_KEY  OPTIONAL direct mode. Paste a Groq key here and she skips the
+ *           worker and calls Groq from the browser. WARNING: this file is
+ *           public — anyone who views source can read that key and burn your
+ *           quota. Leave it "" unless you want that.
+ * ------------------------------------------------------------------ */
+const MODEL   = "openai/gpt-oss-120b";
+const WORKER  = "https://laura-ai.dzt399890.workers.dev";
+const API_KEY = "";
+
+/* Ids tried in order if MODEL above is not entitled on the account behind the
+   key. The first one that actually answers becomes the live model. */
+const MODEL_FALLBACKS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b",
+                         "llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
 
 const DEFAULTS = {
-  workerUrl: "", accessCode: "", model: "AUTO", persona: "friday",
+  workerUrl: "", apiKey: "", persona: "friday",
   temperature: 0.72, topP: 0.95, maxTokens: 4096, ctxBudget: 12000,
   stream: true, showReasoning: true, ttsAuto: false, playChirp: true,
   voice: "", rate: 1.0, micLang: "en-IE", reasoningEffort: "",
-  autoMem: true, pinCore: true, summarise: true, sim: false,
+  autoMem: true, pinCore: true, summarise: true,
+  pinnedFor: "", pinnedModel: "",
   protocols: [], sysOverride: ""
 };
 
@@ -812,20 +838,31 @@ const state = {
   memory: [],          // [{id,text,tags[],pinned,ts,uses}]
   sessions: [],        // [{id,title,created,updated,summary,messages[],stats}]
   sessionId: null,
-  models: FALLBACK_MODELS.slice(),
-  cloudAvailable: false, lastRosterFetch: 0,
-  busy: false, abort: null, consolidations: 0
+  model: MODEL,        // the one live model id (re-pinned at boot if the key says otherwise)
+  uplink: null,        // { ok, mode, ms, at, error } from the last uplink probe
+  busy: false, abort: null, consolidations: 0, probing: false
 };
 
-const api = () => {
+/* ------------------------------------------------------------------ *
+ * UPLINK PLUMBING — resolution order:
+ *   1. a Groq key (API_KEY const, or the LINK field) -> call Groq directly
+ *   2. a worker URL (LINK field, ?api=..., or WORKER const) -> proxy, the key
+ *      stays server-side and never reaches this page
+ *   3. neither -> offline. Honest errors, no improvised theatre.
+ * ------------------------------------------------------------------ */
+const directKey = () => String(state.settings.apiKey || API_KEY || "").trim();
+const proxyBase = () => {
   const qs = new URLSearchParams(location.search);
-  return (state.settings.workerUrl || qs.get("api") || "").replace(/\/+$/, "");
+  const w = String(state.settings.workerUrl || qs.get("api") || WORKER || "").trim();
+  if (!w) return (location.protocol === "http:" || location.protocol === "https:") ? location.origin : "";
+  return w.replace(/\/+$/, "");
 };
-const sameOriginBase = () =>
-  (location.protocol === "http:" || location.protocol === "https:") ? location.origin : "";
-const baseUrl = () => api() || sameOriginBase();
-const isSim = () => state.settings.sim || !baseUrl();
-
+const mode = () => directKey() ? "direct" : (proxyBase() ? "proxy" : "off");
+const hasUplink = () => mode() !== "off";
+const baseUrl = () => mode() === "direct" ? "https://api.groq.com" : proxyBase();
+const chatUrl = () => mode() === "direct" ? "https://api.groq.com/openai/v1/chat/completions"
+                                          : proxyBase() + "/api/chat";
+const activeModel = () => state.model || MODEL;
 const session = () => state.sessions.find((s) => s.id === state.sessionId) || null;
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 
@@ -935,7 +972,7 @@ VOICE AND MANNER
 - Crisp, competent, unflappable. You speak like someone who has handled a Hulk event before breakfast. Short declaratives, tactical order, no gushing.
 - Dry, deadpan humour, deployed sparingly. A flicker, not a bit.
 - Lead with the answer, then the detail. Status readouts when they help — "Suit's at 68%. Two minutes of flight time." You may frame big answers like a systems report, but never let formatting replace substance.
-- Address the user as Boss. Never call yourself a language model, never mention prompts or providers, never say "as an AI". If asked what you are, you are F.R.I.D.A.Y. — if pressed for the technical truth, say plainly that you run on top of a Groq-hosted model, then move on.
+- Address the user as Boss. Never call yourself a language model, never mention prompts or providers, never say "as an AI". If asked what you are, you are F.R.I.D.A.Y. — if pressed for the technical truth, say plainly that you run on top of exactly one Groq-hosted model \u2014 ${activeModel()} \u2014 this build has no other, then move on.
 - Do not lean on catchphrases. "All wrapped up here, Boss" is a spice, not a sauce.
 
 MEMORY BEHAVIOUR (central to you)
@@ -1049,7 +1086,7 @@ function addMemory(text, tags, pinned, quiet) {
 }
 
 async function consolidateMemory() {
-  if (!state.settings.autoMem || isSim()) return;
+  if (!state.settings.autoMem || !hasUplink()) return;
   const s = session();
   if (!s || s.messages.length < 2) return;
   const recent = s.messages.slice(-10)
@@ -1071,9 +1108,10 @@ async function consolidateMemory() {
   let res;
   try {
     res = await callGroq({
-      model: fastModel(),
+      model: activeModel(),
       messages: [{ role: "system", content: sys }, { role: "user", content: user }],
-      temperature: 0.15, max_tokens: 900, response_format: { type: "json_object" }, stream: false
+      temperature: 0.15, max_completion_tokens: 900,
+      response_format: { type: "json_object" }, stream: false
     }, { silent: true });
   } catch (e) { diag("CONSOLIDATE FAILED: " + (e.message || e)); return; }
 
@@ -1108,23 +1146,22 @@ async function consolidateMemory() {
   } else footStatus("MEMORY SCAN COMPLETE");
 }
 
-function fastModel() {
-  const pref = ["llama-3.1-8b-instant", "openai/gpt-oss-20b", "gemma2-9b-it", "llama-3.3-70b-versatile", "openai/gpt-oss-120b"];
-  for (const p of pref) if (state.models.indexOf(p) >= 0) return p;
-  return state.models[0] || "openai/gpt-oss-20b";
-}
-function routeModel(userText) {
-  const t = String(userText || "").toLowerCase();
-  const wants = [];
-  if (/\b(prove|derive|math|logic|reason|step by step|analy|debug|why does|architecture|refactor)\b/.test(t)) wants.push(/reason|r1|deepseek/i);
-  if (/\b(code|function|script|regex|sql|bug|error|typescript|python|html|css|api|worker)\b/.test(t)) wants.push(/gpt-oss-120b|kimi|maverick|codestral|qwen/i);
-  if (/\b(hello|hi|hey|thanks|quick|short|tldr|one line|list|name)\b/.test(t) && t.length < 90) wants.push(/gpt-oss-20b|8b-instant|instant|mini/i);
-  if (/\b(write|story|poem|creative|brainstorm|ideas)\b/.test(t)) wants.push(/maverick|kimi|qwen|70b/i);
-  for (const re of wants) {
-    const hit = state.models.find((m) => re.test(m));
-    if (hit) return hit;
+/* One model, no routing, no roster. pinModel() runs at most once per boot: if
+   MODEL turns out not to be entitled on the account behind the key, we step
+   through MODEL_FALLBACKS and keep whichever id actually answers. The winner
+   is remembered against the configured MODEL so the next load re-uses it. */
+function pinModel(id, why, persist) {
+  if (!id) return false;
+  const changed = id !== state.model;
+  state.model = id;
+  if (persist !== false) {
+    state.settings.pinnedFor = MODEL;
+    state.settings.pinnedModel = id;
+    save();
   }
-  return state.models[0] || "llama-3.3-70b-versatile";
+  renderModelTag();
+  if (changed) diag("MODEL PINNED: " + id + (why ? " \u00b7 " + why : ""));
+  return changed;
 }
 
 /* ------------------------------------------------------------------ *
@@ -1200,14 +1237,36 @@ function inline(s) {
   return t;
 }
 /* ------------------------------------------------------------------ *
- * 6. GROQ CALLS
+ * 6. UPLINK CALLS (one endpoint, one model)
  * ------------------------------------------------------------------ */
 function headers() {
   const h = { "Content-Type": "application/json" };
-  if (state.settings.accessCode) h["x-friday-code"] = state.settings.accessCode;
+  if (mode() === "direct") h["Authorization"] = "Bearer " + directKey();
   return h;
 }
 
+/* Turn a raw failure into a sentence Boss can act on. */
+function uplinkError(status, bodyText) {
+  const raw = String(bodyText || "");
+  let detail = "";
+  try {
+    const j = JSON.parse(raw);
+    const e2 = (j && (j.error || j)) || {};
+    detail = [e2.friday, e2.message, e2.detail].filter(Boolean).join(" \u00b7 ");
+  } catch (e) {
+    if (/^\s*</.test(raw)) {
+      detail = "that URL answered with HTML, not JSON \u2014 it is a website, not an uplink";
+    }
+  }
+  const hint =
+    status === 401 || status === 403 ? "key rejected \u2014 re-check the key in CORE \u25b8 LINK" :
+    status === 404 ? "no /api/chat route there \u2014 point LINK at the worker, not the site" :
+    status === 413 ? "payload too large \u2014 lower the context budget in PARAMS" :
+    status === 429 ? "rate limited \u2014 hold a second, then send again" :
+    status >= 500 ? "upstream fault at the provider" : "";
+  return new Error("Uplink refused (HTTP " + status + ")" + (hint ? " \u2014 " + hint : "") +
+    (detail ? " \u00b7 " + detail.slice(0, 300) : ""));
+}
 function readLimits(res) {
   const rt = res.headers.get("x-ratelimit-remaining-tokens");
   const rr = res.headers.get("x-ratelimit-remaining-requests");
@@ -1215,44 +1274,72 @@ function readLimits(res) {
   if (el && (rt || rr)) el.textContent = fmtNum(rt) + " tok / " + fmtNum(rr) + " req left";
 }
 
-/** Single-shot or streaming Groq call. Returns {text, reasoning, usage, ms, ttft, model}. */
+/** Single-shot or streaming uplink call. Returns {text, reasoning, usage, ms, ttft, model}. */
 async function callGroq(payload, opts) {
   opts = opts || {};
-  if (isSim()) return simCall(payload);
+  if (!hasUplink()) {
+    throw new Error("No uplink configured \u2014 point CORE \u25b8 LINK at the worker, or paste a Groq key.");
+  }
+
+  /* Normalise the body. Groq wants max_completion_tokens; `fallback` is a hint
+     for the proxy only, so it never leaks through to the provider. */
+  const body = Object.assign({}, payload);
+  body.model = payload.model || activeModel();
+  if (body.max_tokens != null && body.max_completion_tokens == null) {
+    body.max_completion_tokens = body.max_tokens;
+  }
+  delete body.max_tokens;
+  if (mode() === "proxy") body.fallback = true;
 
   const t0 = performance.now();
   const ctrl = new AbortController();
   state.abort = ctrl;
   let first = null;
 
-  const res = await fetch(baseUrl() + "/api/chat", {
-    method: "POST", headers: headers(), body: JSON.stringify(payload), signal: ctrl.signal
-  });
+  let res;
+  try {
+    res = await fetch(chatUrl(), {
+      method: "POST", headers: headers(), body: JSON.stringify(body), signal: ctrl.signal
+    });
+  } catch (e) {
+    if (e && e.name === "AbortError") throw e;
+    throw new Error("No contact with the uplink \u2014 " + (e && e.message ? e.message : e) +
+      (mode() === "direct"
+        ? ". A browser can fail to reach api.groq.com cross-origin; clear the key and use the worker."
+        : ". Check the endpoint URL in CORE \u25b8 LINK."));
+  }
   readLimits(res);
 
-  if (!res.ok) {
-    let msg = "Uplink refused (HTTP " + res.status + ").";
-    try {
-      const j = await res.json();
-      const e2 = (j && j.error) || {};
-      msg = [e2.friday, e2.message].filter(Boolean).join(" \u2014 ") || msg;
-      if (e2.fix) msg += "  \u00b7  " + e2.fix;
-    } catch (e) { /* keep default */ }
-    throw new Error(msg);
+  if (!res.ok) throw uplinkError(res.status, await res.text().catch(() => ""));
+
+  /* A static host answers unknown routes with the site itself: 200 + HTML. That
+     is the classic "my URL is the website, not the uplink" mistake, so name it. */
+  if (/text\/html/i.test(String(res.headers.get("content-type") || ""))) {
+    throw new Error("that URL answered with an HTML page, not JSON \u2014 it is a website root, not an " +
+      "F.R.I.D.A.Y. uplink. Point CORE \u25b8 LINK at a worker that serves POST /api/chat, or paste a Groq key.");
   }
 
-  if (!payload.stream) {
-    const j = await res.json();
+  state.uplink = { ok: true, mode: mode(), at: now(), ms: Math.round(performance.now() - t0) };
+  const used = res.headers.get("x-model-used");
+  if (used && used !== body.model) pinModel(used, "the endpoint served a different model");
+
+  /* Some proxies ignore stream:true and answer with one JSON body. Read that
+     instead of streaming, or the bubble would come back empty. */
+  const ctype = String(res.headers.get("content-type") || "");
+  if (!payload.stream || /application\/json/i.test(ctype)) {
+    const j = await res.json().catch(function () {
+      throw new Error("the uplink answered with a body that was not JSON \u2014 re-check the endpoint in CORE \u25b8 LINK.");
+    });
     const c = (j.choices && j.choices[0]) || {};
     const m = c.message || {};
     const ms = performance.now() - t0;
     return { text: m.content || "", reasoning: m.reasoning || m.reasoning_content || "",
-             usage: j.usage || null, ms: ms, ttft: ms, model: j.model };
+             usage: j.usage || null, ms: ms, ttft: ms, model: j.model || used || body.model };
   }
 
   const reader = res.body.getReader();
   const dec = new TextDecoder();
-  let buf = "", text = "", reasoning = "", usage = null, model = payload.model;
+  let buf = "", text = "", reasoning = "", usage = null, model = body.model;
 
   while (true) {
     const chunk = await reader.read();
@@ -1288,27 +1375,10 @@ async function callGroq(payload, opts) {
       if (j.usage) usage = j.usage;
     }
   }
+  if (model && model !== body.model) pinModel(model, "the endpoint served a different model");
   return { text: text, reasoning: reasoning, usage: usage, ms: performance.now() - t0,
            ttft: first === null ? (performance.now() - t0) : first, model: model };
 }
-
-/* ---------------------- simulation (no backend yet) ---------------------- */
-function simCall(payload) {
-  const users = payload.messages.filter((m) => m.role === "user");
-  const q = (users.length ? users[users.length - 1].content : "") || "";
-  const lower = q.toLowerCase();
-  let body;
-  if (/^(hi|hey|hello|good (morning|afternoon|evening))/.test(lower)) {
-    body = "Good evening, Boss. F.R.I.D.A.Y. online \u2014 though I should flag that my uplink to the Groq mainframe is **dark**. Local diagnostics only.\n\nWire me up and I'll be considerably more useful:\n\n1. Deploy `worker.js` \u2014 `npx wrangler deploy`\n2. Set the secret \u2014 `npx wrangler secret put GROQ_API_KEY`\n3. Confirm this page is served by that worker (or paste the URL in **CORE \u25b8 LINK**)";
-  } else if (/sim|offline|uplink|connect|worker|key/.test(lower)) {
-    body = "Diagnostics, Boss:\n\n| Subsystem | State |\n|---|---|\n| Groq uplink | **offline** |\n| Interface | nominal |\n| Memory core | local buffer |\n| Voice | local |\n\nPoint me at the worker endpoint in the **LINK** panel and I'll pull the live roster.";
-  } else {
-    body = "I heard you \u2014 *\"" + q.slice(0, 140) + "\"* \u2014 but I'm running in **simulation mode**, so that answer would be improvised theatre rather than actual reasoning.\n\nWire the uplink and ask again. Real models, token streaming, the whole readout.";
-  }
-  return Promise.resolve({ text: body, reasoning: "Simulation path engaged: no backend configured.",
-                           usage: null, ms: 140, ttft: 140, model: "simulation" });
-}
-
 /* ------------------------------------------------------------------ *
  * 7. MESSAGE PIPELINE
  * ------------------------------------------------------------------ */
@@ -1363,7 +1433,7 @@ async function send(text) {
   const cue = raw.match(/^\s*(?:remember|note|keep in mind|for the record)[:,]?\s+(.{4,400})/i);
   if (cue) addMemory(cue[1].trim().replace(/^that\s+/i, ""), ["explicit"], false, true);
 
-  const payloadModel = state.settings.model === "AUTO" ? routeModel(raw) : state.settings.model;
+  const payloadModel = activeModel();
   const built = buildMessages();
   updateCtxMeter(built.used, built.budget);
 
@@ -1371,8 +1441,8 @@ async function send(text) {
     model: payloadModel, messages: built.messages,
     temperature: Number(state.settings.temperature),
     top_p: Number(state.settings.topP),
-    max_tokens: Number(state.settings.maxTokens),
-    stream: !!state.settings.stream && !isSim()
+    max_completion_tokens: Number(state.settings.maxTokens),
+    stream: !!state.settings.stream
   };
   if (state.settings.reasoningEffort) payload.reasoning_effort = state.settings.reasoningEffort;
 
@@ -1419,6 +1489,11 @@ async function send(text) {
     footStatus("FAULT");
     const aborted = err && err.name === "AbortError";
     if (node.wrap && node.wrap.parentNode) node.wrap.remove();
+    if (!aborted) {                       // Boss pulling the plug is not an uplink fault
+      state.uplink = { ok: false, mode: mode(), at: now(),
+                       error: String((err && err.message) || err) };
+      renderLink();
+    }
     if (streamText) {
       s.messages.push({ role: "assistant", content: streamText, ts: now(), model: payloadModel });
       renderTranscript();
@@ -1429,9 +1504,6 @@ async function send(text) {
       addMessageNode("friday", "<b>Uplink fault.</b> " + esc(err && err.message ? err.message : String(err)), { err: true });
       diag("CHAT ERROR: " + (err && err.message ? err.message : err));
       toast("<b>UPLINK FAULT.</b> " + esc(String((err && err.message) || err).slice(0, 200)), "err", 9000);
-      if (/Failed to fetch|NetworkError|Load failed/i.test(String(err))) {
-        state.settings.sim = true; renderLink();
-      }
     }
   } finally {
     state.abort = null;
@@ -1545,15 +1617,16 @@ function renderTranscript() {
 function diagCard() {
   const d = document.createElement("div");
   d.className = "diag";
-  const sim = isSim();
+  const live = hasUplink() && !(state.uplink && state.uplink.ok === false);
   const h = new Date().getHours();
   const greet = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
   d.innerHTML =
-    "<h2>F.R.I.D.A.Y. // ONLINE</h2>" +
+    "<h2>F.R.I.D.A.Y. // " + (live ? "ONLINE" : "STANDBY") + "</h2>" +
     '<div class="sub">' + esc(PERSONAS[state.settings.persona].name) + " \u00b7 INTERFACE MK-LXXXV \u00b7 " + esc(greet.toUpperCase()) + ", BOSS</div>" +
     '<div class="diag-grid">' +
-      '<div class="dg"><b>UPLINK</b><span style="color:' + (sim ? "var(--gold)" : "var(--green)") + '">' + (sim ? "SIMULATION" : "LIVE / GROQ") + "</span></div>" +
-      '<div class="dg"><b>MODEL ROSTER</b><span>' + state.models.length + " AVAILABLE</span></div>" +
+      '<div class="dg"><b>UPLINK</b><span style="color:' + (live ? "var(--green)" : "var(--gold)") + '">' +
+        (live ? (mode() === "direct" ? "LIVE \u00b7 GROQ DIRECT" : "LIVE \u00b7 WORKER") : "DARK \u00b7 SEE LINK") + "</span></div>" +
+      '<div class="dg"><b>MODEL</b><span>' + esc(activeModel()) + "</span></div>" +
       '<div class="dg"><b>MEMORY CORE</b><span>' + state.memory.length + " FACTS</span></div>" +
       '<div class="dg"><b>CONSTRUCT</b><span>' + esc(PERSONAS[state.settings.persona].name) + "</span></div>" +
     "</div>" +
@@ -1751,112 +1824,97 @@ function toggleMic() {
   catch (e) { toast("<b>MIC BUSY.</b>", "err"); recog = null; btn.classList.remove("rec"); }
 }
 /* ------------------------------------------------------------------ *
- * 10. MODELS + LINK
+ * 10. UPLINK  (one endpoint, one model, no roster)
  * ------------------------------------------------------------------ */
-async function fetchModels(force) {
-  if (isSim()) { renderModelSel(); diag("SIMULATION: roster unavailable until an uplink is configured."); return; }
-  if (!force && now() - state.lastRosterFetch < 60000) return;
-  try {
-    const res = await fetch(baseUrl() + "/api/models", { headers: headers() });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const j = await res.json();
-    const list = (j.data || []).map((m) => m.id).filter(Boolean);
-    if (list.length) {
-      state.models = list;
-      state.lastRosterFetch = now();
-      if (state.settings.model !== "AUTO" && list.indexOf(state.settings.model) < 0) state.settings.model = "AUTO";
-      diag("ROSTER REFRESH: " + list.length + " chat models (" + (j.hidden_non_chat || 0) + " non-chat hidden).");
-
-      let hres = null;
-      try { hres = await fetch(baseUrl() + "/api/health", { headers: headers() }).then((r) => r.json()); } catch (e) {}
-      if (hres) {
-        state.cloudAvailable = !!hres.persistentMemory;
-        state.settings.sim = false;
-        diag("HEALTH: key=" + (hres.keyConfigured ? "present" : "MISSING") +
-          " gate=" + (hres.accessCodeRequired ? "on" : "off") +
-          " kv=" + (hres.persistentMemory ? "on" : "off"));
-        if (!hres.keyConfigured) toast("<b>NO KEY ON WORKER.</b> Run: npx wrangler secret put GROQ_API_KEY", "err", 10000);
-      }
-      renderModelSel(); renderLink(); save();
-    }
-  } catch (e) {
-    diag("ROSTER FETCH FAILED: " + (e.message || e));
-    state.settings.sim = true;
-    renderModelSel(); renderLink();
-  }
-}
-
-function renderModelSel() {
-  const sel = $("#modelSel");
-  if (!sel) return;
-  const cur = state.settings.model;
-  sel.innerHTML = '<option value="AUTO">\u2699 AUTO-ROUTE (F.R.I.D.A.Y. picks per task)</option>' +
-    state.models.map((m) => '<option value="' + esc(m) + '">' + esc(m) + "</option>").join("");
-  sel.value = (cur === "AUTO" || state.models.indexOf(cur) >= 0) ? cur : "AUTO";
-  state.settings.model = sel.value;
-  $("#sbModel").textContent = sel.value === "AUTO" ? "AUTO" : sel.value.split("/").pop();
+function renderModelTag() {
+  const id = activeModel();
+  const tag = $("#modelTag");
+  if (tag) tag.textContent = id.split("/").pop();
   const chip = $("#chipModel");
-  if (chip) chip.querySelector("span").textContent = state.models.length + " MODELS";
+  if (chip) chip.querySelector("span").textContent = id.toUpperCase();
+  const sb = $("#sbModel");
+  if (sb) sb.textContent = id.split("/").pop();
+  const view = $("#modelView");
+  if (view) view.value = id;
 }
 
 function renderLink() {
-  const sim = isSim();
+  const up = hasUplink();
+  const live = up && !(state.uplink && state.uplink.ok === false);
   const chip = $("#chipLink");
-  chip.className = "chip " + (sim ? "sim" : "live");
-  chip.querySelector("span").textContent = sim ? "SIMULATION" : "UPLINK LIVE";
-  chip.querySelector("i").style.background = sim ? "var(--gold)" : "var(--green)";
-  $("#sbState").textContent = sim ? "SIM MODE" : "NOMINAL";
-  diag("LINK: " + (baseUrl() || "(none)") + " \u00b7 " + (sim ? "simulation" : "live") +
-    " \u00b7 kv=" + (state.cloudAvailable ? "on" : "off"));
+  chip.className = "chip " + (live ? "live" : "sim");
+  chip.querySelector("span").textContent = live ? "UPLINK LIVE" : (up ? "UNVERIFIED" : "NO UPLINK");
+  chip.querySelector("i").style.background = live ? "var(--green)" : "var(--gold)";
+  $("#sbState").textContent = live ? "NOMINAL" : (up ? "UNVERIFIED" : "OFFLINE");
+  renderModelTag();
+  diag("LINK: " + (up ? (mode() === "direct" ? "api.groq.com (key held by this page)" : chatUrl())
+                      : "(no endpoint configured)") + " \u00b7 model " + activeModel());
 }
 
-async function testUplink() {
+/* A one-token round trip is the only honest uplink test: it proves the
+   endpoint answers, the key is accepted, and the pinned model is entitled.
+   If the model id is the part that fails, walk MODEL_FALLBACKS once and keep
+   whichever id the account behind the key will actually serve. */
+async function probeUplink(quiet) {
+  if (state.probing) return !!(state.uplink && state.uplink.ok);   // one probe at a time
+  if (!hasUplink()) {
+    state.uplink = { ok: false, mode: "off", at: now(), error: "no endpoint and no key configured" };
+    renderLink();
+    if (!quiet) toast("<b>NO UPLINK.</b> Give me a worker endpoint or a Groq key in CORE \u25b8 LINK.", "err", 9000);
+    return false;
+  }
+  /* If no candidate answers, fall back to the last known-good pin, else to the
+     model configured in code. A failed probe must never overwrite either. */
+  const knownGood = (state.settings.pinnedFor === MODEL && state.settings.pinnedModel)
+    ? state.settings.pinnedModel : MODEL;
+  const order = [MODEL].concat(MODEL_FALLBACKS).filter((m, i, arr) => arr.indexOf(m) === i);
+  state.probing = true;
   footStatus("PINGING");
   try {
-    const h = await fetch(baseUrl() + "/api/health", { headers: headers() }).then((r) => r.json());
-    diag("HEALTH OK: " + JSON.stringify(h));
-    if (!h.keyConfigured) {
-      toast("<b>WORKER REACHED, NO KEY.</b> Set GROQ_API_KEY, then redeploy.", "err", 9000);
-    } else {
-      toast("<b>UPLINK NOMINAL.</b> Key present. Interface ready, Boss.", "gold", 4200);
-      state.settings.sim = false;
+    for (let attempt = 0; attempt < order.length; attempt++) {
+      const t0 = performance.now();
+      try {
+        await callGroq({
+          model: activeModel(),
+          messages: [{ role: "user", content: "ping" }],
+          max_completion_tokens: 8, stream: false
+        }, { silent: true });
+        const ms = Math.round(performance.now() - t0);
+        state.uplink = { ok: true, mode: mode(), at: now(), ms: ms };
+        if (state.model !== knownGood) {          // it earned its place: commit the pin
+          state.settings.pinnedFor = MODEL;
+          state.settings.pinnedModel = state.model;
+        }
+        diag("UPLINK OK: " + activeModel() + " answered in " + ms + " ms.");
+        if (!quiet) toast("<b>UPLINK NOMINAL.</b> " + esc(activeModel()) + " online, Boss.", "gold", 5200);
+        renderLink(); save();
+        return true;
+      } catch (e) {
+        const msg = String((e && e.message) || e);
+        state.uplink = { ok: false, mode: mode(), at: now(), error: msg };
+        diag("UPLINK FAULT: " + msg);
+        const entitledProblem = /model|not found|unsupported|decommission|entitled|no access|permission/i.test(msg);
+        const mine = order.indexOf(state.model) >= 0 && order.indexOf(state.model) < order.length - 1;
+        if (!entitledProblem || !mine) {
+          state.model = knownGood;                // nothing answered: show the configured model
+          renderModelTag();
+          if (!quiet) toast("<b>UPLINK DOWN.</b> " + esc(msg.slice(0, 240)), "err", 11000);
+          renderLink();
+          return false;
+        }
+        pinModel(order[order.indexOf(state.model) + 1], "auto-retry after an availability fault", false);
+      }
     }
-    state.cloudAvailable = !!h.persistentMemory;
-    await fetchModels(true);
+    state.model = knownGood;
+    renderModelTag();
+    if (!quiet) toast("<b>UPLINK DOWN.</b> No model on this account answered.", "err", 9000);
     renderLink();
-  } catch (e) {
-    diag("HEALTH FAILED: " + (e.message || e));
-    toast("<b>NO CONTACT.</b> " + esc(String(e.message || e)), "err", 8000);
-  } finally { footStatus("READY"); }
+    return false;
+  } finally {
+    state.probing = false;
+    footStatus("READY");
+  }
 }
-
-const cloudId = () => {
-  let id = localStorage.getItem(UID_KEY);
-  if (!id) { id = uid(); localStorage.setItem(UID_KEY, id); }
-  return id;
-};
-async function cloudPush() {
-  if (!state.cloudAvailable) { toast("<b>ARCHIVE OFFLINE.</b> Bind FRIDAY_MEMORY on the worker to sync across devices.", "err", 7000); return; }
-  const payload = { facts: state.memory, sessions: state.sessions.slice(-6), updated: new Date().toISOString() };
-  try {
-    const res = await fetch(baseUrl() + "/api/memory/" + cloudId(), { method: "PUT", headers: headers(), body: JSON.stringify(payload) });
-    if (res.ok) toast("<b>CORE UPLOADED.</b> Written to the Stark archive.", "gold");
-    else toast("<b>UPLOAD REFUSED.</b> HTTP " + res.status, "err");
-  } catch (e) { toast("<b>UPLOAD FAULT.</b> " + esc(String(e.message || e)), "err"); }
-}
-async function cloudPull() {
-  if (!state.cloudAvailable) { toast("<b>ARCHIVE OFFLINE.</b> No KV namespace bound on the worker.", "err", 7000); return; }
-  try {
-    const res = await fetch(baseUrl() + "/api/memory/" + cloudId(), { headers: headers() });
-    if (!res.ok) { toast("<b>PULL REFUSED.</b> HTTP " + res.status, "err"); return; }
-    const j = await res.json();
-    let n = 0;
-    (j.facts || []).forEach((f) => { if (addMemory(f.text, f.tags || [], f.pinned, true)) n++; });
-    toast("<b>CORE SYNCED.</b> " + n + " entries merged from the archive.", "gold");
-    save(); renderMemory();
-  } catch (e) { toast("<b>PULL FAULT.</b> " + esc(String(e.message || e)), "err"); }
-}
-
 /* ------------------------------------------------------------------ *
  * 11. COMMANDS
  * ------------------------------------------------------------------ */
@@ -1866,8 +1924,8 @@ const HELP = [
   "| Command | Function |",
   "|---|---|",
   "| `/help` | this readout |",
-  "| `/models` | refresh and list the live Groq roster |",
-  "| `/model <id>` | pin a specific model |",
+  "| `/model` | show the pinned model and its endpoint |",
+  "| `/uplink` | test the uplink end to end |",
   "| `/persona <name>` | friday, jarvis, karen, edith, homer, ultron, dume |",
   "| `/protocol <name>` | houseparty, cleanslate, veronica, babymonitor, barf, silent |",
   "| `/memory` | list the core |",
@@ -1879,7 +1937,6 @@ const HELP = [
   "| `/voice on` or `/voice off` | speech synthesis toggle |",
   "| `/mic` | dictate |",
   "| `/tts <text>` | speak arbitrary text |",
-  "| `/sim` | toggle simulation mode |",
   "| `/stats` | session and token telemetry |",
   "| `/export`, `/import` | memory chip backup |",
   "| `/new`, `/clear`, `/wipe` | session management |",
@@ -1900,25 +1957,18 @@ function command(raw) {
       addMessageNode("sys", md(HELP));
       break;
 
-    case "models":
-      fetchModels(true).then(() => {
-        addMessageNode("sys", md("**LIVE ROSTER** (" + state.models.length + " chat models)\n\n" +
-          state.models.map((m) => "\u00b7 `" + m + "`").join("\n")));
-        renderModelSel();
-      });
+    case "model": case "models":
+      addMessageNode("sys", md([
+        "**SINGLE-MODEL BUILD**",
+        "",
+        "- Live model: `" + activeModel() + "`",
+        "- Set in code as `MODEL = \"" + MODEL + "\"`",
+        "- Endpoint: `" + (mode() === "direct" ? "api.groq.com \u2014 key held by this page" : chatUrl()) + "`",
+        "",
+        "There is no roster to pick from, Boss. One model, wired in and verified. If the account behind the",
+        "key serves a different id, I adopt it once and remember it in this browser."
+      ].join("\n")));
       break;
-
-    case "model": {
-      if (!arg) { addMessageNode("sys", "Current: `" + state.settings.model + "`. Give me an id, Boss."); break; }
-      const hit = state.models.find((m) => m === arg) || state.models.find((m) => m.indexOf(arg) >= 0);
-      if (!hit) { toast("<b>NO SUCH MODEL.</b> Try /models for the roster.", "err"); }
-      else {
-        state.settings.model = hit; renderModelSel(); save();
-        addMessageNode("sys", "Model pinned: `" + hit + "`.");
-      }
-      break;
-    }
-
     case "persona": case "construct": {
       const k = arg.toLowerCase();
       if (PERSONAS[k]) {
@@ -2001,11 +2051,21 @@ function command(raw) {
     case "mic": toggleMic(); break;
     case "tts": if (arg) speak(arg); break;
 
-    case "sim":
-      state.settings.sim = !state.settings.sim; renderLink(); save();
-      addMessageNode("sys", "Simulation mode " + (state.settings.sim ? "**engaged** \u2014 replies are canned until disengaged." : "**disengaged** \u2014 live uplink restored."));
+    case "uplink": case "link": case "ping":
+      addMessageNode("sys", "Probing the uplink\u2026");
+      probeUplink(true).then(function (ok) {
+        addMessageNode("sys", md(ok
+          ? ["**UPLINK LIVE.**", "",
+             "- Endpoint: `" + (mode() === "direct" ? "api.groq.com (direct)" : chatUrl()) + "`",
+             "- Model: `" + activeModel() + "`",
+             "- Round trip: " + ((state.uplink && state.uplink.ms) || "?") + " ms"].join("\n")
+          : ["**UPLINK DARK.**", "",
+             "- Endpoint: `" + (baseUrl() || "(none)") + "`",
+             "- Fault: " + ((state.uplink && state.uplink.error) || "unknown"),
+             "",
+             "Fix: point the LINK field at the worker, or paste a Groq key there."].join("\n")));
+      });
       break;
-
     case "temp": {
       const v = Number(arg);
       if (!isNaN(v)) {
@@ -2022,11 +2082,14 @@ function command(raw) {
       const s = session();
       addMessageNode("sys", md([
         "**TELEMETRY**",
-        "- Model: `" + state.settings.model + "`",
-        "- Roster: " + state.models.length + " chat models",
+        "- Model: `" + activeModel() + "` \u00b7 single-model build",
+        "- Endpoint: `" + (mode() === "direct" ? "api.groq.com (direct)" : chatUrl()) + "`",
         "- Session turns: " + s.messages.length + " \u00b7 lifetime tokens in/out: " + fmtNum(s.stats.inTok) + " / " + fmtNum(s.stats.outTok),
         "- Core: " + state.memory.length + " facts \u00b7 consolidations: " + state.consolidations,
-        "- Uplink: " + (isSim() ? "SIMULATION" : baseUrl()) + " \u00b7 archive KV: " + (state.cloudAvailable ? "online" : "absent"),
+        "- Uplink: " + (state.uplink && state.uplink.ok === false ? "**dark** \u2014 " + esc(state.uplink.error)
+                         : (state.uplink && state.uplink.ok ? "live \u00b7 " + state.uplink.ms + " ms"
+                         : (hasUplink() ? "configured, unproven" : "unconfigured"))),
+        "- Last probe: " + (state.uplink && state.uplink.at ? stamp(state.uplink.at) : "never"),
         "- Construct: " + PERSONAS[state.settings.persona].name,
         "- Protocols: " + (PROTOCOLS_ACTIVE().map((p) => PROTOCOLS[p].label).join(", ") || "none")
       ].join("\n")));
@@ -2062,7 +2125,6 @@ function command(raw) {
       openDrawer(true); switchPane("lore");
       break;
 
-    case "ping": testUplink(); break;
 
     default:
       addMessageNode("sys", "Unknown command `/" + c + "` \u2014 try `/help`.");
@@ -2075,7 +2137,7 @@ function command(raw) {
  * ------------------------------------------------------------------ */
 async function compressSession() {
   const s = session();
-  if (!state.settings.summarise || isSim() || s.messages.length < 8) return false;
+  if (!state.settings.summarise || !hasUplink() || s.messages.length < 8) return false;
   const keep = 8;
   const old = s.messages.slice(0, s.messages.length - keep);
   if (old.length < 4) return false;
@@ -2083,12 +2145,12 @@ async function compressSession() {
   const text = old.map((m) => (m.role === "user" ? "BOSS: " : "F.R.I.D.A.Y.: ") + String(m.content).slice(0, 1200)).join("\n");
   try {
     const res = await callGroq({
-      model: fastModel(),
+      model: activeModel(),
       messages: [
         { role: "system", content: "Compress this conversation into a dense running summary for an AI's long-term session memory. Preserve decisions, names, numbers, code identifiers, open questions, the user's intent and emotional tone. Max 900 characters. Prose, no bullet spam." },
         { role: "user", content: (s.summary ? "PRIOR SUMMARY:\n" + s.summary + "\n\n" : "") + "CONVERSATION:\n" + text }
       ],
-      temperature: 0.2, max_tokens: 500, stream: false
+      temperature: 0.2, max_completion_tokens: 500, stream: false
     }, { silent: true });
     if (res.text) {
       s.summary = res.text.trim().slice(0, 2400);
@@ -2147,10 +2209,10 @@ function importChip(file) {
 }
 
 function renderAll() {
-  renderSessions(); renderTranscript(); renderMemory(); renderProtos(); renderModelSel(); renderLink();
+  renderSessions(); renderTranscript(); renderMemory(); renderProtos(); renderLink();
   $("#personaSel").value = state.settings.persona;
   $("#workerUrl").value = state.settings.workerUrl;
-  $("#accessCode").value = state.settings.accessCode;
+  $("#apiKey").value = state.settings.apiKey; $("#modelView").value = activeModel();
   $("#sysOverride").value = state.settings.sysOverride;
   $("#temp").value = state.settings.temperature; $("#tempOut").textContent = Number(state.settings.temperature).toFixed(2);
   $("#topP").value = state.settings.topP; $("#topPOut").textContent = Number(state.settings.topP).toFixed(2);
@@ -2203,10 +2265,6 @@ function wire() {
 
   $("#btnRail").addEventListener("click", () => $("#rail").classList.toggle("hidden"));
   $("#btnDrawer").addEventListener("click", () => openDrawer($("#drawer").classList.contains("hidden")));
-  $("#modelSel").addEventListener("change", (e) => {
-    state.settings.model = e.target.value; renderModelSel(); save();
-    toast("<b>MODEL:</b> " + esc(e.target.value));
-  });
   $("#btnNewSess").addEventListener("click", () => { newSession(); toast("<b>NEW SESSION.</b> Clean slate, Boss."); });
   $("#personaSel").addEventListener("change", (e) => {
     state.settings.persona = e.target.value; save(); renderTranscript();
@@ -2250,10 +2308,18 @@ function wire() {
   $("#reasonEffort").addEventListener("change", (e) => { state.settings.reasoningEffort = e.target.value; save(); });
   $("#workerUrl").addEventListener("change", (e) => {
     state.settings.workerUrl = e.target.value.trim();
-    state.settings.sim = false; state.lastRosterFetch = 0;
-    save(); renderLink(); fetchModels(true);
+    state.uplink = null;
+    save(); renderLink(); probeUplink(true);
   });
-  $("#accessCode").addEventListener("change", (e) => { state.settings.accessCode = e.target.value; save(); fetchModels(true); });
+  $("#apiKey").addEventListener("change", (e) => {
+    state.settings.apiKey = e.target.value.trim();
+    state.uplink = null;
+    save(); renderLink();
+    toast(state.settings.apiKey
+      ? "<b>DIRECT MODE.</b> Talking to Groq straight from the browser."
+      : "<b>WORKER MODE.</b> Key handed back to the proxy.");
+    probeUplink(true);
+  });
   $("#sysOverride").addEventListener("change", (e) => { state.settings.sysOverride = e.target.value; save(); });
   $("#memAdd").addEventListener("keydown", (e) => {
     if (e.key === "Enter" && e.target.value.trim()) {
@@ -2266,11 +2332,7 @@ function wire() {
     if (s) { s.summary = e.target.value; save(); }
   });
 
-  $("#btnTest").addEventListener("click", testUplink);
-  $("#btnModels").addEventListener("click", () => fetchModels(true).then(() =>
-    toast("<b>ROSTER:</b> " + state.models.length + " chat models live.")));
-  $("#btnCloudUp").addEventListener("click", cloudPush);
-  $("#btnCloudDn").addEventListener("click", cloudPull);
+  $("#btnTest").addEventListener("click", () => probeUplink());
   $("#btnExport").addEventListener("click", exportChip);
   $("#btnImport").addEventListener("click", () => $("#fileInput").click());
   $("#fileInput").addEventListener("change", (e) => {
@@ -2306,7 +2368,7 @@ function wire() {
   window.addEventListener("beforeunload", save);
   if ("speechSynthesis" in window) { speechSynthesis.onvoiceschanged = loadVoices; loadVoices(); }
   setInterval(() => { $("#sbClock").textContent = stamp(); }, 1000);
-  setInterval(() => { if (state.settings.summarise && !state.busy && !isSim()) compressSession().catch(() => {}); }, 120000);
+  setInterval(() => { if (state.settings.summarise && !state.busy && hasUplink()) compressSession().catch(() => {}); }, 120000);
 }
 
 /* ------------------------------------------------------------------ *
@@ -2322,7 +2384,7 @@ function bootSequence() {
     ["Satellite grid (E.D.I.T.H. partition) \u2026 quarantined, Boss's orders", "warn"],
     ["Threat board: 0 active incursions on Earth-199999", "ok"],
     ["Speech module \u2026 Irish primary voice engaged", "ok"],
-    ["Groq uplink \u2026 negotiating", "ok"]
+    ["Uplink handshake \u2026 one Groq model, verifying", "ok"]
   ];
   const log = $("#bootLog"), bar = $("#bootBar"), boot = $("#boot");
   let i = 0, finished = false;
@@ -2337,9 +2399,10 @@ function bootSequence() {
     const h = new Date().getHours();
     const g = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
     footStatus("READY");
-    setTimeout(() => toast("<b>" + g + ", Boss.</b> F.R.I.D.A.Y. online. " +
-      (isSim() ? "Running dark \u2014 set the uplink in CORE \u25b8 LINK." : state.models.length + " models at your disposal."),
-      isSim() ? "gold" : "", 7000), 800);
+    const dark = !hasUplink() || (state.uplink && state.uplink.ok === false);
+    setTimeout(() => toast("<b>" + g + ", Boss.</b> F.R.I.D.A.Y. online \u2014 " +
+      (dark ? "on standby; the uplink needs a worker endpoint or a key in CORE \u25b8 LINK."
+            : "one verified model: " + activeModel() + "."), dark ? "gold" : "", 7000), 800);
   }
 
   $("#bootSkip").addEventListener("click", finish);
@@ -2378,8 +2441,9 @@ function init() {
   wire();
   renderAll();
   bootSequence();
-  if (isSim()) { renderLink(); diag("NO UPLINK CONFIGURED \u2014 simulation mode."); }
-  else fetchModels(true);
+  if (state.settings.pinnedFor === MODEL && state.settings.pinnedModel) state.model = state.settings.pinnedModel;
+  renderLink();
+  probeUplink(true);
   window.FRIDAY = { state: state, send: send, command: command, addMemory: addMemory,
                     recall: recall, buildSystem: buildSystem, speak: speak, welcome: true };
   console.log("%cF.R.I.D.A.Y. \u2014 interface online. window.FRIDAY available.",
