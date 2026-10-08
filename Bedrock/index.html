@@ -347,7 +347,7 @@ textarea#prompt::placeholder{color:var(--dim2)}
       <label>Model check</label>
       <div class="hint">Sends one tiny request to each chat model (3 at a time) and marks the list with ✓ or ✗. Each check is a real, billed Bedrock call.</div>
       <div class="actions" style="justify-content:flex-start;align-items:center;gap:10px">
-        <button class="btn" id="checkModels">Check models</button><span id="checkOut" class="hint"></span>
+        <button class="btn" id="checkModels">Check models</button><button class="btn" id="clearChecks">Clear results</button><span id="checkOut" class="hint"></span>
       </div>
     </div>
     <div class="actions">
@@ -505,11 +505,12 @@ document.addEventListener('click', (e) => {
    no network) so the UI still lists what Bedrock offers. Sending needs the
    Worker, so these stay flagged as "unverified". */
 const FALLBACK_MODELS = [
-  { id: 'us.anthropic.claude-sonnet-5-5', label: 'Claude Sonnet 5.5', family: 'Anthropic Claude', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 128000, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'Newest Sonnet: sharp at coding and knowledge work.' },
-  { id: 'us.anthropic.claude-haiku-5-5', label: 'Claude Haiku 5.5', family: 'Anthropic Claude', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 128000, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'Fastest Claude 5.5, built for volume.' },
-  { id: 'us.openai.gpt-6.1-sol', label: 'GPT-6.1 Sol', family: 'OpenAI', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 131072, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'OpenAI GPT-6.1 Sol.' },
-  { id: 'us.amazon.nova-2-lite-v1:0', label: 'Nova 2 Lite', family: 'Amazon Nova', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 64000, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'Amazon multimodal reasoner.' },
-  { id: 'us.deepseek.v3.2', label: 'DeepSeek V3.2', family: 'DeepSeek', tier: 'production', kind: 'chat', ctx: 163840, maxOut: 163840, speed: 0, caps: { chat: true, reasoning: true, tools: true }, blurb: 'DeepSeek V3.2, strong all-rounder.' },
+  { id: 'us.anthropic.claude-sonnet-5-5', label: 'Claude Sonnet 5.5', family: 'Anthropic', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 0, speed: 0, caps: { chat: true, reasoning: true }, blurb: 'Launched 2026-09-28. 1M context.' },
+  { id: 'us.anthropic.claude-haiku-5-5', label: 'Claude Haiku 5.5', family: 'Anthropic', tier: 'production', kind: 'chat', ctx: 0, maxOut: 0, speed: 0, caps: { chat: true }, blurb: 'Launched 2026-10-07.' },
+  { id: 'us.anthropic.claude-opus-5-5', label: 'Claude Opus 5.5', family: 'Anthropic', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 128000, speed: 0, caps: { chat: true, reasoning: true, vision: true }, blurb: 'Launched 2026-09-22. 1M context, 128K output.' },
+  { id: 'us.openai.gpt-6.1-sol', label: 'GPT-6.1 Sol', family: 'OpenAI', tier: 'production', kind: 'chat', ctx: 0, maxOut: 0, speed: 0, caps: { chat: true }, blurb: 'Available through Converse and Responses on Bedrock.' },
+  { id: 'us.xai.grok-4.7', label: 'Grok 4.7', family: 'xAI', tier: 'production', kind: 'chat', ctx: 500000, maxOut: 0, speed: 0, caps: { chat: true }, blurb: '500K context.' },
+  { id: 'us.amazon.nova-2-lite-v1:0', label: 'Nova 2 Lite', family: 'Amazon', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 65536, speed: 0, caps: { chat: true, vision: true }, blurb: 'Text, image and video input (no audio). 1M context, 64K output.' },
   { id: 'polly-neural', label: 'Amazon Polly (neural voices)', family: 'Amazon Polly', tier: 'production', kind: 'tts', ctx: 3000, maxOut: 0, speed: 0, caps: { chat: false, tts: true, voices: ['Joanna', 'Matthew', 'Ivy', 'Joey', 'Justin', 'Kendra', 'Kimberly', 'Salli', 'Kevin', 'Ruth', 'Stephen', 'Danielle', 'Gregory'] }, blurb: 'Read answers aloud.' },
 ];
 
@@ -545,14 +546,16 @@ function setStatus(kind, text) {
 }
 function renderModelSelect() {
   const sel = $('#modelSelect');
-  const chat = S.models.filter(m => m.kind === 'chat');
+  const failed = (m) => !!(S.checks && S.checks[m.id] && !S.checks[m.id].ok);
+  const chat = S.models.filter(m => m.kind === 'chat' && !failed(m));
   const other = S.models.filter(m => m.kind !== 'chat');
+  if (chat.length && S.models.some(m => m.id === S.model) && !chat.some(m => m.id === S.model)) { S.model = chat[0].id; LS.set('model', S.model); }
   const opt = (m) => {
     const bits = [m.label];
     if (m.ctx) bits.push(fmt(m.ctx) + ' ctx');
     if (m.speed) bits.push(m.speed + ' t/s');
     const ck = S.checks && S.checks[m.id];
-    if (ck) bits.push(ck.ok ? '✓ works' : '✗ failed');
+    if (ck && ck.ok) bits.push('✓ works');
     if (m.kind !== 'chat') bits.push(m.kind);
     return '<option value="' + esc(m.id) + '"' + (ck && !ck.ok ? ' title="' + esc(ck.error || 'failed') + '"' : '') + '>' + esc(bits.filter(Boolean).join(' · ')) + '</option>';
   };
@@ -644,7 +647,7 @@ function renderChat() {
   scrollDown();
 }
 function renderWelcome() {
-  const picks = ['us.anthropic.claude-sonnet-5-5', 'us.openai.gpt-6.1-sol', 'us.amazon.nova-2-lite-v1:0', 'us.deepseek.v3.2'];
+  const picks = ['us.anthropic.claude-sonnet-5-5', 'us.openai.gpt-6.1-sol', 'us.amazon.nova-2-lite-v1:0', 'us.anthropic.claude-opus-5-5'];
   const cards = [
     { t: 'Explain it simply', s: 'Break down any hard concept in plain language.', p: 'Explain what Amazon Bedrock is and why teams use it, in plain language.' },
     { t: 'Write & edit', s: 'Draft, tighten, rewrite in any tone.', p: 'Write a 150-word product blurb for a local coffee roaster. Make it warm, not cheesy.' },
@@ -910,6 +913,7 @@ $('#openSettings').onclick = () => {
   drawVoices(); $('#scrim').classList.add('on');
 };
 $('#sClose').onclick = () => $('#scrim').classList.remove('on');
+$('#clearChecks').onclick = () => { S.checks = {}; LS.set('checks', S.checks); $('#checkOut').textContent = 'Results cleared. Every model is shown again.'; renderModelSelect(); renderBadges(); };
 $('#checkModels').onclick = async () => {
   const btn = $('#checkModels'), out = $('#checkOut');
   const chat = S.models.filter(m => m.kind === 'chat');
@@ -935,10 +939,10 @@ $('#checkModels').onclick = async () => {
   await Promise.all([worker(), worker(), worker()]);
   S.checks = results; LS.set('checks', S.checks);
   const okN = Object.values(results).filter(x => x.ok).length;
-  out.textContent = okN + ' of ' + chat.length + ' answered.';
+  out.textContent = okN + ' of ' + chat.length + ' answered. Failed models are hidden.';
   btn.disabled = false;
   renderModelSelect(); renderBadges();
-  toast(okN + ' of ' + chat.length + ' models answered. Failed ones are marked ✗ in the list.', okN ? 'good' : 'bad', 6000);
+  toast(okN + ' of ' + chat.length + ' models answered. The rest are hidden from the list.', okN ? 'good' : 'bad', 6000);
 };
 $('#scrim').onclick = (e) => { if (e.target.id === 'scrim') $('#scrim').classList.remove('on'); };
 $('#sSave').onclick = () => {

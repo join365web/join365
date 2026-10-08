@@ -4,9 +4,10 @@
  * API backend for the Bedrock chat page (Bedrock/index.html, hosted on GitHub
  * Pages). Only /api/* and a health check live here. No SDK, no build step:
  * it signs AWS requests itself (SigV4) and talks to Amazon Bedrock's
- * Converse / ConverseStream API, so one request shape works for Claude, Nova,
- * Llama, Mistral, DeepSeek, Qwen, GPT-OSS, GPT-5/6, Grok, Kimi, GLM, MiniMax,
- * Nemotron, Palmyra and anything else that Bedrock exposes through Converse.
+ * Converse / ConverseStream API, so one request shape works for every model
+ * that Bedrock exposes through Converse. The page's built-in list only holds
+ * models verified against their AWS model cards (see CATALOG below); anything
+ * else this account can call is picked up live from ListInferenceProfiles.
  *
  * Routes
  *   GET  /              health check (never returns secrets)
@@ -41,108 +42,35 @@ const MODEL_CACHE_MS = 10 * 60 * 1000;
 
 // If the requested model fails and the page asked for auto-fallback, these are tried in order.
 const FALLBACK_CHAIN = [
-  'us.anthropic.claude-sonnet-4-6',
+  'us.anthropic.claude-haiku-5-5',
   'us.amazon.nova-2-lite-v1:0',
-  'us.meta.llama4-maverick-17b-instruct-v1:0',
-  'us.deepseek.v3.2',
+  'us.openai.gpt-6.1-sol',
 ];
 
 // Amazon Polly neural en-US voices (the page's "speak" voices).
 const POLLY_VOICES = ['Joanna', 'Matthew', 'Ivy', 'Joey', 'Justin', 'Kendra', 'Kimberly', 'Salli', 'Kevin', 'Ruth', 'Stephen', 'Danielle', 'Gregory'];
 
 // Used only for auto-discovered models: skip anything that is not a text chat model.
-const NON_CHAT = /embed|rerank|image|canvas|reel|stable|diffusion|pegasus|marengo|sonic|guard|transcri|speech|upscale|voxtral|polly|tts/i;
+const NON_CHAT = /embed|rerank|image|canvas|reel|stable|diffusion|pegasus|marengo|sonic|guard|transcri|speech|upscale|voxtral|polly|tts|mythos/i;
 
 // Claude models that use adaptive thinking ("effort") rather than a fixed thinking budget.
 const ADAPTIVE_CLAUDE = /claude-(opus|sonnet|haiku|fable|mythos)-(4-[6-9]|5)/;
 
-// Curated catalogue. Every id is a Bedrock Converse modelId (us.* cross-region
-// inference profile, or an in-region base id). A model is only shown when the
-// account's live Bedrock listing contains it (see listModels), so the dropdown
-// never offers something AWS would reject.
+// Curated catalogue: only models verified against their AWS model card. When the
+// account's live Bedrock listing works, the dropdown shows what that listing
+// contains (curated entries get card labels, other models get AWS's own names).
+// This list is used only if the listing is unavailable.
 const C = (id, label, family, ctx, maxOut, caps, blurb) => ({ id, label, family, ctx, maxOut, caps, blurb, tier: 'production' });
 const CATALOG = [
-  // Anthropic Claude
-  C('us.anthropic.claude-sonnet-5-5', 'Claude Sonnet 5.5', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Newest Sonnet: sharp at coding and knowledge work, cheaper per task.'),
-  C('us.anthropic.claude-opus-5-5', 'Claude Opus 5.5', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Top Claude for hard, long-running agent work.'),
-  C('us.anthropic.claude-haiku-5-5', 'Claude Haiku 5.5', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Fastest Claude 5.5 with effort controls. Built for high volume.'),
-  C('us.anthropic.claude-fable-5-1', 'Claude Fable 5.1', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Claude 5.1 family, 1M context.'),
-  C('us.anthropic.claude-sonnet-5', 'Claude Sonnet 5', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Sonnet 5 generation.'),
-  C('us.anthropic.claude-opus-5', 'Claude Opus 5', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Opus 5 generation.'),
-  C('us.anthropic.claude-fable-5', 'Claude Fable 5', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Claude 5 family, 1M context.'),
-  C('us.anthropic.claude-opus-4-8', 'Claude Opus 4.8', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Opus 4.8 with 1M context.'),
-  C('us.anthropic.claude-opus-4-7', 'Claude Opus 4.7', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Opus 4.7 with 1M context.'),
-  C('us.anthropic.claude-opus-4-6-v1', 'Claude Opus 4.6', 'Anthropic Claude', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'Opus 4.6 with 1M context.'),
-  C('us.anthropic.claude-sonnet-4-6', 'Claude Sonnet 4.6', 'Anthropic Claude', 1000000, 64000, { reasoning: true, vision: true, tools: true }, 'Balanced speed and intelligence.'),
-  C('us.anthropic.claude-opus-4-5-20251101-v1:0', 'Claude Opus 4.5', 'Anthropic Claude', 200000, 64000, { reasoning: true, vision: true, tools: true }, 'Opus 4.5.'),
-  C('us.anthropic.claude-sonnet-4-5-20250929-v1:0', 'Claude Sonnet 4.5', 'Anthropic Claude', 200000, 64000, { reasoning: true, vision: true, tools: true }, 'Sonnet 4.5.'),
-  C('us.anthropic.claude-haiku-4-5-20251001-v1:0', 'Claude Haiku 4.5', 'Anthropic Claude', 200000, 64000, { reasoning: true, vision: true, tools: true }, 'Fast, cheap Claude.'),
-  C('us.anthropic.claude-sonnet-4-20250514-v1:0', 'Claude Sonnet 4', 'Anthropic Claude', 1000000, 64000, { reasoning: true, vision: true, tools: true }, 'Sonnet 4.'),
-  C('us.anthropic.claude-opus-4-1-20250805-v1:0', 'Claude Opus 4.1', 'Anthropic Claude', 200000, 32000, { reasoning: true, vision: true, tools: true }, 'Opus 4.1.'),
-  // Amazon Nova
-  C('us.amazon.nova-2-lite-v1:0', 'Nova 2 Lite', 'Amazon Nova', 1000000, 64000, { reasoning: true, vision: true, tools: true }, 'Amazon multimodal reasoner, 1M context.'),
-  C('us.amazon.nova-pro-v1:0', 'Nova Pro', 'Amazon Nova', 300000, 10000, { vision: true, tools: true }, 'Amazon Nova Pro.'),
-  C('us.amazon.nova-lite-v1:0', 'Nova Lite', 'Amazon Nova', 300000, 10000, { vision: true, tools: true }, 'Cheap multimodal Nova.'),
-  C('us.amazon.nova-micro-v1:0', 'Nova Micro', 'Amazon Nova', 128000, 10000, { tools: true }, 'Text-only, fastest Nova.'),
-  // OpenAI models served through Bedrock Runtime (Converse)
-  C('us.openai.gpt-6.1-sol', 'GPT-6.1 Sol', 'OpenAI', 1000000, 131072, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-6.1 Sol.'),
-  C('us.openai.gpt-6-sol', 'GPT-6 Sol', 'OpenAI', 1050000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-6 Sol.'),
-  C('us.openai.gpt-6-astra', 'GPT-6 Astra', 'OpenAI', 1050000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-6 Astra.'),
-  C('us.openai.gpt-6-luna', 'GPT-6 Luna', 'OpenAI', 1050000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-6 Luna.'),
-  C('us.openai.gpt-5.6-sol', 'GPT-5.6 Sol', 'OpenAI', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-5.6 Sol.'),
-  C('us.openai.gpt-5.6-terra', 'GPT-5.6 Terra', 'OpenAI', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-5.6 Terra.'),
-  C('us.openai.gpt-5.6-luna', 'GPT-5.6 Luna', 'OpenAI', 1000000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-5.6 Luna.'),
-  C('us.openai.gpt-5.5', 'GPT-5.5', 'OpenAI', 272000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-5.5.'),
-  C('us.openai.gpt-5.4', 'GPT-5.4', 'OpenAI', 272000, 128000, { reasoning: true, vision: true, tools: true }, 'OpenAI GPT-5.4.'),
-  C('openai.gpt-oss-120b-1:0', 'GPT-OSS 120B', 'OpenAI Open-Weight', 128000, 128000, { reasoning: true, tools: true }, 'OpenAI open-weight 120B reasoner.'),
-  C('openai.gpt-oss-20b-1:0', 'GPT-OSS 20B', 'OpenAI Open-Weight', 128000, 128000, { reasoning: true, tools: true }, 'OpenAI open-weight 20B reasoner.'),
-  // Meta Llama
-  C('us.meta.llama4-maverick-17b-instruct-v1:0', 'Llama 4 Maverick 17B', 'Meta Llama', 128000, 4096, { tools: true }, 'Llama 4 Maverick (MoE).'),
-  C('us.meta.llama4-scout-17b-instruct-v1:0', 'Llama 4 Scout 17B', 'Meta Llama', 128000, 4096, { tools: true }, 'Llama 4 Scout, long context.'),
-  C('us.meta.llama3-3-70b-instruct-v1:0', 'Llama 3.3 70B', 'Meta Llama', 128000, 4096, { tools: true }, 'Llama 3.3 70B Instruct.'),
-  // DeepSeek
-  C('us.deepseek.v3.2', 'DeepSeek V3.2', 'DeepSeek', 163840, 163840, { reasoning: true, tools: true }, 'DeepSeek V3.2, strong all-rounder.'),
-  C('us.deepseek.r1-v1:0', 'DeepSeek R1', 'DeepSeek', 128000, 4096, { reasoning: true }, 'DeepSeek R1 reasoning model.'),
-  // Mistral
-  C('mistral.mistral-large-3-675b-instruct', 'Mistral Large 3', 'Mistral AI', 256000, 32000, { vision: true, tools: true }, 'Mistral Large 3 (675B).'),
-  C('mistral.devstral-2-123b', 'Devstral 2 123B', 'Mistral AI', 256000, 32000, { tools: true }, 'Mistral coding model.'),
-  C('mistral.magistral-small-2509', 'Magistral Small', 'Mistral AI', 128000, 40000, { reasoning: true, vision: true }, 'Mistral reasoning model.'),
-  C('mistral.ministral-3-14b-instruct', 'Ministral 14B 3.0', 'Mistral AI', 128000, 8000, { vision: true, tools: true }, 'Small, capable Mistral.'),
-  C('mistral.ministral-3-8b-instruct', 'Ministral 3 8B', 'Mistral AI', 128000, 8000, { vision: true, tools: true }, 'Small, fast Mistral.'),
-  C('mistral.ministral-3-3b-instruct', 'Ministral 3 3B', 'Mistral AI', 128000, 8000, { vision: true, tools: true }, 'Tiny Mistral.'),
-  C('mistral.pixtral-large-2502-v1:0', 'Pixtral Large', 'Mistral AI', 128000, 16384, { vision: true, tools: true }, 'Vision-language model.'),
-  // Qwen
-  C('qwen.qwen3-235b-a22b-2507-v1:0', 'Qwen3 235B A22B', 'Alibaba Qwen', 262144, 131072, { reasoning: true, tools: true }, 'Qwen3 235B MoE, 2507 release.'),
-  C('qwen.qwen3-next-80b-a3b', 'Qwen3 Next 80B A3B', 'Alibaba Qwen', 256000, 8000, { tools: true }, 'Qwen3-Next efficient MoE.'),
-  C('qwen.qwen3-coder-next', 'Qwen3 Coder Next', 'Alibaba Qwen', 256000, 16000, { tools: true }, 'Qwen3 coding model.'),
-  C('qwen.qwen3-coder-480b-a35b-v1:0', 'Qwen3 Coder 480B', 'Alibaba Qwen', 262000, 65536, { reasoning: true, tools: true }, 'Large Qwen3 coder.'),
-  C('qwen.qwen3-coder-30b-a3b-v1:0', 'Qwen3 Coder 30B', 'Alibaba Qwen', 262144, 131072, { reasoning: true, tools: true }, 'Small Qwen3 coder.'),
-  C('qwen.qwen3-32b-v1:0', 'Qwen3 32B', 'Alibaba Qwen', 131072, 16384, { reasoning: true, tools: true }, 'Dense Qwen3 32B.'),
-  C('qwen.qwen3-vl-235b-a22b', 'Qwen3 VL 235B', 'Alibaba Qwen', 256000, 8000, { vision: true, tools: true }, 'Qwen3 vision-language.'),
-  // Moonshot Kimi
-  C('us.moonshotai.kimi-k3', 'Kimi K3', 'Moonshot AI', 1000000, 131072, { reasoning: true, vision: true, tools: true }, 'Kimi K3 agentic model.'),
-  C('moonshotai.kimi-k2.5', 'Kimi K2.5', 'Moonshot AI', 256000, 16000, { vision: true, tools: true }, 'Kimi K2.5.'),
-  C('moonshot.kimi-k2-thinking', 'Kimi K2 Thinking', 'Moonshot AI', 256000, 16000, { reasoning: true, tools: true }, 'Kimi K2 with long reasoning.'),
-  // MiniMax
-  C('minimax.minimax-m2.5', 'MiniMax M2.5', 'MiniMax', 196000, 8000, { tools: true }, 'MiniMax M2.5 agentic model.'),
-  C('minimax.minimax-m2.1', 'MiniMax M2.1', 'MiniMax', 196000, 8000, { tools: true }, 'MiniMax M2.1.'),
-  C('minimax.minimax-m2', 'MiniMax M2', 'MiniMax', 196000, 8000, { tools: true }, 'MiniMax M2.'),
-  // Z.AI GLM
-  C('us.zai.glm-5.3', 'GLM 5.3', 'Z.AI GLM', 200000, 128000, { reasoning: true, tools: true }, 'GLM 5.3 (cross-region profile).'),
-  C('zai.glm-5', 'GLM 5', 'Z.AI GLM', 200000, 128000, { reasoning: true, tools: true }, 'GLM 5.'),
-  C('zai.glm-4.7', 'GLM 4.7', 'Z.AI GLM', 203000, 4000, { reasoning: true, tools: true }, 'GLM 4.7.'),
-  C('zai.glm-4.7-flash', 'GLM 4.7 Flash', 'Z.AI GLM', 203000, 4000, { reasoning: true, tools: true }, 'Fast GLM 4.7.'),
-  // NVIDIA Nemotron
-  C('nvidia.nemotron-super-3-120b', 'Nemotron 3 Super 120B', 'NVIDIA Nemotron', 256000, 32000, { reasoning: true, tools: true }, 'NVIDIA Nemotron 3 Super.'),
-  C('nvidia.nemotron-nano-3-30b', 'Nemotron 3 Nano 30B', 'NVIDIA Nemotron', 256000, 8000, { tools: true }, 'NVIDIA Nemotron 3 Nano.'),
-  C('nvidia.nemotron-nano-12b-v2', 'Nemotron Nano 12B v2 VL', 'NVIDIA Nemotron', 128000, 8000, { vision: true, tools: true }, 'Nemotron Nano with vision.'),
-  C('nvidia.nemotron-nano-9b-v2', 'Nemotron Nano 9B v2', 'NVIDIA Nemotron', 128000, 8000, { tools: true }, 'Small Nemotron.'),
-  // Writer Palmyra
-  C('us.writer.palmyra-x5-v1:0', 'Palmyra X5', 'Writer', 1000000, 8192, { tools: true }, 'Writer Palmyra X5, 1M context.'),
-  C('us.writer.palmyra-x4-v1:0', 'Palmyra X4', 'Writer', 128000, 8192, { tools: true }, 'Writer Palmyra X4.'),
-  // xAI Grok
-  C('us.xai.grok-4.7', 'Grok 4.7', 'xAI Grok', 500000, 0, { reasoning: true, vision: true, tools: true }, 'xAI frontier model for coding and agents.'),
-  C('us.xai.grok-4.6', 'Grok 4.6', 'xAI Grok', 500000, 0, { reasoning: true, vision: true, tools: true }, 'xAI Grok 4.6.'),
+  // Every entry below was checked against its AWS model card: the model ID or
+  // geo inference-profile ID is printed there, and the card lists Converse on
+  // bedrock-runtime. Facts in the labels and blurbs come from those cards.
+  C('us.anthropic.claude-sonnet-5-5', 'Claude Sonnet 5.5', 'Anthropic', 1000000, 0, { reasoning: true }, 'Launched 2026-09-28. 1M context.'),
+  C('us.anthropic.claude-haiku-5-5', 'Claude Haiku 5.5', 'Anthropic', 0, 0, {}, 'Launched 2026-10-07.'),
+  C('us.anthropic.claude-opus-5-5', 'Claude Opus 5.5', 'Anthropic', 1000000, 128000, { reasoning: true, vision: true }, 'Launched 2026-09-22. 1M context, 128K output, adaptive reasoning.'),
+  C('us.openai.gpt-6.1-sol', 'GPT-6.1 Sol', 'OpenAI', 0, 0, {}, 'Available through Converse and Responses on Bedrock.'),
+  C('us.xai.grok-4.7', 'Grok 4.7', 'xAI', 500000, 0, {}, '500K context.'),
+  C('us.amazon.nova-2-lite-v1:0', 'Nova 2 Lite', 'Amazon', 1000000, 65536, { vision: true }, 'Text, image and video input (no audio). 1M context, 64K output.'),
 ];
 
 const CORS = {
@@ -421,7 +349,7 @@ async function listModels(env) {
       seen.add(normId(id));
     }
   }
-  const usingStatic = !found || models.length < 3;
+  const usingStatic = !found || models.length === 0;
   if (usingStatic) {
     models.length = 0;
     for (const c of CATALOG) models.push(publicModel(c, 'static'));
