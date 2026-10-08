@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Laura AI · Groq Chat</title>
-<meta name="description" content="Chat with every Groq model from one page.">
+<title>Laura AI · Amazon Bedrock Chat</title>
+<meta name="description" content="Chat with every Amazon Bedrock model from one page.">
 <style>
 /* ============================  THEME  ============================ */
 :root{
@@ -245,7 +245,7 @@ textarea#prompt::placeholder{color:var(--dim2)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="logo">L</div>
-      <div><h1>Laura AI</h1><small>Groq Gateway</small></div>
+      <div><h1>Laura AI</h1><small>Amazon Bedrock Gateway</small></div>
     </div>
     <button class="newchat" id="newChat">＋ New chat</button>
     <div class="convos" id="convos"></div>
@@ -278,7 +278,7 @@ textarea#prompt::placeholder{color:var(--dim2)}
     <div class="chatwrap" id="chatwrap">
       <div class="welcome" id="welcome">
         <div class="mark">L</div>
-        <h2>Every Groq model, one page.</h2>
+        <h2>Every Bedrock model, one page.</h2>
         <p id="welcomeSub">Pick a model above and start typing. Responses stream straight from your Cloudflare Worker.</p>
         <div class="cards" id="startCards"></div>
         <div class="statrow" id="statRow"></div>
@@ -290,7 +290,7 @@ textarea#prompt::placeholder{color:var(--dim2)}
     <div class="composer">
       <div class="inner">
         <div class="ctl">
-          <label>temp <input type="number" id="temp" min="0" max="2" step="0.1" value="0.7"></label>
+          <label>temp <input type="number" id="temp" min="0" max="1" step="0.1" value="0.7" title="Bedrock accepts 0 to 1"></label>
           <label>max tok <input type="number" id="maxTok" min="0" step="256" placeholder="auto"></label>
           <label>reasoning
             <select id="effort">
@@ -301,13 +301,13 @@ textarea#prompt::placeholder{color:var(--dim2)}
           <span class="sep"></span>
           <label class="switch"><input type="checkbox" id="jsonMode"> JSON mode</label>
           <label class="switch"><input type="checkbox" id="fallbackOn" checked title="Auto-retry on another model if this one is rate-limited or down"> auto-fallback</label>
-          <label class="switch"><input type="checkbox" id="ttsOn" title="Read answers aloud with Orpheus TTS"> speak</label>
+          <label class="switch"><input type="checkbox" id="ttsOn" title="Read answers aloud with Amazon Polly (neural)"> speak</label>
           <span class="sep"></span>
           <label class="switch"><input type="checkbox" id="thinkOpen"> show reasoning</label>
         </div>
         <div class="inputbar">
           <textarea id="prompt" rows="1" placeholder="Ask anything…  (Enter to send · Shift+Enter for a new line)"></textarea>
-          <button class="iconbtn" id="micBtn" title="Dictate with Whisper"><svg class="ic lg" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"/></svg></button>
+          <button class="iconbtn" id="micBtn" title="Dictate (browser speech recognition)"><svg class="ic lg" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"/></svg></button>
           <button class="send" id="sendBtn" title="Send"><svg class="ic lg" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
         </div>
         <div class="foot">
@@ -323,29 +323,32 @@ textarea#prompt::placeholder{color:var(--dim2)}
 <div class="scrim" id="scrim">
   <div class="modal" role="dialog" aria-modal="true">
     <h3>Settings</h3>
-    <p class="sub">Your Groq key lives in the Worker secret — this page never needs it.</p>
+    <p class="sub">Your AWS keys live in the Worker secrets — this page never needs them.</p>
 
     <div class="field">
       <label>Worker URL</label>
-      <input id="sWorker" placeholder="https://laura-ai.dzt399890.workers.dev" spellcheck="false">
+      <input id="sWorker" placeholder="https://aws.join365-website.workers.dev" spellcheck="false">
       <div class="hint">Deployed elsewhere? Point this at your own <code>*.workers.dev</code> or custom domain.</div>
     </div>
     <div class="field">
-      <label>Fallback API key <span style="color:var(--dim2);font-weight:400">(optional)</span></label>
-      <input id="sKey" type="password" placeholder="gsk_… (leave blank to use the Worker secret)" spellcheck="false">
-      <div class="hint">Only used if the Worker has no <code>GROQ_API</code> secret set. Stored in this browser's localStorage.</div>
+      <label>Worker access key <span style="color:var(--dim2);font-weight:400">(optional)</span></label>
+      <input id="sKey" type="password" placeholder="only if the Worker has a WORKER_KEY secret" spellcheck="false">
+      <div class="hint">Leave blank unless you set a <code>WORKER_KEY</code> secret on the Worker. Stored in this browser's localStorage.</div>
     </div>
     <div class="field">
       <label>System prompt</label>
       <textarea id="sSystem" placeholder="You are Laura, a concise and helpful AI assistant."></textarea>
     </div>
     <div class="field">
-      <label>Whisper model (dictation)</label>
-      <select id="sWhisper"><option value="whisper-large-v3-turbo">whisper-large-v3-turbo (fast)</option><option value="whisper-large-v3">whisper-large-v3 (accurate)</option></select>
+      <label>Polly voice (speak)</label>
+      <select id="sVoice"></select>
     </div>
     <div class="field">
-      <label>Orpheus voice (speak)</label>
-      <select id="sVoice"></select>
+      <label>Model check</label>
+      <div class="hint">Sends one tiny request to each chat model (3 at a time) and marks the list with ✓ or ✗. Each check is a real, billed Bedrock call.</div>
+      <div class="actions" style="justify-content:flex-start;align-items:center;gap:10px">
+        <button class="btn" id="checkModels">Check models</button><span id="checkOut" class="hint"></span>
+      </div>
     </div>
     <div class="actions">
       <button class="btn" id="sClose">Cancel</button>
@@ -354,28 +357,28 @@ textarea#prompt::placeholder{color:var(--dim2)}
   </div>
 </div>
 
-<div class="record-pill" id="recPill">● Recording… <span id="recTime">0:00</span> <button class="btn" style="padding:3px 10px;font-size:12px" id="recStop">Stop &amp; transcribe</button></div>
+<div class="record-pill" id="recPill">● Listening… <span id="recTime">0:00</span> <button class="btn" style="padding:3px 10px;font-size:12px" id="recStop">Stop dictation</button></div>
 <div class="toasts" id="toasts"></div>
 
 <script>
 /* =====================================================================
- * Laura AI — Groq chat front end
+ * Laura AI — Amazon Bedrock chat front end
  * Talks only to the Cloudflare Worker (see worker.js). No dependencies.
  * ===================================================================== */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const DEFAULT_WORKER = 'https://laura-ai.dzt399890.workers.dev';
+const DEFAULT_WORKER = 'https://aws.join365-website.workers.dev';
 
 const LS = {
   get(k, d) {
     try {
-      const v = localStorage.getItem('laura.' + k);
+      const v = localStorage.getItem('bedrock.' + k);
       if (v == null) return d;
       try { return JSON.parse(v); } catch { return v; }   // tolerate hand-written values
     } catch { return d; }
   },
-  set(k, v) { try { localStorage.setItem('laura.' + k, JSON.stringify(v)); } catch { } },
+  set(k, v) { try { localStorage.setItem('bedrock.' + k, JSON.stringify(v)); } catch { } },
 };
 
 /* ------------------------------- state ------------------------------- */
@@ -384,10 +387,11 @@ const S = {
   key: LS.get('key', ''),
   cfg: Object.assign({
     system: '', temp: 0.7, maxTok: 0, effort: '', json: false, fallback: true,
-    tts: false, thinkOpen: false, whisper: 'whisper-large-v3-turbo', voice: 'hannah',
+    tts: false, thinkOpen: false, voice: 'Joanna',
   }, LS.get('cfg', {})),
   models: [],
-  model: LS.get('model', 'openai/gpt-oss-120b'),
+  checks: LS.get('checks', {}),
+  model: LS.get('model', 'us.anthropic.claude-sonnet-5-5'),
   convos: LS.get('convos', []),
   active: LS.get('active', null),
   busy: false,
@@ -498,19 +502,15 @@ document.addEventListener('click', (e) => {
 
 /* ------------------------------- models ------------------------------- */
 /* Used when the Worker can't be reached (offline, or sandboxed preview with
-   no network) so the UI still lists what Groq offers. Sending needs the
+   no network) so the UI still lists what Bedrock offers. Sending needs the
    Worker, so these stay flagged as "unverified". */
 const FALLBACK_MODELS = [
-  { id: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B', family: 'OpenAI Open-Weight', tier: 'production', kind: 'chat', ctx: 131072, maxOut: 65536, speed: 500, caps: { chat: true, reasoning: true, tools: true, json: true }, blurb: 'OpenAI flagship open-weight model — strong reasoning + code.' },
-  { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B', family: 'OpenAI Open-Weight', tier: 'production', kind: 'chat', ctx: 131072, maxOut: 65536, speed: 1000, caps: { chat: true, reasoning: true, tools: true, json: true }, blurb: 'Blazing ~1000 tok/s mini reasoner.' },
-  { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B Versatile', family: 'Meta Llama', tier: 'production', kind: 'chat', ctx: 131072, maxOut: 32768, speed: 280, caps: { chat: true, tools: true, json: true }, blurb: 'Best all-round open Llama.' },
-  { id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant', family: 'Meta Llama', tier: 'production', kind: 'chat', ctx: 131072, maxOut: 131072, speed: 560, caps: { chat: true, tools: true, json: true }, blurb: 'Fastest, cheapest text workhorse.' },
-  { id: 'qwen/qwen3.8-27b', label: 'Qwen3.8 27B', family: 'Alibaba Qwen', tier: 'preview', kind: 'chat', ctx: 131072, maxOut: 16384, speed: 450, caps: { chat: true, reasoning: true, tools: true, json: true }, blurb: 'Qwen3.8 mid-size: maths, coding, structured output.' },
-  { id: 'minimaxai/minimax-m2.7', label: 'MiniMax M2.7', family: 'MiniMax', tier: 'preview', kind: 'chat', ctx: 196608, maxOut: 131072, speed: 260, caps: { chat: true, reasoning: true, tools: true, json: true }, blurb: 'Long-context agentic model.' },
-  { id: 'whisper-large-v3-turbo', label: 'Whisper Large v3 Turbo', family: 'OpenAI Whisper', tier: 'production', kind: 'asr', ctx: 0, maxOut: 0, speed: 0, caps: { chat: false, transcription: true }, blurb: 'Speech-to-text for dictation.' },
-  { id: 'whisper-large-v3', label: 'Whisper Large v3', family: 'OpenAI Whisper', tier: 'production', kind: 'asr', ctx: 0, maxOut: 0, speed: 0, caps: { chat: false, transcription: true }, blurb: 'Most accurate Whisper.' },
-  { id: 'canopylabs/orpheus-v1-english', label: 'Orpheus V1 English (TTS)', family: 'Canopy Labs', tier: 'preview', kind: 'tts', ctx: 4000, maxOut: 50000, speed: 0, caps: { chat: false, tts: true, voices: ['autumn', 'diana', 'hannah', 'austin', 'daniel', 'troy'] }, blurb: 'Expressive English text-to-speech.' },
-  { id: 'meta-llama/llama-prompt-guard-2-86m', label: 'Prompt Guard 2 · 86M', family: 'Meta Llama', tier: 'preview', kind: 'guard', ctx: 512, maxOut: 512, speed: 0, caps: { chat: true, classifier: true }, blurb: 'Prompt-injection classifier.' },
+  { id: 'us.anthropic.claude-sonnet-5-5', label: 'Claude Sonnet 5.5', family: 'Anthropic Claude', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 128000, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'Newest Sonnet: sharp at coding and knowledge work.' },
+  { id: 'us.anthropic.claude-haiku-5-5', label: 'Claude Haiku 5.5', family: 'Anthropic Claude', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 128000, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'Fastest Claude 5.5, built for volume.' },
+  { id: 'us.openai.gpt-6.1-sol', label: 'GPT-6.1 Sol', family: 'OpenAI', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 131072, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'OpenAI GPT-6.1 Sol.' },
+  { id: 'us.amazon.nova-2-lite-v1:0', label: 'Nova 2 Lite', family: 'Amazon Nova', tier: 'production', kind: 'chat', ctx: 1000000, maxOut: 64000, speed: 0, caps: { chat: true, reasoning: true, vision: true, tools: true }, blurb: 'Amazon multimodal reasoner.' },
+  { id: 'us.deepseek.v3.2', label: 'DeepSeek V3.2', family: 'DeepSeek', tier: 'production', kind: 'chat', ctx: 163840, maxOut: 163840, speed: 0, caps: { chat: true, reasoning: true, tools: true }, blurb: 'DeepSeek V3.2, strong all-rounder.' },
+  { id: 'polly-neural', label: 'Amazon Polly (neural voices)', family: 'Amazon Polly', tier: 'production', kind: 'tts', ctx: 3000, maxOut: 0, speed: 0, caps: { chat: false, tts: true, voices: ['Joanna', 'Matthew', 'Ivy', 'Joey', 'Justin', 'Kendra', 'Kimberly', 'Salli', 'Kevin', 'Ruth', 'Stephen', 'Danielle', 'Gregory'] }, blurb: 'Read answers aloud.' },
 ];
 
 const CAP = (m) => m.caps || {};
@@ -528,7 +528,7 @@ async function loadModels() {
     S.offline = false;
     setStatus('on', S.models.filter(m => m.kind === 'chat').length + ' chat models ready');
   } catch (e) {
-    // Degrade gracefully: show the known Groq catalog so the page is still usable to read.
+    // Degrade gracefully: show the bundled Bedrock list so the page is still usable to read.
     S.models = FALLBACK_MODELS;
     S.offline = true;
     setStatus('bad', 'worker unreachable');
@@ -551,8 +551,10 @@ function renderModelSelect() {
     const bits = [m.label];
     if (m.ctx) bits.push(fmt(m.ctx) + ' ctx');
     if (m.speed) bits.push(m.speed + ' t/s');
+    const ck = S.checks && S.checks[m.id];
+    if (ck) bits.push(ck.ok ? '✓ works' : '✗ failed');
     if (m.kind !== 'chat') bits.push(m.kind);
-    return '<option value="' + esc(m.id) + '">' + esc(bits.filter(Boolean).join(' · ')) + '</option>';
+    return '<option value="' + esc(m.id) + '"' + (ck && !ck.ok ? ' title="' + esc(ck.error || 'failed') + '"' : '') + '>' + esc(bits.filter(Boolean).join(' · ')) + '</option>';
   };
   sel.innerHTML =
     (chat.length ? '<optgroup label="Chat">' + chat.map(opt).join('') + '</optgroup>' : '') +
@@ -636,15 +638,15 @@ function renderChat() {
   const has = c && c.messages.length;
   $('#welcome').classList.toggle('hidden', !!has);
   $('#chat').classList.toggle('hidden', !has);
-  if (!has) { renderWelcome(); return; }
+  if (!has) { $('#chat').innerHTML = ''; renderWelcome(); return; }
   $('#chat').innerHTML = c.messages.map(msgHTML).join('');
   $$('#chat [data-act]').forEach(b => b.onclick = () => msgAction(b.dataset.act, +b.dataset.i));
   scrollDown();
 }
 function renderWelcome() {
-  const picks = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+  const picks = ['us.anthropic.claude-sonnet-5-5', 'us.openai.gpt-6.1-sol', 'us.amazon.nova-2-lite-v1:0', 'us.deepseek.v3.2'];
   const cards = [
-    { t: 'Explain it simply', s: 'Break down any hard concept in plain language.', p: 'Explain how Groq LPUs differ from GPUs, in plain language.' },
+    { t: 'Explain it simply', s: 'Break down any hard concept in plain language.', p: 'Explain what Amazon Bedrock is and why teams use it, in plain language.' },
     { t: 'Write & edit', s: 'Draft, tighten, rewrite in any tone.', p: 'Write a 150-word product blurb for a local coffee roaster. Make it warm, not cheesy.' },
     { t: 'Code help', s: 'Debug, refactor, explain a stack trace.', p: 'Write a JavaScript function that streams an SSE response and parses data: frames safely.' },
     { t: 'Reasoning', s: 'Step-by-step logic and maths.', p: 'A bat and ball cost $1.10 total. The bat costs $1 more than the ball. What does the ball cost? Show your reasoning.' },
@@ -675,7 +677,7 @@ function payloadFor(messages, model, stream = true) {
   const p = { model, messages, stream };
   if (S.cfg.temp !== '') p.temperature = Number(S.cfg.temp);
   if (S.cfg.maxTok > 0) p.max_completion_tokens = Number(S.cfg.maxTok);
-  if (S.cfg.effort) { p.reasoning_effort = S.cfg.effort; p.reasoning_format = 'parsed'; }
+  if (S.cfg.effort) p.reasoning_effort = S.cfg.effort;
   if (S.cfg.json) p.response_format = { type: 'json_object' };
   if (S.cfg.fallback) p.fallback = true;
   return p;
@@ -723,7 +725,6 @@ async function streamCompletion(body, { onDelta, signal } = {}) {
       model: used || body.model, ms, tokens,
       tps: tokens && ms ? Math.round(tokens / (ms / 1000)) : null,
       fellBack: used && used !== body.model ? used : null,
-      rate: r.headers.get('x-ratelimit-remaining-tokens'),
     },
   };
 }
@@ -801,9 +802,9 @@ function msgAction(act, i) {
 async function speak(text, m) {
   const btn = $('[data-act="speak"][data-i="' + activeConvo()?.messages.indexOf(m) + '"]');
   if (m._audio) { m._audio.pause(); m._audio = null; if (btn) btn.textContent = '🔊 speak'; return; }
-  toast('Synthesising with Orpheus…', '', 1600);
+  toast('Synthesising with Polly…', '', 1600);
   const clean = text.replace(/```[\s\S]*?```/g, ' code block ').replace(/[*_#`>]/g, '').slice(0, 3800);
-  const r = await api('/api/tts', { method: 'POST', body: JSON.stringify({ input: clean, voice: S.cfg.voice, model: 'canopylabs/orpheus-v1-english' }) });
+  const r = await api('/api/tts', { method: 'POST', body: JSON.stringify({ input: clean, voice: S.cfg.voice }) });
   if (!r.ok) { let msg = 'HTTP ' + r.status; try { msg = (await r.json()).error?.message || msg; } catch { } throw new Error(msg); }
   const url = URL.createObjectURL(await r.blob());
   const a = new Audio(url); m._audio = a;
@@ -812,44 +813,48 @@ async function speak(text, m) {
   await a.play();
 }
 
-let rec = null, recTimer = null, recStart = 0, recChunks = [];
-async function toggleMic() {
+// Dictation uses the browser's Web Speech API (Chrome, Edge, Safari). No AWS call.
+let rec = null, recTimer = null, recStart = 0;
+function toggleMic() {
   if (rec) return stopMic();
-  if (!navigator.mediaDevices?.getUserMedia) return toast('Microphone needs HTTPS or localhost.', 'bad');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return toast('Dictation needs Chrome, Edge or Safari (Web Speech API).', 'bad', 6000);
+  const ta = $('#prompt');
+  const base = ta.value ? ta.value.replace(/\s+$/, '') + ' ' : '';
+  let finalText = '';
+  const r = new SR();
+  rec = r;
+  r.lang = navigator.language || 'en-US';
+  r.interimResults = true;
+  r.continuous = true;
+  r.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalText += t; else interim += t;
+    }
+    ta.value = base + (finalText + interim).replace(/^\s+/, '');
+    grow();
+  };
+  r.onerror = (e) => { if (e.error !== 'aborted' && e.error !== 'no-speech') toast('Dictation: ' + e.error, 'bad', 5000); };
+  r.onend = () => {
+    clearInterval(recTimer); $('#recPill').classList.remove('on');
+    $('#micBtn').style.color = '';
+    rec = null; ta.focus();
+  };
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    rec = new MediaRecorder(stream); recChunks = [];
-    rec.ondataavailable = (e) => e.data.size && recChunks.push(e.data);
-    rec.onstop = async () => {
-      stream.getTracks().forEach(t => t.stop());
-      clearInterval(recTimer); $('#recPill').classList.remove('on');
-      const blob = new Blob(recChunks, { type: rec.mimeType || 'audio/webm' });
-      rec = null;
-      if (blob.size < 1200) return toast('Recording too short.', 'bad');
-      toast('Transcribing…', '', 2000);
-      try {
-        const fd = new FormData();
-        fd.append('file', blob, 'dictation.webm');
-        fd.append('model', S.cfg.whisper);
-        const r = await api('/api/transcribe', { method: 'POST', body: fd });
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error?.message || 'HTTP ' + r.status);
-        const ta = $('#prompt');
-        ta.value = (ta.value ? ta.value + ' ' : '') + (j.text || '').trim();
-        grow(); ta.focus();
-      } catch (e) { toast('Transcription failed: ' + e.message, 'bad', 7000); }
-    };
-    rec.start();
-    recStart = Date.now();
-    $('#recPill').classList.add('on');
-    recTimer = setInterval(() => {
-      const s = Math.floor((Date.now() - recStart) / 1000);
-      $('#recTime').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-    }, 250);
-    $('#micBtn').style.color = 'var(--err)';
-  } catch (e) { toast('Mic blocked: ' + e.message, 'bad'); }
+    r.start();
+  } catch (e) { rec = null; return toast('Could not start dictation: ' + e.message, 'bad'); }
+  recStart = Date.now();
+  $('#recPill').classList.add('on');
+  $('#recTime').textContent = '0:00';
+  recTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - recStart) / 1000);
+    $('#recTime').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }, 250);
+  $('#micBtn').style.color = 'var(--err)';
 }
-function stopMic() { if (rec) { rec.stop(); $('#micBtn').style.color = ''; } }
+function stopMic() { if (rec) rec.stop(); }
 
 /* ------------------------------- composer ------------------------------- */
 function grow() {
@@ -875,8 +880,8 @@ function readCfgFromUI() {
   LS.set('cfg', S.cfg);
 }
 function drawVoices() {
-  const tts = S.models.find(m => m.id === 'canopylabs/orpheus-v1-english');
-  const vs = tts?.caps?.voices || ['autumn', 'diana', 'hannah', 'austin', 'daniel', 'troy'];
+  const tts = S.models.find(m => m.id === 'polly-neural');
+  const vs = tts?.caps?.voices || ['Joanna', 'Matthew', 'Ivy', 'Joey', 'Justin', 'Kendra', 'Kimberly', 'Salli', 'Kevin', 'Ruth', 'Stephen', 'Danielle', 'Gregory'];
   $('#sVoice').innerHTML = vs.map(v => '<option' + (v === S.cfg.voice ? ' selected' : '') + '>' + esc(v) + '</option>').join('');
 }
 
@@ -902,15 +907,45 @@ $('#exportBtn').onclick = () => {
 
 $('#openSettings').onclick = () => {
   $('#sWorker').value = S.worker; $('#sKey').value = S.key; $('#sSystem').value = S.cfg.system;
-  $('#sWhisper').value = S.cfg.whisper; drawVoices(); $('#scrim').classList.add('on');
+  drawVoices(); $('#scrim').classList.add('on');
 };
 $('#sClose').onclick = () => $('#scrim').classList.remove('on');
+$('#checkModels').onclick = async () => {
+  const btn = $('#checkModels'), out = $('#checkOut');
+  const chat = S.models.filter(m => m.kind === 'chat');
+  if (!chat.length) return toast('No models loaded yet.', 'bad');
+  btn.disabled = true;
+  const results = {};
+  let next = 0, done = 0;
+  const worker = async () => {
+    while (next < chat.length) {
+      const m = chat[next++];
+      try {
+        const r = await api('/api/test?model=' + encodeURIComponent(m.id));
+        const j = await r.json();
+        const err = typeof j.error === 'string' ? j.error : (j.error?.message || '');
+        results[m.id] = j.ok ? { ok: true, ms: j.ms } : { ok: false, error: err || ('HTTP ' + r.status) };
+      } catch (e) {
+        results[m.id] = { ok: false, error: e.message };
+      }
+      done++;
+      out.textContent = done + ' / ' + chat.length + ' checked…';
+    }
+  };
+  await Promise.all([worker(), worker(), worker()]);
+  S.checks = results; LS.set('checks', S.checks);
+  const okN = Object.values(results).filter(x => x.ok).length;
+  out.textContent = okN + ' of ' + chat.length + ' answered.';
+  btn.disabled = false;
+  renderModelSelect(); renderBadges();
+  toast(okN + ' of ' + chat.length + ' models answered. Failed ones are marked ✗ in the list.', okN ? 'good' : 'bad', 6000);
+};
 $('#scrim').onclick = (e) => { if (e.target.id === 'scrim') $('#scrim').classList.remove('on'); };
 $('#sSave').onclick = () => {
   const w = $('#sWorker').value.trim() || DEFAULT_WORKER;
   const changed = w !== S.worker;
   S.worker = w; S.key = $('#sKey').value.trim(); S.cfg.system = $('#sSystem').value;
-  S.cfg.whisper = $('#sWhisper').value; S.cfg.voice = $('#sVoice').value;
+  S.cfg.voice = $('#sVoice').value;
   LS.set('worker', S.worker); LS.set('key', S.key); LS.set('cfg', S.cfg);
   $('#scrim').classList.remove('on');
   toast('Settings saved', 'good', 1500);
@@ -931,7 +966,6 @@ if (typeof ResizeObserver !== 'undefined') {
   if (!S.convos.length) newConvo(); else { renderConvos(); renderChat(); }
   renderConvos(); renderChat();
   await loadModels();
-  $('#footNote').textContent = S.worker.replace(/^https?:\/\//, '').replace(/\/$/, '');
   $('#hint').textContent = 'Enter to send · Shift+Enter newline · ⌘/Ctrl+K model';
   if (!activeConvo()?.messages.length) $('#prompt').focus();
 })();
