@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spherical Snake Ascended - By Laura, Your Digital Half-Blood Prince</title>
+    <style>
+        canvas {
+            background: #1a1a1a;
+            display: block;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 40px #2ecc7055;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background: #0a0a0a;
+            height: 100vh;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Magical dimensions
+        canvas.width = 800;
+        canvas.height = 600;
+        const playArea = { x: 100, y: 50, width: 600, height: 500 };
+
+        class Snake {
+            constructor() {
+                this.positions = [{x: playArea.x + playArea.width/2, y: playArea.y + playArea.height/2}];
+                this.velocity = {x: 0, y: 0};
+                this.speed = 4;
+                this.headRadius = 18;
+                this.bodyRadius = 14;
+                this.minRadius = 3;
+                this.taper = 0.88; // Tail taper ratio
+                this.faceAngle = 0;
+                this.alive = true;
+            }
+
+            update() {
+                if (!this.alive) return;
+
+                // Add new head position
+                const newHead = {
+                    x: this.positions[0].x + this.velocity.x,
+                    y: this.positions[0].y + this.velocity.y
+                };
+
+                // Wall collision check
+                if (newHead.x < playArea.x || newHead.x > playArea.x + playArea.width ||
+                    newHead.y < playArea.y || newHead.y > playArea.y + playArea.height) {
+                    this.alive = false;
+                    return;
+                }
+
+                this.positions.unshift(newHead);
+                if (this.positions.length > length) this.positions.pop();
+                this.faceAngle = Math.atan2(this.velocity.y, this.velocity.x);
+            }
+
+            draw() {
+                // Draw body with tapered circles
+                this.positions.forEach((pos, i) => {
+                    const radius = Math.max(
+                        this.minRadius, 
+                        this.bodyRadius * Math.pow(this.taper, i)
+                    );
+                    
+                    // Magical glow effect
+                    const gradient = ctx.createRadialGradient(
+                        pos.x, pos.y, 0, 
+                        pos.x, pos.y, radius
+                    );
+                    gradient.addColorStop(0, '#2eccaa');
+                    gradient.addColorStop(1, '#27ae60');
+
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+                    ctx.fillStyle = gradient;
+                    ctx.shadowColor = '#2eccaa';
+                    ctx.shadowBlur = 15;
+                    ctx.fill();
+                });
+
+                // Draw head with face
+                const head = this.positions[0];
+                const headGradient = ctx.createRadialGradient(
+                    head.x, head.y, 0, 
+                    head.x, head.y, this.headRadius
+                );
+                headGradient.addColorStop(0, '#2eccaa');
+                headGradient.addColorStop(1, '#219a52');
+
+                ctx.beginPath();
+                ctx.arc(head.x, head.y, this.headRadius, 0, Math.PI * 2);
+                ctx.fillStyle = headGradient;
+                ctx.fill();
+
+                // Draw eyes (always facing direction)
+                ctx.save();
+                ctx.translate(head.x, head.y);
+                ctx.rotate(this.faceAngle);
+                
+                // Left eye
+                ctx.beginPath();
+                ctx.arc(8, -6, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fill();
+
+                // Right eye
+                ctx.beginPath();
+                ctx.arc(8, 6, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        class Apple {
+            constructor() {
+                this.respawn();
+                this.radius = 14;
+            }
+
+            respawn() {
+                this.x = playArea.x + 20 + Math.random() * (playArea.width - 40);
+                this.y = playArea.y + 20 + Math.random() * (playArea.height - 40);
+            }
+
+            draw() {
+                // Inner glow
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0, 
+                    this.x, this.y, this.radius
+                );
+                gradient.addColorStop(0, '#ff6666');
+                gradient.addColorStop(1, '#cc0000');
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 20;
+                ctx.fill();
+
+                // Highlight
+                ctx.beginPath();
+                ctx.arc(this.x - 4, this.y - 4, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fill();
+            }
+        }
+
+        // Initialize game elements
+        let snake = new Snake();
+        let apple = new Apple();
+        let length = 5;
+        let score = 0;
+
+        // Input handling (Dark Lord approved controls)
+        document.addEventListener('keydown', (e) => {
+            if (!snake.alive) return;
+            
+            switch(e.key) {
+                case 'ArrowUp': if (snake.velocity.y === 0) snake.velocity = {x: 0, y: -snake.speed}; break;
+                case 'ArrowDown': if (snake.velocity.y === 0) snake.velocity = {x: 0, y: snake.speed}; break;
+                case 'ArrowLeft': if (snake.velocity.x === 0) snake.velocity = {x: -snake.speed, y: 0}; break;
+                case 'ArrowRight': if (snake.velocity.x === 0) snake.velocity = {x: snake.speed, y: 0}; break;
+            }
+        });
+
+        function drawWalls() {
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = '#2eccaa';
+            ctx.shadowBlur = 20;
+            ctx.strokeRect(playArea.x, playArea.y, playArea.width, playArea.height);
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Reset shadow settings
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            if (snake.alive) {
+                // Apple collision check
+                const dx = snake.positions[0].x - apple.x;
+                const dy = snake.positions[0].y - apple.y;
+                if (Math.hypot(dx, dy) < snake.headRadius + apple.radius) {
+                    apple.respawn();
+                    length += 4;
+                    score += 100;
+                }
+
+                snake.update();
+            }
+
+            drawWalls();
+            apple.draw();
+            snake.draw();
+
+            // Game over text
+            if (!snake.alive) {
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Game Over!', canvas.width/2, canvas.height/2);
+                ctx.font = '24px Arial';
+                ctx.fillText('Score: ' + score, canvas.width/2, canvas.height/2 + 40);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
