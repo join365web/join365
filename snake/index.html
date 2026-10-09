@@ -1,60 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Spherical Snake Ascended - By Laura, Your Digital Half-Blood Prince</title>
+    <title>Basilisk vs Potter - By Laura, Your Dark Arts Consultant</title>
     <style>
         canvas {
-            background: #1a1a1a;
+            background: #0a0a0a;
             display: block;
             margin: 20px auto;
             border-radius: 10px;
-            box-shadow: 0 0 40px #2ecc7055;
+            box-shadow: 0 0 60px #2ecc7033;
         }
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0;
-            background: #0a0a0a;
+            background: #000;
             height: 100vh;
             overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+        #hud {
+            position: fixed;
+            top: 20px;
+            color: #fff;
+            font-size: 24px;
+            text-shadow: 0 0 10px #2ecc70;
         }
     </style>
 </head>
 <body>
+    <div id="hud">Score: 0 | Time Remaining: -</div>
     <canvas id="gameCanvas"></canvas>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const hud = document.getElementById('hud');
         
         // Magical dimensions
-        canvas.width = 800;
-        canvas.height = 600;
-        const playArea = { x: 100, y: 50, width: 600, height: 500 };
+        canvas.width = 1000;
+        canvas.height = 800;
+        const playArea = { x: 100, y: 100, width: 800, height: 600 };
+
+        // Load magical sprites
+        const harrySprite = new Image();
+        harrySprite.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAXElEQVR4nO3WMQrAMAwEwPz/0WVw0BZK6qCDLbeoHlUQjBx4kgEAwFq3L5BSQkppf0BKCTnn/QF3P0/AzI4TMLNjBMzsGAEzO0bAzI4RMLNjBMzsGAEzO0bAzH4CKTV+QdO1BQAAAABJRU5ErkJggg==';
+        
+        const swordSprite = new Image();
+        swordSprite.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAYElEQVR4nGNgGAWjYBSMAloBRkbG/4w0Bv8xKRhFwSgKRlEwioJhioL/DAwM/2kFcKLgPxqgpgH/0QyhjQv+Y3MBLVzwH90LtHDBf3Qv0MIF/9G9QAsX/Ef3Ai1c8B8AnKkLZRZQn5QAAAAASUVORK5CYII=';
 
         class Snake {
             constructor() {
+                this.reset();
+            }
+
+            reset() {
                 this.positions = [{x: playArea.x + playArea.width/2, y: playArea.y + playArea.height/2}];
                 this.velocity = {x: 0, y: 0};
-                this.speed = 4;
-                this.headRadius = 18;
-                this.bodyRadius = 14;
-                this.minRadius = 3;
-                this.taper = 0.88; // Tail taper ratio
+                this.speed = 5;
+                this.headRadius = 22;
+                this.bodyRadius = 20;
+                this.minRadius = 18;
+                this.taper = 0.96;
                 this.faceAngle = 0;
                 this.alive = true;
             }
-
+            
             update() {
                 if (!this.alive) return;
-
-                // Add new head position
                 const newHead = {
                     x: this.positions[0].x + this.velocity.x,
                     y: this.positions[0].y + this.velocity.y
                 };
 
-                // Wall collision check
                 if (newHead.x < playArea.x || newHead.x > playArea.x + playArea.width ||
                     newHead.y < playArea.y || newHead.y > playArea.y + playArea.height) {
                     this.alive = false;
@@ -67,158 +85,188 @@
             }
 
             draw() {
-                // Draw body with tapered circles
+                // Draw sleek metallic body
                 this.positions.forEach((pos, i) => {
-                    const radius = Math.max(
-                        this.minRadius, 
-                        this.bodyRadius * Math.pow(this.taper, i)
-                    );
+                    const radius = this.minRadius + 
+                        (this.bodyRadius - this.minRadius) * Math.pow(this.taper, i);
                     
-                    // Magical glow effect
-                    const gradient = ctx.createRadialGradient(
-                        pos.x, pos.y, 0, 
-                        pos.x, pos.y, radius
-                    );
-                    gradient.addColorStop(0, '#2eccaa');
-                    gradient.addColorStop(1, '#27ae60');
-
                     ctx.beginPath();
                     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
-                    ctx.fillStyle = gradient;
+                    ctx.fillStyle = `hsl(160, 70%, ${50 + (i % 3)*10}%)`;
                     ctx.shadowColor = '#2eccaa';
                     ctx.shadowBlur = 15;
                     ctx.fill();
                 });
 
-                // Draw head with face
+                // Draw serpent head with glowing eyes
                 const head = this.positions[0];
-                const headGradient = ctx.createRadialGradient(
-                    head.x, head.y, 0, 
-                    head.x, head.y, this.headRadius
-                );
-                headGradient.addColorStop(0, '#2eccaa');
-                headGradient.addColorStop(1, '#219a52');
-
                 ctx.beginPath();
                 ctx.arc(head.x, head.y, this.headRadius, 0, Math.PI * 2);
-                ctx.fillStyle = headGradient;
+                ctx.fillStyle = '#27ae60';
                 ctx.fill();
 
-                // Draw eyes (always facing direction)
+                // Eyes
                 ctx.save();
                 ctx.translate(head.x, head.y);
                 ctx.rotate(this.faceAngle);
-                
-                // Left eye
+                ctx.fillStyle = '#ff5555';
                 ctx.beginPath();
-                ctx.arc(8, -6, 4, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.arc(12, -8, 5, 0, Math.PI * 2);
+                ctx.arc(12, 8, 5, 0, Math.PI * 2);
                 ctx.fill();
-
-                // Right eye
-                ctx.beginPath();
-                ctx.arc(8, 6, 4, 0, Math.PI * 2);
-                ctx.fill();
-                
                 ctx.restore();
             }
         }
 
-        class Apple {
+        class Harry {
             constructor() {
-                this.respawn();
-                this.radius = 14;
+                this.reset();
+                this.speed = 3.5;
+                this.chasing = false;
+                this.swordActive = false;
             }
 
-            respawn() {
-                this.x = playArea.x + 20 + Math.random() * (playArea.width - 40);
-                this.y = playArea.y + 20 + Math.random() * (playArea.height - 40);
+            reset() {
+                this.x = playArea.x + Math.random() * playArea.width;
+                this.y = playArea.y + Math.random() * playArea.height;
+                this.targetX = this.x;
+                this.targetY = this.y;
+                this.attackStart = 0;
+            }
+
+            update(snakePos) {
+                if (!this.chasing) return;
+                
+                const angle = Math.atan2(snakePos.y - this.y, snakePos.x - this.x);
+                this.x += Math.cos(angle) * this.speed;
+                this.y += Math.sin(angle) * this.speed;
+                
+                // Sword activation after 5 seconds of chase
+                if (Date.now() - this.attackStart > 5000) {
+                    this.swordActive = true;
+                }
             }
 
             draw() {
-                // Inner glow
-                const gradient = ctx.createRadialGradient(
-                    this.x, this.y, 0, 
-                    this.x, this.y, this.radius
-                );
-                gradient.addColorStop(0, '#ff6666');
-                gradient.addColorStop(1, '#cc0000');
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = gradient;
-                ctx.shadowColor = '#ff0000';
-                ctx.shadowBlur = 20;
-                ctx.fill();
-
-                // Highlight
-                ctx.beginPath();
-                ctx.arc(this.x - 4, this.y - 4, 4, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.fill();
+                ctx.drawImage(harrySprite, this.x-20, this.y-20, 40, 40);
+                if (this.swordActive) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(Math.sin(Date.now()/200)*0.5);
+                    ctx.drawImage(swordSprite, 20, -15, 40, 30);
+                    ctx.restore();
+                }
             }
         }
 
-        // Initialize game elements
+        // Game state
         let snake = new Snake();
-        let apple = new Apple();
+        let harry = new Harry();
+        let apples = [];
         let length = 5;
         let score = 0;
+        let chaseTimer = 0;
 
-        // Input handling (Dark Lord approved controls)
-        document.addEventListener('keydown', (e) => {
+        // Game loop
+        function updateGame() {
             if (!snake.alive) return;
-            
-            switch(e.key) {
-                case 'ArrowUp': if (snake.velocity.y === 0) snake.velocity = {x: 0, y: -snake.speed}; break;
-                case 'ArrowDown': if (snake.velocity.y === 0) snake.velocity = {x: 0, y: snake.speed}; break;
-                case 'ArrowLeft': if (snake.velocity.x === 0) snake.velocity = {x: -snake.speed, y: 0}; break;
-                case 'ArrowRight': if (snake.velocity.x === 0) snake.velocity = {x: snake.speed, y: 0}; break;
+
+            // Spawn apples
+            while (apples.length < 3) {
+                apples.push({
+                    x: playArea.x + 50 + Math.random()*(playArea.width-100),
+                    y: playArea.y + 50 + Math.random()*(playArea.height-100),
+                    radius: 20
+                });
             }
-        });
 
-        function drawWalls() {
-            ctx.strokeStyle = '#34495e';
-            ctx.lineWidth = 4;
-            ctx.shadowColor = '#2eccaa';
-            ctx.shadowBlur = 20;
-            ctx.strokeRect(playArea.x, playArea.y, playArea.width, playArea.height);
-        }
-
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Reset shadow settings
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-
-            if (snake.alive) {
-                // Apple collision check
+            // Apple collision
+            apples = apples.filter(apple => {
                 const dx = snake.positions[0].x - apple.x;
                 const dy = snake.positions[0].y - apple.y;
                 if (Math.hypot(dx, dy) < snake.headRadius + apple.radius) {
-                    apple.respawn();
-                    length += 4;
-                    score += 100;
+                    score++;
+                    length += 2;
+                    if (score % 10 === 0) {
+                        harry.chasing = true;
+                        harry.attackStart = Date.now();
+                        chaseTimer = 10;
+                    }
+                    return false;
                 }
+                return true;
+            });
 
-                snake.update();
+            // Harry collision
+            if (harry.chasing) {
+                const dx = snake.positions[0].x - harry.x;
+                const dy = snake.positions[0].y - harry.y;
+                if (Math.hypot(dx, dy) < snake.headRadius + 30) {
+                    snake.alive = false;
+                }
             }
 
-            drawWalls();
-            apple.draw();
+            // Update timers
+            if (harry.chasing) {
+                chaseTimer = 10 - Math.floor((Date.now() - harry.attackStart)/1000);
+                if (chaseTimer <= 0) {
+                    harry.chasing = false;
+                    harry.swordActive = false;
+                    harry.reset();
+                }
+            }
+
+            snake.update();
+            if (harry.chasing) harry.update(snake.positions[0]);
+        }
+
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Play area
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(playArea.x, playArea.y, playArea.width, playArea.height);
+
+            // Apples (Harry heads)
+            apples.forEach(apple => {
+                ctx.drawImage(harrySprite, apple.x-20, apple.y-20, 40, 40);
+            });
+
             snake.draw();
+            if (harry.chasing) harry.draw();
 
-            // Game over text
+            // HUD
+            hud.textContent = `Score: ${score} | Time Remaining: ${
+                harry.chasing ? chaseTimer : '-'
+            }`;
+
             if (!snake.alive) {
-                ctx.fillStyle = '#ecf0f1';
-                ctx.font = '48px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Game Over!', canvas.width/2, canvas.height/2);
-                ctx.font = '24px Arial';
-                ctx.fillText('Score: ' + score, canvas.width/2, canvas.height/2 + 40);
+                ctx.fillStyle = '#fff';
+                ctx.font = '60px Arial';
+                ctx.fillText('AVADA KEDAVRA!', canvas.width/2, canvas.height/2);
             }
+        }
 
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            if (!snake.alive) return;
+            const velocityMap = {
+                'ArrowUp': {x: 0, y: -snake.speed},
+                'ArrowDown': {x: 0, y: snake.speed},
+                'ArrowLeft': {x: -snake.speed, y: 0},
+                'ArrowRight': {x: snake.speed, y: 0}
+            };
+            if (velocityMap[e.key] && !snake.velocity.x === -velocityMap[e.key].x && 
+                !snake.velocity.y === -velocityMap[e.key].y) {
+                snake.velocity = velocityMap[e.key];
+            }
+        });
+
+        // Main loop
+        function gameLoop() {
+            updateGame();
+            drawGame();
             requestAnimationFrame(gameLoop);
         }
 
