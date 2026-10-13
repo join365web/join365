@@ -70,6 +70,22 @@ Both directions run in the browser. Speech-in uses the Web Speech API (Chrome or
 speech-out prefers an **en-IE** voice — Kerry Condon's accent is the point — and falls back
 to en-GB, then any English voice. Toggle it with **voice** in the header or in Settings.
 
+## If she isn't answering
+
+The page probes `GET /api/health` on every load and classifies whatever comes back, so it
+can tell you exactly what is at that URL instead of failing quietly:
+
+| What the endpoint returns | What the page shows |
+| --- | --- |
+| Her JSON (`"system":"F.R.I.D.A.Y."`) | **core online** (gold) or **reflex mode** (amber), and she thinks or remembers accordingly |
+| `Hello World!` or any HTML | **endpoint is not her yet** — still the Worker template. A **wake her up** button appears in the header with the two deploy steps |
+| A 404 or an unexpected error | **endpoint answered oddly**, with the status in the readout |
+| Nothing at all | **uplink lost · local reflexes** — she answers from the console itself: protocol board, archive, manners, no fresh thinking |
+
+`GET /` on the Worker serves the same kind of status card when it can't reach the console
+page (or with `?raw=card`), so visiting the bare Worker URL tells you what is switched on
+and what to paste.
+
 ## Offline behaviour
 
 If the Worker can't be reached, the page drops to local reflexes rather than going blank:

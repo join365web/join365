@@ -45,7 +45,7 @@
    0 · CONFIG
    ========================================================================== */
 
-const VERSION = '2.0.0-stark';
+const VERSION = '2.1.0-stark';
 const BUILD = '2063.10.13';
 
 const DEFAULTS = {
@@ -1080,61 +1080,94 @@ function sanitiseMessages(raw, maxTurns, maxChars) {
    small built-in card if the site is unreachable.
    ========================================================================== */
 
-const BUILTIN_PAGE = `<!doctype html>
+/**
+ * The card the Worker serves at GET / when it can't reach the console page
+ * (or when you ask for ?raw=card). It reads its own status, says what is and
+ * isn't switched on, and gives the deploy steps — because the most common
+ * thing anyone does at a fresh Worker URL is wonder why she is quiet.
+ */
+function builtinPage(env, extras) {
+  const runtime = resolveRuntime(env);
+  const live = runtime === 'workers-ai' || runtime === 'upstream';
+  const info = extras || {};
+  const row = (k, v, cls) => `<div class="row"><span>${k}</span><b class="${cls || ''}">${v}</b></div>`;
+  return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>F.R.I.D.A.Y.</title>
 <style>
-  :root{--g:#ffb42d;--c:#5fd8ff;--b:#07090c}
+  :root{--g:#ffb42d;--c:#57d9ff;--b:#05070a;--ok:#5ef2a5;--warn:#ffb02e}
   *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;display:grid;place-items:center;background:
-    radial-gradient(1200px 600px at 70% -10%,#33210a,transparent 60%),var(--b);
-    color:#e9eef5;font:15px/1.6 ui-monospace,Menlo,Consolas,monospace;padding:24px}
-  .card{width:min(680px,100%);border:1px solid #ffb42d4d;border-radius:14px;padding:28px;
-    background:linear-gradient(180deg,#ffb42d0d,#0000);box-shadow:0 0 60px #ffb42d22}
-  h1{margin:0 0 4px;font-size:22px;letter-spacing:.22em;color:var(--g)}
-  .sub{color:#8fa2b8;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px}
-  a.btn{display:inline-block;margin-top:16px;padding:10px 16px;border:1px solid var(--g);border-radius:8px;
-    color:var(--g);text-decoration:none;letter-spacing:.1em;font-size:12px}
-  code{color:var(--c)} li{color:#c7d3e0}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;padding:26px;
+    background:radial-gradient(1000px 560px at 72% -12%,rgba(255,150,30,.18),transparent 60%),var(--b);
+    color:#eaf1f8;font:15px/1.65 ui-monospace,Menlo,Consolas,monospace}
+  .card{width:min(720px,100%);border:1px solid rgba(255,180,45,.35);border-radius:16px;padding:30px;
+    background:linear-gradient(180deg,rgba(255,180,45,.07),transparent 40%),#0a0e13;
+    box-shadow:0 40px 90px -40px #000,0 0 70px -24px rgba(255,160,40,.5)}
+  h1{margin:0;font-size:26px;letter-spacing:.34em;color:var(--g);text-shadow:0 0 24px rgba(255,180,45,.5)}
+  .sub{color:#8fa2b8;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;margin:6px 0 20px}
+  .rows{display:grid;gap:7px;margin:0 0 20px}
+  .row{display:flex;gap:10px;font-size:12px;color:#93a4b8}
+  .row b{margin-left:auto;color:#eaf1f8;font-weight:400}
+  .row b.ok{color:var(--ok)} .row b.warn{color:var(--warn)}
+  ol{margin:0;padding-left:1.3em;font-size:12.5px;color:#c7d3e0}
+  li{margin:.4em 0}
+  code{color:var(--c);font-size:12px}
+  a{color:var(--c)}
+  .cta{display:inline-block;margin-top:20px;padding:11px 18px;border:1px solid var(--g);border-radius:9px;
+    color:var(--g);text-decoration:none;letter-spacing:.14em;font-size:11px;text-transform:uppercase}
+  .note{margin-top:16px;font-size:11.5px;color:#7d8b9c}
 </style></head><body><div class="card">
   <h1>F.R.I.D.A.Y.</h1>
   <div class="sub">Female Replacement Intelligent Digital Assistant Youth</div>
-  <p>Interface core is up and streaming. The console page lives at
-     <a href="https://join365.eu.cc/Friday/" style="color:var(--c)">join365.eu.cc/Friday/</a>,
-     and I could not pull a copy of it from there just now, so you are looking at my short-form card instead.</p>
-  <ul>
-    <li><code>GET /api/health</code> — which core is online</li>
-    <li><code>GET /api/canon</code> — the whole archive: protocols, systems, people, events</li>
-    <li><code>POST /api/chat</code> — SSE chat</li>
-    <li><code>POST /api/protocol</code> — run a protocol by id</li>
-  </ul>
-  <a class="btn" href="https://join365.eu.cc/Friday/">OPEN THE CONSOLE</a>
+  <div class="rows">
+    ${row('interface core', 'online', 'ok')}
+    ${row('inference', live ? runtime + ' — thinking' : 'reflex mode — no model bound', live ? 'ok' : 'warn')}
+    ${row('archive', (info.entries || 62) + ' files · ' + (info.protocols || 17) + ' protocols')}
+    ${row('console page', info.pageFrom || 'not reachable from here', info.pageFrom ? 'ok' : 'warn')}
+    ${row('version', VERSION)}
+  </div>
+  ${live ? '' : `<ol>
+    <li>Cloudflare dashboard → <b>Workers &amp; Pages</b> → this Worker → <b>Edit code</b>, and paste <code>Friday/worker.js</code> from the Join365 repo over the template.</li>
+    <li><b>Settings → Functions → Workers AI → Add binding</b>, variable name <code>AI</code>. That is what makes her think rather than remember.</li>
+    <li>Reload <a href="/">this URL</a> or the console page.</li>
+  </ol>`}
+  <a class="cta" href="https://join365.eu.cc/Friday/">open the console</a>
+  <div class="note">API: <code>/api/health</code> · <code>/api/models</code> · <code>/api/canon</code> · <code>/api/chat</code> (SSE) · <code>/api/protocol</code></div>
 </div></body></html>`;
+}
 
 async function servePage(request, env) {
   const url = new URL(request.url);
   const target = (env.PAGE_URL || DEFAULTS.pageUrl) + (url.search || '');
-  if (url.searchParams.get('raw') === 'card') {
-    return new Response(BUILTIN_PAGE, { headers: { 'content-type': 'text/html; charset=utf-8' } });
-  }
+  const card = (extras) =>
+    new Response(builtinPage(env, extras), {
+      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-friday-source': 'builtin' },
+    });
+
+  if (url.searchParams.get('raw') === 'card') return card({});
+
   try {
     const res = await fetch(target, { cf: { cacheTtl: 60, cacheEverything: true } });
     if (res.ok) {
       const body = await res.text();
-      return new Response(body, {
-        headers: {
-          'content-type': 'text/html; charset=utf-8',
-          'cache-control': 'public, max-age=60',
-          'x-friday-source': 'join365',
-        },
-      });
+      /* only trust it if it is actually her console — an un-updated Pages deploy
+         or a parked domain should not be dressed up as the interface */
+      const isConsole = /<html/i.test(body) && /F\.?R\.?I\.?D\.?A\.?Y/i.test(body) && body.length > 4000;
+      if (isConsole) {
+        return new Response(body, {
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'public, max-age=60',
+            'x-friday-source': 'join365',
+          },
+        });
+      }
+      return card({ pageFrom: 'responded, but that is not her console', entries: ARCHIVE.length, protocols: ARCHIVE.filter((c) => c.kind === 'protocol').length });
     }
+    return card({ pageFrom: 'no answer (' + res.status + ')', entries: ARCHIVE.length, protocols: ARCHIVE.filter((c) => c.kind === 'protocol').length });
   } catch {
-    /* fall through to the built-in card */
+    return card({ entries: ARCHIVE.length, protocols: ARCHIVE.filter((c) => c.kind === 'protocol').length });
   }
-  return new Response(BUILTIN_PAGE, {
-    headers: { 'content-type': 'text/html; charset=utf-8', 'x-friday-source': 'builtin' },
-  });
 }
 
 /* ==========================================================================

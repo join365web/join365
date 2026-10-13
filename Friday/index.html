@@ -434,6 +434,7 @@ body.no-anim .spin,body.no-anim .spin-r,body.no-anim .pulse{animation:none}
     <button class="tbtn" id="voiceBtn" type="button" title="Speak her replies out loud">voice: off</button>
     <button class="tbtn" id="micBtn2" type="button" title="Talk to her">mic</button>
     <button class="tbtn" id="newBtn" type="button">new session</button>
+    <button class="tbtn" id="wakeBtn" type="button" title="Her core is not answering — here is how to switch it on" style="display:none;border-color:rgba(255,82,82,.5);color:#ffc9c9">wake her up</button>
     <button class="tbtn" id="setBtn" type="button">settings</button>
   </header>
 
@@ -611,6 +612,47 @@ body.no-anim .spin,body.no-anim .spin-r,body.no-anim .pulse{animation:none}
       <button class="btn" id="setSave" type="button">save &amp; reconnect</button>
       <button class="btn ghost" id="setTest" type="button">test uplink</button>
       <button class="btn ghost" id="setReset" type="button">reset defaults</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== wake her up (deploy helper) ===================== -->
+<div class="modal" id="wake" role="dialog" aria-modal="true" aria-label="Wake her up">
+  <div class="sheet">
+    <div class="sheet-h"><b>Wake her up</b><span class="spacer"></span><button class="tbtn" id="wakeClose" type="button">close</button></div>
+    <div class="sheet-b">
+      <div class="field">
+        <label>Step 1 · put her core on the Worker</label>
+        <div class="hint">
+          Open <a href="https://github.com/join365web/join365/blob/arena/4829f764-join365/Friday/worker.js" target="_blank" rel="noopener">Friday/worker.js</a>
+          in the Join365 repo, copy <b>the whole file</b>, then in Cloudflare: <b>Workers &amp; Pages → your Worker → Edit code</b>,
+          select everything in the editor, paste, and hit <b>Deploy</b>.
+        </div>
+      </div>
+      <div class="field">
+        <label>Step 2 · give her something to think with</label>
+        <div class="hint">
+          In the same Worker: <b>Settings → Functions → Workers AI → Add binding</b>, variable name <code>AI</code>, save.
+          Without it she runs on reflexes — her own archive, her own words, no fresh thinking. With it, every corridor lights up.
+        </div>
+      </div>
+      <div class="field">
+        <label>Step 3 · this page</label>
+        <div class="hint">
+          Endpoint is <code id="wakeEndpoint">—</code>. Reload, or press test below. If you deployed somewhere else,
+          put that URL in Settings → Worker endpoint (or add <code>?api=https://your-worker.workers.dev</code> to this page's address).
+        </div>
+      </div>
+      <div class="field">
+        <label>What she will say when it works</label>
+        <div class="hint"><code>GET /api/health</code> → <code>{"ok":true,"system":"F.R.I.D.A.Y.","runtime":"workers-ai"…}</code> and the pill above turns gold.</div>
+      </div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn" id="wakeTest" type="button">test uplink</button>
+      <button class="btn ghost" id="wakeCopy" type="button">copy endpoint</button>
+      <a class="btn ghost" href="https://github.com/join365web/join365/blob/arena/4829f764-join365/Friday/worker.js" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">open worker.js</a>
     </div>
   </div>
 </div>
@@ -866,6 +908,31 @@ function api(path, opts) {
   return fetch(S.api + path, Object.assign({ headers: headers() }, opts || {}));
 }
 
+/** Classify whatever answered at /api/health. Pure, so it can be reasoned about. */
+function classifyHealth(status, bodyText) {
+  var text = String(bodyText == null ? '' : bodyText);
+  var j = null;
+  try { j = JSON.parse(text); } catch (e) { j = null; }
+
+  if (status === 200 && j && /F\.?R\.?I\.?D\.?A\.?Y/i.test(String(j.system || j.fullName || ''))) {
+    return { state: j.runtime === 'offline' ? 'reflex' : 'live', info: j };
+  }
+  if (status === 200 && /hello\s*world/i.test(text)) return { state: 'template', info: { body: text.trim().slice(0, 80) } };
+  if (status === 200 && /<!doctype html|<html/i.test(text)) return { state: 'template', info: { body: 'an HTML page, not an API' } };
+  if (status === 404) return { state: 'noroute', info: {} };
+  if (j && (j.error || j.errors)) return { state: 'error', info: j };
+  if (!status) return { state: 'offline', info: {} };
+  return { state: 'unknown', info: {} };
+}
+
+/** Ask the endpoint what it is. Never throws. */
+function probeCore(base) {
+  var url = (base || S.api) + '/api/health';
+  return fetch(url, { headers: headers(), cache: 'no-store' })
+    .then(function (r) { return r.text().then(function (t) { return classifyHealth(r.status, t); }); })
+    .catch(function () { return classifyHealth(0, ''); });
+}
+
 function loadHealth() {
   return api('/api/health').then(function (r) {
     if (!r.ok) throw new Error('http ' + r.status);
@@ -924,6 +991,57 @@ function paintRuntime(j) {
   }
   setStat('#stUplink', 'ok', 'linked');
   if (j && j.archiveEntries) setStat('#stArchive', 'ok', j.archiveEntries + ' entries');
+}
+
+/** Paint the four states the endpoint can be in, and offer the fix when needed. */
+function paintProbe(res) {
+  var state = res.state;
+  var info = res.info || {};
+  if (state === 'live' || state === 'reflex') {
+    if (state === 'live') { setStatusPill('ok', 'core online · ' + info.runtime); setStat('#stCore', 'ok', 'live'); }
+    else { setStatusPill('warn', 'reflex mode — no model bound'); setStat('#stCore', 'warn', 'reflexes only'); }
+    setStat('#stUplink', 'ok', 'linked');
+    if (info.archiveEntries) setStat('#stArchive', 'ok', info.archiveEntries + ' entries');
+    $('#wakeBtn').style.display = 'none';
+    return;
+  }
+  $('#wakeBtn').style.display = '';
+  if (state === 'template') {
+    setStatusPill('bad', 'endpoint is not her yet');
+    setStat('#stUplink', 'bad', 'not her core');
+    setStat('#stCore', 'warn', 'reflexes only');
+    wakeCard('template', info);
+  } else if (state === 'noroute' || state === 'error' || state === 'unknown') {
+    setStatusPill('bad', 'endpoint answered oddly');
+    setStat('#stUplink', 'bad', 'unexpected reply');
+    setStat('#stCore', 'warn', 'reflexes only');
+    wakeCard(state, info);
+  } else {
+    setStatusPill('bad', 'uplink lost · local reflexes');
+    setStat('#stUplink', 'bad', 'no link');
+    setStat('#stCore', 'warn', 'reflexes only');
+    wakeCard('offline', info);
+  }
+}
+
+/** One in-character nudge in the log, once, when her core isn't where it should be. */
+function wakeCard(state, info) {
+  if (S.wakeCardShown) return;
+  S.wakeCardShown = true;
+  var body =
+    state === 'template'
+      ? 'That link answers, Boss — but that is not me. It is still the template somebody left in the Worker: <code>' + esc(String(info.body || 'Hello World!')) + '</code>.\n\n' +
+        'Paste <code>worker.js</code> over it and I will be at the other end of this channel properly.'
+      : state === 'offline'
+      ? 'I cannot raise anything at <code>' + esc(S.api) + '</code>. So I am running from the console itself — protocols, archive, manners, no fresh thinking.'
+      : 'Something is answering at <code>' + esc(S.api) + '</code>, but not the way I do. Health check came back ' + esc(state) + ', so I am on reflexes until it is sorted.';
+  var node = addRawMessage('friday',
+    '<p>' + body + '</p>' +
+    '<pre>▛ DEPLOY CHECK\n│ endpoint  · ' + esc(S.api) + '\n│ state     · ' + esc(state) + '\n│ reflexes  · local, working\n│ fix       · wake her up (button in the header)\n▙</pre>');
+  S.msgs.push({ role: 'assistant', content: body.replace(/<[^>]+>/g, ''), at: Date.now(), runtime: 'local' });
+  LS.set('msgs', S.msgs);
+  updateSessionStats();
+  return node;
 }
 
 /* ------------------------------------------------------------------ voice */
@@ -1454,15 +1572,15 @@ function saveSettings() {
 }
 function reconnect() {
   setStatusPill('talk', 'linking…');
-  loadModels()
-    .then(loadHealth)
-    .then(function () { toast('Uplink confirmed. Core: ' + (S.runtime === 'offline' ? 'reflex mode — no model bound to the Worker yet' : S.runtime)); })
-    .catch(function () {
-      setStatusPill('bad', 'uplink lost');
-      setStat('#stUplink', 'bad', 'no link');
-      setStat('#stCore', 'warn', 'reflexes only');
-      toast('Could not reach ' + S.api + '. Is worker.js deployed there yet? She will answer from the console until it is.', true);
-    });
+  loadModels().catch(function () {}).then(function () {
+    return probeCore();
+  }).then(function (res) {
+    paintProbe(res);
+    if (res.state === 'live') toast('Uplink confirmed. Core: ' + (res.info.runtime || 'live') + '. She is thinking again.');
+    else if (res.state === 'reflex') toast('Her Worker is live, but no model is bound — she is answering from her own archive. Add the AI binding (Settings → Functions → Workers AI).', true);
+    else if (res.state === 'template') toast('That endpoint is up, but it is not running worker.js yet — it is still the template. Press "wake her up" for the two-minute fix.', true);
+    else toast('No answer from ' + S.api + '. She will answer from the console until that changes.', true);
+  });
 }
 
 function init() {
@@ -1514,10 +1632,13 @@ function init() {
   $('#setTest').addEventListener('click', function () {
     var w = $('#sWorker').value.trim().replace(/\/+$/, '') || DEFAULT_WORKER;
     toast('Pinging ' + w + ' …');
-    fetch(w + '/api/health')
-      .then(function (r) { return r.json(); })
-      .then(function (j) { toast('Core answered: ' + j.system + ' · runtime=' + j.runtime + ' · ' + (j.protocols || 0) + ' protocols.'); })
-      .catch(function (e) { toast('No answer from ' + w + ' (' + String(e.message || e).slice(0, 90) + ').', true); });
+    probeCore(w).then(function (res) {
+      if (res.state === 'live') toast('Core answered: ' + res.info.system + ' · runtime=' + res.info.runtime + ' · ' + (res.info.protocols || 0) + ' protocols, ' + (res.info.archiveEntries || 0) + ' archive files.');
+      else if (res.state === 'reflex') toast('Her core answered (' + (res.info.archiveEntries || '?') + ' archive files) but runtime=offline — bind Workers AI as AI to give her a model.');
+      else if (res.state === 'template') toast('That endpoint answered "' + (res.info.body || '') + '" — that is still the Cloudflare template, not worker.js.', true);
+      else if (res.state === 'offline') toast('Nothing answered at ' + w + '. Check the URL, or that the Worker is deployed.', true);
+      else toast('Unexpected answer from ' + w + ' (state: ' + res.state + ').', true);
+    });
   });
   $('#setReset').addEventListener('click', function () {
     ['api', 'key', 'model', 'callsign', 'temperature', 'voiceName'].forEach(LS.del);
@@ -1537,7 +1658,7 @@ function init() {
   $('#arSearch').addEventListener('input', function () { filterArchive(this.value); });
   $('#settings').addEventListener('click', function (e) { if (e.target === this) closeSettings(); });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { closeSettings(); endBoot(); }
+    if (e.key === 'Escape') { closeSettings(); $('#wake').classList.remove('on'); endBoot(); }
     if (e.key === '/' && document.activeElement !== $('#input') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
       e.preventDefault(); $('#input').focus();
     }
@@ -1546,6 +1667,28 @@ function init() {
     b.addEventListener('click', function () { switchTab(b.dataset.tab); });
   });
   $('#bootSkip').addEventListener('click', endBoot);
+  $('#wakeBtn').addEventListener('click', function () {
+    $('#wakeEndpoint').textContent = S.api;
+    $('#wake').classList.add('on');
+  });
+  $('#wakeClose').addEventListener('click', function () { $('#wake').classList.remove('on'); });
+  $('#wake').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('on'); });
+  $('#wakeCopy').addEventListener('click', function () {
+    var txt = S.api;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { toast('Endpoint copied: ' + txt); }, function () { toast(txt); });
+    } else { toast(txt); }
+  });
+  $('#wakeTest').addEventListener('click', function () {
+    toast('Pinging ' + S.api + ' …');
+    probeCore().then(function (res) {
+      paintProbe(res);
+      if (res.state === 'live') toast('That is her. Runtime: ' + res.info.runtime + '.');
+      else if (res.state === 'reflex') toast('She is there but running on reflexes — no model bound yet.');
+      else if (res.state === 'template') toast('Still the template at that URL. Step 1 in this panel is the one that changes it.', true);
+      else toast('Nothing usable at ' + S.api + ' yet.', true);
+    });
+  });
   window.addEventListener('resize', function () { if (window.innerWidth > 1180) switchTab('chat'); });
 
   $('#voiceBtn').classList.toggle('on', !!S.tts);
@@ -1553,12 +1696,17 @@ function init() {
   autosize();
   updateSessionStats();
 
-  /* reach for the core, then let her in */
+  /* reach for the core, work out what is actually there, then let her in */
   loadModels().catch(function () {}).then(function () {
-    return loadHealth().catch(function () {
-      setStatusPill('bad', 'uplink lost · reflexes');
-      setStat('#stUplink', 'bad', 'no link');
-      setStat('#stCore', 'warn', 'reflexes only');
+    return probeCore().then(function (res) {
+      if (res.state === 'live' || res.state === 'reflex') {
+        S.runtime = res.info.runtime || S.runtime;
+        if (!S.models.length && res.info.models) {
+          S.models = res.info.models.map(function (id) { return { id: id, label: id }; });
+          paintModels();
+        }
+      }
+      paintProbe(res);
     });
   }).then(loadArchive).then(function () {
     runBoot(endBoot);
