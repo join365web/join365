@@ -21,18 +21,32 @@
  *  DEPLOY (Cloudflare dashboard → Workers → this Worker → Edit code)
  *  ------------------------------------------------------------------
  *    1. Paste this whole file over the template code. Save & deploy.
- *    2. Settings → Functions → Workers AI binding → variable name:  AI
+ *    2. Settings → Bindings → Add → Workers AI → variable name:  AI
  *       (that single binding is the difference between a canned FRIDAY
  *        and a thinking one — without it she still talks, on reflexes.)
- *    3. Optional vars/secrets:
+ *    3. Optional vars/secrets (all of them optional — this file needs no keys):
  *         WORKER_KEY      – if set, requests must send  x-api-key: <key>
- *         RUNTIME         – auto | workers-ai | upstream | offline
+ *         RUNTIME         – auto | workers-ai | bedrock | upstream | offline
  *         MODEL           – force a model id (see /api/models)
+ *         BEDROCK_GATEWAY – an OpenAI-compatible gateway to borrow
+ *                           (defaults to the Join365 AWS Bedrock worker)
  *         UPSTREAM_URL    – any OpenAI-compatible /chat/completions endpoint
- *         UPSTREAM_KEY    – bearer token for that endpoint
+ *         UPSTREAM_KEY    – sent as BOTH  Authorization: Bearer  and  x-api-key,
+ *                           which suits either gateway style
  *         UPSTREAM_MODEL  – model name for that endpoint
  *         ALLOWED_ORIGINS – comma list; default "*" (public demo)
  *         PAGE_URL        – where GET / fetches the interface from
+ *
+ *  ON KEYS — READ THIS ONCE
+ *  ------------------------
+ *  There is no API key in this file, and there is not supposed to be one.
+ *  Nothing here reads a BEDROCK_API_KEY or an AWS secret. Source is public
+ *  text: a secret written into it is a leaked secret. Keys belong in the
+ *  Worker's own Variables and Secrets, where Cloudflare stores them encrypted
+ *  and injects them into `env` at runtime. With the Workers AI binding there is
+ *  nothing to store at all — the account is billed directly, which is the
+ *  simplest route. GET /api/health reports which secrets are present (never
+ *  their values) so you can see at a glance what is wired up.
  *
  *  She is not a chatbot playing a character. As far as this file is
  *  concerned, she is F.R.I.D.A.Y., and she has been since 2015.
@@ -50,6 +64,11 @@ const BUILD = '2063.10.13';
 
 const DEFAULTS = {
   pageUrl: 'https://join365.eu.cc/Friday/',
+  /* The Join365 Amazon Bedrock gateway. The AWS keys live in THAT Worker's own
+     secrets — never here. She just borrows the door. */
+  bedrockGateway: 'https://aws.join365-website.workers.dev',
+  /* what the Join365 gateway serves by default (see Laura's page) */
+  bedrockModel: 'us.anthropic.claude-sonnet-5-5',
   model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   maxTurns: 24,          // history turns forwarded to the model
   maxChars: 8000,        // per-message budget
@@ -936,7 +955,10 @@ function workersAiToSse(upstream, meta) {
         try {
           const j = JSON.parse(payload);
           chunk = j.response || (j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content) || '';
-          if (j.error) chunk = '';
+          if (j.error) {
+            const detail = (j.error && j.error.message) || j.error;
+            chunk = '\n\n(System note: the core returned an error — ' + String(detail).slice(0, 200) + '.)\n';
+          }
         } catch {
           chunk = '';
         }
@@ -953,13 +975,21 @@ function workersAiToSse(upstream, meta) {
    7 · PROVIDERS
    ========================================================================== */
 
+/** Where an OpenAI-compatible model gateway lives, if one is configured. */
+function upstreamTarget(env) {
+  if (env.UPSTREAM_URL) return env.UPSTREAM_URL;
+  if (env.BEDROCK_GATEWAY) return env.BEDROCK_GATEWAY;
+  if ((env.RUNTIME || '').toLowerCase() === 'bedrock') return DEFAULTS.bedrockGateway;
+  return '';
+}
+
 function resolveRuntime(env) {
   const forced = (env.RUNTIME || 'auto').toLowerCase();
   if (forced === 'offline') return 'offline';
   if (forced === 'workers-ai') return env.AI ? 'workers-ai' : 'offline';
-  if (forced === 'upstream') return env.UPSTREAM_URL ? 'upstream' : 'offline';
+  if (forced === 'bedrock' || forced === 'upstream') return upstreamTarget(env) ? 'upstream' : 'offline';
   if (env.AI) return 'workers-ai';
-  if (env.UPSTREAM_URL) return 'upstream';
+  if (upstreamTarget(env)) return 'upstream';
   return 'offline';
 }
 
@@ -984,12 +1014,23 @@ async function runWorkersAI(env, messages, opts) {
 }
 
 async function runUpstream(env, messages, opts) {
-  const model = opts.model && !MODELS.some((m) => m.id === opts.model) ? opts.model : env.UPSTREAM_MODEL || 'gpt-4o-mini';
-  const res = await fetch(env.UPSTREAM_URL, {
+  const usingBedrock = !env.UPSTREAM_URL && Boolean(env.BEDROCK_GATEWAY || (env.RUNTIME || '').toLowerCase() === 'bedrock');
+  const model =
+    opts.model && !MODELS.some((m) => m.id === opts.model)
+      ? opts.model
+      : env.UPSTREAM_MODEL || (usingBedrock ? DEFAULTS.bedrockModel : 'gpt-4o-mini');
+  let url = upstreamTarget(env);
+  /* a bare origin gets the usual chat path, so both
+       https://my-gateway.workers.dev
+       https://my-gateway.workers.dev/api/chat
+     work without anyone having to remember which one the gateway wants */
+  if (!/\/api\/|\/v1\/|\/chat/.test(url)) url = url.replace(/\/+$/, '') + '/api/chat';
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      ...(env.UPSTREAM_KEY ? { authorization: 'Bearer ' + env.UPSTREAM_KEY } : {}),
+      /* gateways differ on which header they read, so send both */
+      ...(env.UPSTREAM_KEY ? { authorization: 'Bearer ' + env.UPSTREAM_KEY, 'x-api-key': env.UPSTREAM_KEY } : {}),
     },
     body: JSON.stringify({
       model,
@@ -1003,7 +1044,7 @@ async function runUpstream(env, messages, opts) {
     const detail = await res.text().catch(() => '');
     throw new Error(`upstream ${res.status}: ${detail.slice(0, 300)}`);
   }
-  return { stream: workersAiToSse(res.body, { runtime: 'upstream', model }) };
+  return { stream: workersAiToSse(res.body, { runtime: env.BEDROCK_GATEWAY || (env.RUNTIME || '').toLowerCase() === 'bedrock' ? 'bedrock' : 'upstream', model }) };
 }
 
 /* ==========================================================================
@@ -1268,10 +1309,22 @@ export default {
             runtime,
             cores: {
               'workers-ai': Boolean(env.AI),
-              upstream: Boolean(env.UPSTREAM_URL),
+              'bedrock-gateway': Boolean(upstreamTarget(env)),
               reflexes: true,
             },
-            model: runtime === 'offline' ? 'personality-disk' : pickModel(env, ''),
+            /* presence only — never values, never in this file */
+            keys: {
+              'in this file': 'none — by design',
+              WORKER_KEY: env.WORKER_KEY ? 'set on the Worker' : 'not set',
+              UPSTREAM_KEY: env.UPSTREAM_KEY ? 'set on the Worker' : 'not set',
+            },
+            upstream: upstreamTarget(env) || null,
+            model:
+              runtime === 'offline'
+                ? 'personality-disk'
+                : runtime === 'upstream'
+                ? env.UPSTREAM_MODEL || DEFAULTS.bedrockModel
+                : pickModel(env, ''),
             models: MODELS.map((m) => m.id),
             archiveEntries: ARCHIVE.length,
             protocols: ARCHIVE.filter((c) => c.kind === 'protocol').length,

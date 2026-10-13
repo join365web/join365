@@ -70,6 +70,82 @@ Both directions run in the browser. Speech-in uses the Web Speech API (Chrome or
 speech-out prefers an **en-IE** voice — Kerry Condon's accent is the point — and falls back
 to en-GB, then any English voice. Toggle it with **voice** in the header or in Settings.
 
+## Adding the Workers AI binding
+
+Workers AI is what makes her *think* rather than *remember*. There is no API key involved —
+Cloudflare bills your account directly, so there is nothing secret to paste anywhere.
+
+**Dashboard (the usual route)**
+
+1. <https://dash.cloudflare.com> → **Workers & Pages**.
+2. Pick your Worker (`friday6`).
+3. **Settings** → **Bindings** → **Add binding** → **Workers AI**.
+   *(On older dashboards this lives under Settings → Functions → "Workers AI binding".)*
+4. **Variable name: `AI`** — capital A, capital I. The code reads `env.AI`, so the name matters.
+5. Save / **Deploy**, then reload the page. The pill should read **core online · workers-ai**.
+
+**Wrangler (if you deploy from the CLI)**
+
+```toml
+# wrangler.toml
+name = "friday6"
+main = "Friday/worker.js"
+
+[ai]
+binding = "AI"
+```
+
+```bash
+npx wrangler deploy
+```
+
+Check it worked: `GET /api/health` → `"runtime": "workers-ai"` and `"cores": { "workers-ai": true, … }`.
+
+Using a model costs money per request past the daily free allowance. If you would rather not use
+Workers AI at all, see the Bedrock option below.
+
+## Does this file hold an API key?
+
+**No — and that is deliberate.** Nothing in `worker.js` or `index.html` contains an AWS, Bedrock,
+OpenAI or Cloudflare key. There is no `BEDROCK_API_KEY` here to leak.
+
+Source files are public text. A key written into one is a key you have published, and Cloudflare
+serves it to anyone who asks for it. So the design is:
+
+| Secret | Where it goes |
+| --- | --- |
+| **Workers AI** | Nowhere. The `AI` binding bills your account — there is nothing to store. |
+| **`WORKER_KEY`** (locks this Worker down) | Worker → Settings → **Variables and Secrets** → add as a *Secret*. Or `npx wrangler secret put WORKER_KEY`. |
+| **`UPSTREAM_KEY`** (a model gateway) | Same place, as a secret. She sends it as both `Authorization: Bearer` and `x-api-key`, so it suits either gateway style. |
+
+Cloudflare stores secrets encrypted and injects them at runtime as `env.SOMETHING`. This file only
+ever reads `env.*`, which is why it is safe to paste into a public dashboard.
+
+`GET /api/health` reports *which* secrets are present, never their values:
+
+```json
+"keys": { "in this file": "none — by design", "WORKER_KEY": "not set", "UPSTREAM_KEY": "not set" }
+```
+
+## Option B · Run her on your Amazon Bedrock gateway
+
+You already have one: the Worker behind **Laura AI** (`aws.join365-website.workers.dev`), whose
+AWS Bedrock keys live in *its* secrets. FRIDAY can borrow that door instead of using Workers AI —
+no `AI` binding needed, and still no key in any file.
+
+Set these on the **FRIDAY** Worker (Settings → Variables and Secrets):
+
+| Variable | Value |
+| --- | --- |
+| `RUNTIME` | `bedrock` |
+| `UPSTREAM_MODEL` | *optional* — a Bedrock model id from the gateway's `/api/models`, e.g. `us.anthropic.claude-sonnet-5-5` |
+| `UPSTREAM_KEY` | *only if* the gateway has a `WORKER_KEY` secret of its own |
+
+She then posts OpenAI-shaped requests to the gateway's `/api/chat`, streaming the same way Laura
+does, and reports `"runtime": "upstream"` with `"cores": { "bedrock-gateway": true }` in health.
+A bare origin is fine — `/api/chat` is appended for you. If the gateway throttles, her page shows
+the reason rather than stopping quietly.
+
 ## If she isn't answering
 
 The page probes `GET /api/health` on every load and classifies whatever comes back, so it

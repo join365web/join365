@@ -645,6 +645,15 @@ body.no-anim .spin,body.no-anim .spin-r,body.no-anim .pulse{animation:none}
         </div>
       </div>
       <div class="field">
+        <label>Alternative · run her on your Amazon Bedrock gateway</label>
+        <div class="hint">
+          You already have one — the Worker behind <b>Laura AI</b> (<code>aws.join365-website.workers.dev</code>) talks to Bedrock
+          with your AWS keys in its own secrets. Point FRIDAY at it instead of binding Workers AI: set
+          <code>RUNTIME = bedrock</code> on this Worker (optionally <code>UPSTREAM_MODEL</code> for the model).
+          No <code>AI</code> binding needed, and still no key in any file.
+        </div>
+      </div>
+      <div class="field">
         <label>What she will say when it works</label>
         <div class="hint"><code>GET /api/health</code> → <code>{"ok":true,"system":"F.R.I.D.A.Y.","runtime":"workers-ai"…}</code> and the pill above turns gold.</div>
       </div>
