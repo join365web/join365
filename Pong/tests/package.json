@@ -1,0 +1,13 @@
+{
+  "name": "pong-vs-vex-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Headless simulation tests for Pong vs VEX (../index.html)",
+  "type": "module",
+  "scripts": {
+    "test": "node sim.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
