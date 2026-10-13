@@ -645,17 +645,22 @@ body.no-anim .spin,body.no-anim .spin-r,body.no-anim .pulse{animation:none}
         </div>
       </div>
       <div class="field">
-        <label>Alternative · run her on your Amazon Bedrock gateway</label>
+        <label>Alternative · she will use a Bedrock key you already saved here</label>
         <div class="hint">
-          You already have one — the Worker behind <b>Laura AI</b> (<code>aws.join365-website.workers.dev</code>) talks to Bedrock
-          with your AWS keys in its own secrets. Point FRIDAY at it instead of binding Workers AI: set
-          <code>RUNTIME = bedrock</code> on this Worker (optionally <code>UPSTREAM_MODEL</code> for the model).
-          No <code>AI</code> binding needed, and still no key in any file.
+          If <code>BEDROCK_API_KEY</code> is saved as a secret on this Worker, <b>nothing else is needed</b> — she finds it
+          by name and calls Bedrock Runtime directly. Aliases she also checks: <code>BEDROCK_KEY</code>,
+          <code>AWS_BEDROCK_API_KEY</code>, <code>AWS_BEARER_TOKEN_BEDROCK</code>, <code>BEDROCK_TOKEN</code>, <code>BEDROCK_API</code>.
+          Optional: <code>BEDROCK_REGION</code> (default us-east-1), <code>BEDROCK_MODEL</code>.
+          A key saved on a <i>different</i> Worker can't be read from here — for that, point
+          <code>RUNTIME = bedrock</code> and <code>BEDROCK_GATEWAY</code> at your AWS gateway instead.
         </div>
       </div>
       <div class="field">
         <label>What she will say when it works</label>
-        <div class="hint"><code>GET /api/health</code> → <code>{"ok":true,"system":"F.R.I.D.A.Y.","runtime":"workers-ai"…}</code> and the pill above turns gold.</div>
+        <div class="hint">
+          <code>GET /api/health</code> → <code>"runtime":"bedrock"</code> or <code>"workers-ai"</code>, and the pill above turns gold.
+          That same readout lists which secrets are present — never their values.
+        </div>
       </div>
     </div>
     <div class="sheet-f">

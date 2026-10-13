@@ -28,7 +28,17 @@
  *         WORKER_KEY      – if set, requests must send  x-api-key: <key>
  *         RUNTIME         – auto | workers-ai | bedrock | upstream | offline
  *         MODEL           – force a model id (see /api/models)
- *         BEDROCK_GATEWAY – an OpenAI-compatible gateway to borrow
+ *         BEDROCK_API_KEY – an Amazon Bedrock API key, kept as a SECRET on
+ *                           this Worker. This file only ever references it by
+ *                           name:  env.BEDROCK_API_KEY  — nothing is stored in
+ *                           the source. Aliases are accepted too, so whatever
+ *                           name the secret already has will be found:
+ *                           BEDROCK_KEY, AWS_BEDROCK_API_KEY,
+ *                           AWS_BEARER_TOKEN_BEDROCK, BEDROCK_TOKEN
+ *         BEDROCK_REGION  – defaults to us-east-1 (AWS_REGION also works)
+ *         BEDROCK_MODEL   – a model or inference-profile id this account can
+ *                           call; defaults to an Anthropic inference profile
+ *         BEDROCK_GATEWAY – an OpenAI-compatible gateway to borrow instead
  *                           (defaults to the Join365 AWS Bedrock worker)
  *         UPSTREAM_URL    – any OpenAI-compatible /chat/completions endpoint
  *         UPSTREAM_KEY    – sent as BOTH  Authorization: Bearer  and  x-api-key,
@@ -37,16 +47,31 @@
  *         ALLOWED_ORIGINS – comma list; default "*" (public demo)
  *         PAGE_URL        – where GET / fetches the interface from
  *
+ *  WHERE THE KEY COMES FROM
+ *  ------------------------
+ *  A secret saved on THIS Worker (Settings → Variables and Secrets) arrives at
+ *  runtime as `env.<NAME>`, so the code just reads the name — that is why there
+ *  can be a working Bedrock key with no key in the file. A secret saved on a
+ *  DIFFERENT Worker cannot be read from here; that is what the gateway option
+ *  is for (point RUNTIME=bedrock at it and it uses its own key).
+ *
+ *    const key = bedrockKey(env);   // → env.BEDROCK_API_KEY, or an alias
+ *
  *  ON KEYS — READ THIS ONCE
  *  ------------------------
- *  There is no API key in this file, and there is not supposed to be one.
- *  Nothing here reads a BEDROCK_API_KEY or an AWS secret. Source is public
- *  text: a secret written into it is a leaked secret. Keys belong in the
- *  Worker's own Variables and Secrets, where Cloudflare stores them encrypted
- *  and injects them into `env` at runtime. With the Workers AI binding there is
- *  nothing to store at all — the account is billed directly, which is the
- *  simplest route. GET /api/health reports which secrets are present (never
- *  their values) so you can see at a glance what is wired up.
+ *  This file REFERS to secrets; it never CONTAINS one. Source is public text,
+ *  and a key written into it would be a published key. So it asks the runtime
+ *  for them by name:
+ *
+ *      env.BEDROCK_API_KEY     ← your Bedrock key, saved as a Worker secret
+ *      env.WORKER_KEY          ← optional lock on this Worker
+ *      env.UPSTREAM_KEY        ← optional key for a model gateway
+ *
+ *  Cloudflare stores each secret encrypted and injects it into `env` at
+ *  runtime, so this same file is safe to paste in public whether or not any
+ *  keys are configured. With the Workers AI binding there is nothing to store
+ *  at all — the account is billed directly. GET /api/health reports WHICH
+ *  secrets are present (never their values) so you can see what is wired up.
  *
  *  She is not a chatbot playing a character. As far as this file is
  *  concerned, she is F.R.I.D.A.Y., and she has been since 2015.
@@ -69,6 +94,10 @@ const DEFAULTS = {
   bedrockGateway: 'https://aws.join365-website.workers.dev',
   /* what the Join365 gateway serves by default (see Laura's page) */
   bedrockModel: 'us.anthropic.claude-sonnet-5-5',
+  /* direct Bedrock Runtime: a model or inference profile this account can call.
+     Override with BEDROCK_MODEL if your access differs. */
+  bedrockRuntimeModel: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+  bedrockRegion: 'us-east-1',
   model: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   maxTurns: 24,          // history turns forwarded to the model
   maxChars: 8000,        // per-message budget
@@ -113,6 +142,20 @@ const MODELS = [
     note: 'Fastest of the set. First thing to try if latency bites.',
     tier: 'production', ctx: 128000,
   },
+];
+
+/**
+ * Bedrock model ids the page can offer when a Bedrock key is saved. Inference
+ * profiles are region-prefixed (us./eu./apac.); change these to whatever the
+ * account can actually call, or set BEDROCK_MODEL and use 'custom'.
+ */
+const BEDROCK_MODELS = [
+  { id: 'us.anthropic.claude-sonnet-4-20250514-v1:0', label: 'Claude Sonnet 4 (Bedrock)', note: 'Default. Best balance of character and speed.', tier: 'production' },
+  { id: 'us.anthropic.claude-3-5-haiku-20241022-v1:0', label: 'Claude 3.5 Haiku (Bedrock)', note: 'Fastest Claude on Bedrock.', tier: 'production' },
+  { id: 'us.amazon.nova-pro-v1:0', label: 'Amazon Nova Pro', note: 'Strong general model, different voice.', tier: 'production' },
+  { id: 'us.amazon.nova-lite-v1:0', label: 'Amazon Nova Lite', note: 'Cheap and quick.', tier: 'production' },
+  { id: 'us.meta.llama3-3-70b-instruct-v1:0', label: 'Llama 3.3 70B (Bedrock)', note: 'Open weights, good lore recall.', tier: 'production' },
+  { id: 'custom', label: 'BEDROCK_MODEL from this Worker', note: 'Whatever BEDROCK_MODEL is set to.', tier: 'custom' },
 ];
 
 /* The callsign Tony used. She will use whatever the user prefers, but this
@@ -956,8 +999,8 @@ function workersAiToSse(upstream, meta) {
           const j = JSON.parse(payload);
           chunk = j.response || (j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content) || '';
           if (j.error) {
-            const detail = (j.error && j.error.message) || j.error;
-            chunk = '\n\n(System note: the core returned an error — ' + String(detail).slice(0, 200) + '.)\n';
+            const detail = String((j.error && j.error.message) || j.error).replace(/[.\s]+$/, '');
+            chunk = '\n\n(System note: the core returned an error — ' + detail.slice(0, 200) + '.)\n';
           }
         } catch {
           chunk = '';
@@ -983,11 +1026,45 @@ function upstreamTarget(env) {
   return '';
 }
 
+/* Secret names this Worker will look for, in order. Whatever the secret was
+   called when it was saved, it turns up here — by name, never by value. */
+const BEDROCK_KEY_NAMES = [
+  'BEDROCK_API_KEY',
+  'BEDROCK_KEY',
+  'AWS_BEDROCK_API_KEY',
+  'AWS_BEARER_TOKEN_BEDROCK',
+  'BEDROCK_TOKEN',
+  'BEDROCK_API',
+];
+
+/** The Bedrock key saved on this Worker, plus which secret name held it. */
+function bedrockKey(env) {
+  for (const name of BEDROCK_KEY_NAMES) {
+    const v = env[name];
+    if (typeof v === 'string' && v.trim()) return { key: v.trim(), name };
+  }
+  return null;
+}
+
+function bedrockConfig(env) {
+  const found = bedrockKey(env);
+  return {
+    key: found ? found.key : '',
+    keyName: found ? found.name : '',
+    region: env.BEDROCK_REGION || env.AWS_REGION || DEFAULTS.bedrockRegion,
+    model: env.BEDROCK_MODEL || DEFAULTS.bedrockRuntimeModel,
+  };
+}
+
 function resolveRuntime(env) {
   const forced = (env.RUNTIME || 'auto').toLowerCase();
   if (forced === 'offline') return 'offline';
   if (forced === 'workers-ai') return env.AI ? 'workers-ai' : 'offline';
-  if (forced === 'bedrock' || forced === 'upstream') return upstreamTarget(env) ? 'upstream' : 'offline';
+  if (forced === 'bedrock') return bedrockKey(env) ? 'bedrock' : upstreamTarget(env) ? 'upstream' : 'offline';
+  if (forced === 'upstream') return upstreamTarget(env) ? 'upstream' : 'offline';
+  /* auto: a Bedrock key saved on this Worker is a deliberate choice, so it
+     goes first — then the Workers AI binding, then a gateway, then reflexes */
+  if (bedrockKey(env)) return 'bedrock';
   if (env.AI) return 'workers-ai';
   if (upstreamTarget(env)) return 'upstream';
   return 'offline';
@@ -1045,6 +1122,236 @@ async function runUpstream(env, messages, opts) {
     throw new Error(`upstream ${res.status}: ${detail.slice(0, 300)}`);
   }
   return { stream: workersAiToSse(res.body, { runtime: env.BEDROCK_GATEWAY || (env.RUNTIME || '').toLowerCase() === 'bedrock' ? 'bedrock' : 'upstream', model }) };
+}
+
+/* ==========================================================================
+   7b · AMAZON BEDROCK RUNTIME
+   Converse API — one request shape for Claude, Nova, Llama and the rest — with
+   the key that is already saved on this Worker. No key is ever written here.
+   ========================================================================== */
+
+/** Bedrock wants system text separately and strictly alternating turns. */
+function toConverse(messages) {
+  const system = messages
+    .filter((m) => m.role === 'system')
+    .map((m) => m.content)
+    .join('\n\n');
+
+  const turns = [];
+  for (const m of messages) {
+    if (m.role !== 'user' && m.role !== 'assistant') continue;
+    const text = String(m.content || '').trim();
+    if (!text) continue;
+    if (!turns.length && m.role === 'assistant') continue; // must open with the user
+    const last = turns[turns.length - 1];
+    if (last && last.role === m.role) {
+      last.content[0].text += '\n\n' + text; // merge consecutive same-role turns
+      continue;
+    }
+    turns.push({ role: m.role, content: [{ text }] });
+  }
+  if (!turns.length || turns[turns.length - 1].role === 'assistant') {
+    turns.push({ role: 'user', content: [{ text: 'Continue.' }] });
+  }
+  return { system, turns };
+}
+
+/** AWS event-stream frames: prelude (len, headers len, CRC), headers, payload. */
+function readEventStreamHeaders(view, start, end) {
+  const headers = {};
+  var p = start;
+  while (p < end) {
+    const nameLen = view.getUint8(p++);
+    const name = new TextDecoder().decode(new Uint8Array(view.buffer, view.byteOffset + p, nameLen));
+    p += nameLen;
+    const type = view.getUint8(p++);
+    if (type === 7) {
+      const vLen = view.getUint16(p);
+      p += 2;
+      headers[name] = new TextDecoder().decode(new Uint8Array(view.buffer, view.byteOffset + p, vLen));
+      p += vLen;
+    } else if (type === 0 || type === 1) {
+      headers[name] = type === 0;
+    } else if (type === 4) {
+      headers[name] = view.getInt32(p);
+      p += 4;
+    } else if (type === 5) {
+      headers[name] = Number(view.getBigInt64(p));
+      p += 8;
+    } else {
+      break; // unknown type — stop reading headers, the payload matters more
+    }
+  }
+  return headers;
+}
+
+/** Pull text out of whichever shape the model family returned. */
+function textFromBedrockChunk(j) {
+  if (!j || typeof j !== 'object') return '';
+  return (
+    (j.delta && j.delta.text) ||
+    (j.contentBlockDelta && j.contentBlockDelta.delta && j.contentBlockDelta.delta.text) ||
+    (j.contentBlockDelta && j.contentBlockDelta.delta && j.contentBlockDelta.delta.text_delta) ||
+    (j.message && j.message.content && j.message.content[0] && j.message.content[0].text) ||
+    j.text ||
+    j.outputText ||
+    j.completion ||
+    ''
+  );
+}
+
+/** Decode a Bedrock event stream into our SSE stream. */
+function bedrockToSse(upstream, meta) {
+  const reader = upstream.getReader();
+  let buffer = new Uint8Array(0);
+
+  function frames() {
+    const out = [];
+    for (;;) {
+      if (buffer.length < 16) break;
+      const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      const total = view.getUint32(0);
+      const headerLen = view.getUint32(4);
+      if (buffer.length < total || total < 16) break;
+      const headers = readEventStreamHeaders(view, 12, 12 + headerLen);
+      const payloadStart = 12 + headerLen;
+      const payloadEnd = total - 4;
+      const payload = new Uint8Array(buffer.buffer, buffer.byteOffset + payloadStart, Math.max(0, payloadEnd - payloadStart));
+      out.push({ headers, payload });
+      buffer = buffer.slice(total);
+    }
+    return out;
+  }
+
+  return new ReadableStream({
+    async pull(controller) {
+      const { done, value } = await reader.read();
+      if (done) {
+        controller.enqueue(sseDone(meta));
+        controller.close();
+        return;
+      }
+      const merged = new Uint8Array(buffer.length + value.length);
+      merged.set(buffer, 0);
+      merged.set(value, buffer.length);
+      buffer = merged;
+
+      for (const frame of frames()) {
+        const type = frame.headers[':message-type'] || '';
+        const event = frame.headers[':event-type'] || '';
+        let json = null;
+        try {
+          json = JSON.parse(new TextDecoder().decode(frame.payload));
+        } catch {
+          json = null;
+        }
+
+        if (type === 'exception' || type === 'error' || event === 'internalServerException' || event === 'modelStreamErrorException' || event === 'validationException') {
+          const detail = String((json && (json.message || json.Message)) || frame.headers[':exception-type'] || 'bedrock error').replace(/[.\s]+$/, '');
+          controller.enqueue(sseChunk('\n\n(System note: Bedrock returned an error — ' + detail.slice(0, 200) + '.)\n'));
+          continue;
+        }
+        if (!json) continue;
+
+        let chunk = '';
+        if (json.bytes) {
+          /* the `chunk` envelope: base64 of a model-specific event */
+          let inner = null;
+          try {
+            const bin = atob(json.bytes);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            inner = JSON.parse(new TextDecoder().decode(bytes));
+          } catch {
+            inner = null;
+          }
+          chunk = textFromBedrockChunk(inner);
+        } else {
+          chunk = textFromBedrockChunk(json);
+        }
+        if (chunk) controller.enqueue(sseChunk(chunk));
+      }
+    },
+    cancel() {
+      reader.cancel().catch(() => {});
+    },
+  });
+}
+
+function bedrockBody(messages, opts, cfg) {
+  const { system, turns } = toConverse(messages);
+  const body = {
+    messages: turns,
+    inferenceConfig: {
+      maxTokens: Math.min(opts.maxTokens || DEFAULTS.maxTokens, 4096),
+      temperature: Math.min(opts.temperature == null ? DEFAULTS.temperature : opts.temperature, 1),
+    },
+  };
+  if (system) body.system = [{ text: system }];
+  const asked = String(opts.model || '');
+  const useAsked = asked && asked !== 'custom' && !asked.startsWith('@cf/');
+  return { body, model: useAsked ? asked : cfg.model };
+}
+
+function bedrockHint(status, detail) {
+  if (status === 401 || /security token|credential|signature|UnauthorizedException|invalid.*token/i.test(detail)) {
+    return ' The key itself was rejected — check the secret value saved on this Worker.';
+  }
+  if (status === 403 || /AccessDenied/i.test(detail)) {
+    return ' The key was accepted but lacks permission — check BEDROCK_MODEL and that this model is enabled for the account.';
+  }
+  if (status === 404 || /model|not found|ValidationException/i.test(detail)) {
+    return ' Check BEDROCK_MODEL (and BEDROCK_REGION) against a model or inference profile this account can call.';
+  }
+  return '';
+}
+
+async function runBedrock(env, messages, opts) {
+  const cfg = bedrockConfig(env);
+  const { body, model } = bedrockBody(messages, opts, cfg);
+  const base = 'https://bedrock-runtime.' + cfg.region + '.amazonaws.com/model/' + encodeURIComponent(model);
+  const headers = {
+    'content-type': 'application/json',
+    authorization: 'Bearer ' + cfg.key,
+  };
+
+  /* 1 — streaming, if the model supports ConverseStream */
+  try {
+    const res = await fetch(base + '/converse-stream', {
+      method: 'POST',
+      headers: Object.assign({ accept: 'application/vnd.amazon.eventstream' }, headers),
+      body: JSON.stringify(body),
+    });
+    if (res.ok && res.body) {
+      return { stream: bedrockToSse(res.body, { runtime: 'bedrock', model }) };
+    }
+    if (res.status !== 404 && res.status !== 400 && res.status !== 403 && res.status !== 401) {
+      const detail = await res.text().catch(() => '');
+      throw new Error('bedrock ' + res.status + ': ' + detail.slice(0, 200) + bedrockHint(res.status, detail));
+    }
+  } catch (err) {
+    if (String(err && err.message || '').indexOf('bedrock ') === 0) throw err;
+    /* network hiccup — try the non-streaming call below before giving up */
+  }
+
+  /* 2 — non-streaming Converse, streamed out to the page word by word so the
+         console still types instead of sitting blank */
+  const res = await fetch(base + '/converse', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error('bedrock ' + res.status + ': ' + detail.slice(0, 240) + bedrockHint(res.status, detail));
+  }
+  const j = await res.json().catch(() => null);
+  const text =
+    (j && j.output && j.output.message && j.output.message.content || [])
+      .map((c) => c.text || '')
+      .join('') || '';
+  if (!text) throw new Error('bedrock returned an empty completion');
+  return { stream: textToStream(text, { runtime: 'bedrock', model }, 12) };
 }
 
 /* ==========================================================================
@@ -1255,6 +1562,8 @@ async function handleChat(request, env, origin) {
     const { stream } =
       runtime === 'workers-ai'
         ? await runWorkersAI(env, payload, opts)
+        : runtime === 'bedrock'
+        ? await runBedrock(env, payload, opts)
         : await runUpstream(env, payload, opts);
     return sseResponse(stream, { origin });
   } catch (err) {
@@ -1309,19 +1618,26 @@ export default {
             runtime,
             cores: {
               'workers-ai': Boolean(env.AI),
+              bedrock: Boolean(bedrockKey(env)),
               'bedrock-gateway': Boolean(upstreamTarget(env)),
               reflexes: true,
             },
             /* presence only — never values, never in this file */
             keys: {
               'in this file': 'none — by design',
+              'bedrock secret': bedrockKey(env) ? bedrockKey(env).name + ' (set on the Worker)' : 'not set',
               WORKER_KEY: env.WORKER_KEY ? 'set on the Worker' : 'not set',
               UPSTREAM_KEY: env.UPSTREAM_KEY ? 'set on the Worker' : 'not set',
             },
+            bedrock: bedrockKey(env)
+              ? { region: bedrockConfig(env).region, model: bedrockConfig(env).model }
+              : null,
             upstream: upstreamTarget(env) || null,
             model:
               runtime === 'offline'
                 ? 'personality-disk'
+                : runtime === 'bedrock'
+                ? bedrockConfig(env).model
                 : runtime === 'upstream'
                 ? env.UPSTREAM_MODEL || DEFAULTS.bedrockModel
                 : pickModel(env, ''),
@@ -1341,13 +1657,18 @@ export default {
 
     if (request.method === 'GET' && path === '/api/models') {
       const runtime = resolveRuntime(env);
+      const bedrockOn = Boolean(bedrockKey(env));
+      const list = bedrockOn
+        ? BEDROCK_MODELS.map((m) => Object.assign({}, m, { id: m.id === 'custom' ? bedrockConfig(env).model : m.id }))
+        : MODELS;
       return json(
         {
           ok: true,
           runtime,
-          default: pickModel(env, ''),
-          models: MODELS,
-          upstream: Boolean(env.UPSTREAM_URL),
+          default: runtime === 'bedrock' ? bedrockConfig(env).model : pickModel(env, ''),
+          models: list,
+          upstream: Boolean(upstreamTarget(env)),
+          bedrock: bedrockOn ? { region: bedrockConfig(env).region } : null,
         },
         200,
         origin
